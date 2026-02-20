@@ -1,11 +1,12 @@
 {
-  "name": "personal-website",
+  "name": "adrienne-personal-site",
   "version": "1.0.0",
-  "description": "Personal website with RSS and book blog feeds.",
+  "description": "Adrienne's personal website with RSS aggregator and portfolio.",
   "main": "src/server.js",
   "scripts": {
     "start": "NODE_ENV=production node src/server.js",
-    "dev": "nodemon src/server.js"
+    "dev": "nodemon src/server.js",
+    "migrate": "node scripts/migrate.js"
   },
   "keywords": [
     "rss",

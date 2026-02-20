@@ -1,44 +1,32 @@
-<% if (articles.length === 0) { %>
-    <div class="no-articles-tile">
-        <div class="no-articles-content">
-            <h3>No articles found</h3>
-            <p>Try adjusting your filters</p>
-        </div>
-    </div>
+<%
+  const safeArticles = Array.isArray(articles) ? articles : [];
+%>
+<% if (safeArticles.length === 0) { %>
+  <p>No articles available.</p>
 <% } else { %>
-    <% articles.forEach(article => {
-        // Extract domain from article URL for favicon
-        let faviconUrl = '';
-        if (article.url) {
-            try {
-                const urlObj = new URL(article.url);
-                faviconUrl = `https://www.google.com/s2/favicons?domain=${urlObj.hostname}&sz=128`;
-            } catch (e) {
-                faviconUrl = '';
-            }
-        }
-    %>
-        <article class="article-card <%= article.image_url ? 'has-image' : 'no-image' %>" <% if (article.image_url) { %>style="background-image: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.85)), url('<%= article.image_url %>') !important; background-size: cover !important; background-position: center !important; background-repeat: no-repeat !important; background-color: #000 !important;"<% } %> data-article-id="<%= article.id %>">
-            <% if (!article.image_url && faviconUrl) { %>
-                <div class="no-image-icon">
-                    <img src="<%= faviconUrl %>" alt="<%= article.publication_name %>" class="favicon-icon">
-                </div>
+  <% safeArticles.forEach(article => { %>
+    <li class="article-card">
+      <a href="<%= article.url %>" class="article-link" target="_blank" rel="noopener noreferrer">
+        <div class="article-image <%= article.image_url ? '' : 'no-image' %>">
+          <% if (article.image_url) { %>
+            <img src="<%= article.image_url %>" alt="<%= article.title %>" loading="lazy">
+          <% } %>
+        </div>
+        <div class="article-content">
+          <div class="article-meta">
+            <span class="publication-name"><%= article.publication_name %></span>
+          </div>
+          <h3 class="article-title"><%= article.title %></h3>
+          <% if (article.author) { %>
+            <p class="article-author">by <%= article.author %></p>
+          <% } %>
+          <div class="article-footer">
+            <% if (article.published_date) { %>
+              <span class="publish-date"><%= new Date(article.published_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></span>
             <% } %>
-            <a href="<%= article.url %>" target="_blank" class="article-link">
-                <div class="article-content">
-                    <h2 class="article-title"><%= article.title %></h2>
-                    <div class="article-meta">
-                        <% if (article.author) { %>
-                        <span class="article-author"><%= article.author %></span>
-                        <span class="meta-separator"> • </span>
-                        <% } %>
-                        <span class="publication-name"><%= article.publication_name || 'Unknown' %></span>
-                        <% if (article.published_date) { %>
-                        <span class="publish-date"> • <%= new Date(article.published_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></span>
-                        <% } %>
-                    </div>
-                </div>
-            </a>
-        </article>
-    <% }) %>
+          </div>
+        </div>
+      </a>
+    </li>
+  <% }); %>
 <% } %>

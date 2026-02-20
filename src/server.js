@@ -5,8 +5,6 @@ const compression = require('compression');
 const path = require('path');
 
 const pagesRouter = require('./routes/pages');
-const adminRouter = require('./routes/admin');
-const booksRouter = require('./routes/books');
 const { runMigrations } = require('./config/migrations');
 const logger = require('./utils/logger');
 
@@ -30,9 +28,7 @@ app.use(compression());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Routes
-app.use('/admin', adminRouter);
-app.use('/books', booksRouter);
+// Routes - public only
 app.use('/', pagesRouter);
 
 // 404 handler for pages

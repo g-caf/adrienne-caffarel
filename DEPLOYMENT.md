@@ -1,177 +1,165 @@
-# Deployment Guide
+# Deployment Guide - Adrienne's Personal Website
 
-This document outlines how to deploy your personal website to Render with database support.
+## Local Development Setup
 
-## Database Setup
+1. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-The application now supports both SQLite (local development) and PostgreSQL (production).
+2. **Create .env file**
+   ```bash
+   cp .env.example .env
+   ```
 
-### Local Development
-- Uses SQLite database stored in `data/database.sqlite`
-- No configuration needed - database is created automatically on first run
+3. **Configure PostgreSQL database** (local development)
+   ```bash
+   # Create database
+   createdb adrienne_personal_site
+   
+   # Set DATABASE_URL in .env
+   DATABASE_URL=postgresql://username:password@localhost:5432/adrienne_personal_site
+   ```
 
-### Production (Render)
-- Uses PostgreSQL via Render's database service
-- Requires `DATABASE_URL` environment variable
+4. **Run migrations**
+   ```bash
+   npm run migrate
+   ```
 
-## Render Deployment Steps
+5. **Start development server**
+   ```bash
+   npm run dev
+   ```
+   
+   Server will run on `http://localhost:3000`
 
-### 1. Create a PostgreSQL Database on Render
+## Deployment to Render
 
-1. Log into your Render dashboard
-2. Click "New +" and select "PostgreSQL"
-3. Configure your database:
-   - Name: `personal-website-db` (or your choice)
-   - Database: `personal_website` (or your choice)
-   - User: Auto-generated
-   - Region: Choose closest to your web service
-   - Instance Type: Free tier is fine to start
-4. Click "Create Database"
-5. Copy the "Internal Database URL" (starts with `postgresql://`)
+### Prerequisites
+- GitHub account with repository
+- Render account (https://render.com)
 
-### 2. Create a Web Service on Render
+### Step 1: Push to GitHub
+```bash
+git remote add origin https://github.com/your-username/adrienne-personal-site.git
+git push -u origin main
+```
 
-1. Click "New +" and select "Web Service"
-2. Connect your GitHub repository
-3. Configure your service:
-   - **Name**: `personal-website` (or your choice)
-   - **Environment**: `Node`
-   - **Build Command**: `npm install`
+### Step 2: Create PostgreSQL Database on Render
+
+1. Go to https://dashboard.render.com/
+2. Click "New +"
+3. Select "PostgreSQL"
+4. Configure:
+   - **Name**: `adrienne-personal-site-db`
+   - **Database**: `adrienne_personal_site`
+   - **User**: `adrienne_user`
+   - **Plan**: Free (or paid tier if preferred)
+   - **Region**: Oregon (or your preferred region)
+5. Click "Create Database"
+6. Note the internal connection URL (you'll need this for the web service)
+
+### Step 3: Create Web Service on Render
+
+1. Go to https://dashboard.render.com/
+2. Click "New +"
+3. Select "Web Service"
+4. Configure:
+   - **Name**: `adrienne-personal-site`
+   - **Environment**: Node
+   - **Build Command**: `npm install && npm run migrate`
    - **Start Command**: `npm start`
-   - **Instance Type**: Free tier
+   - **Region**: Oregon (same as database)
+   - **Plan**: Free or Starter (based on needs)
+5. Click "Connect Repository" and select your GitHub repo
+6. Under "Environment", add variables:
 
-### 3. Set Environment Variables
+   | Key | Value |
+   |-----|-------|
+   | `NODE_ENV` | `production` |
+   | `DATABASE_URL` | (Internal connection string from PostgreSQL service) |
+   | `PORT` | `3000` |
 
-In your Render web service settings, add these environment variables:
+7. Click "Create Web Service"
+8. Render will automatically deploy when you push to main branch
 
-```
-NODE_ENV=production
-DATABASE_URL=<paste your Internal Database URL from step 1>
-PORT=3000
-```
+### Step 4: Add Custom Domain (Optional)
 
-### 4. Deploy
+1. In Render dashboard, go to your web service
+2. Click "Settings"
+3. Under "Custom Domain", add your domain
+4. Follow DNS configuration instructions
 
-Click "Create Web Service" - Render will automatically deploy your application.
+### Step 5: Monitor Deployment
 
-The database migrations will run automatically on startup, creating the necessary tables.
+1. Check deployment status in Render dashboard
+2. View logs by clicking "Logs" tab
+3. Test site at provided URL
 
-## Features
+## Environment Variables Reference
 
-### Admin Panel
-- **URL**: `https://your-app.onrender.com/admin/books`
-- Create, edit, and delete book posts
-- Upload cover images (stored in `/public/uploads/books/`)
-- Manage publication dates
+**Production (Render)**:
+- `NODE_ENV=production`
+- `DATABASE_URL=postgresql://...` (auto-set by Render)
+- `PORT=3000`
 
-### Public Pages
-- **Home**: Shows RSS news feed + your book posts
-- **Book Posts**: Individual pages at `/books/post-slug`
-- Clean, responsive design matching your site aesthetic
-
-### Book Post Fields
-- Title (required)
-- Subtitle (optional)
-- Published Date (required)
-- Content (optional - for longer reviews)
-- Cover Image (optional - accepts JPEG, PNG, GIF, WebP up to 5MB)
-
-## File Structure
-
-```
-src/
-├── config/
-│   ├── database-sqlite.js    # Database abstraction layer
-│   ├── migrations.js          # Database schema
-│   └── upload.js              # File upload configuration
-├── models/
-│   └── BookPost.js            # Book post model
-├── routes/
-│   ├── admin.js               # Admin panel routes
-│   ├── books.js               # Public book post routes
-│   └── pages.js               # Home page route
-├── utils/
-│   └── logger.js              # Logging utility
-└── server.js                  # Main application
-
-views/
-├── admin/
-│   ├── books.ejs              # Admin book list
-│   └── book-form.ejs          # Create/edit form
-├── book-post.ejs              # Individual book post page
-└── home.ejs                   # Main page
-
-public/
-├── css/
-│   └── style.css              # All styles
-└── uploads/
-    └── books/                 # Uploaded book covers
-```
-
-## Database Schema
-
-### book_posts table
-```sql
-- id (INTEGER/SERIAL PRIMARY KEY)
-- title (TEXT/VARCHAR NOT NULL)
-- subtitle (TEXT)
-- slug (TEXT/VARCHAR UNIQUE NOT NULL)
-- content (TEXT)
-- image_url (TEXT/VARCHAR)
-- published_date (TEXT/DATE NOT NULL)
-- created_at (TIMESTAMP)
-- updated_at (TIMESTAMP)
-```
-
-## Adding Authentication (Future)
-
-Currently, the admin panel has no authentication. To add auth after setting up your custom domain:
-
-1. Install additional packages: `npm install bcryptjs jsonwebtoken express-session`
-2. Use the existing middleware in `src/middleware/auth.js`
-3. Create user management routes
-4. Protect admin routes with authentication middleware
-5. Consider domain-based access control
+**Local Development**:
+- `NODE_ENV=development`
+- `DATABASE_URL=postgresql://user:password@localhost:5432/adrienne_personal_site`
+- `PORT=3000`
+- `LOG_LEVEL=info`
 
 ## Troubleshooting
 
-### Database connection errors
-- Verify `DATABASE_URL` is set correctly in Render
-- Check that database service is running
-- Ensure database and web service are in the same region
+### Database Connection Issues
+- Verify DATABASE_URL is correct
+- Check IP allowlist if using PostgreSQL
+- Ensure migrations ran successfully
 
-### Image uploads not working
-- Check file size (must be under 5MB)
-- Verify file type (JPEG, PNG, GIF, WebP only)
-- Ensure `/public/uploads/books/` directory exists (auto-created)
+### Build Failures
+- Check build logs in Render dashboard
+- Verify all dependencies in package.json
+- Ensure Node version is compatible
 
-### Migrations fail
-- Check database connection
-- Review logs for specific error messages
-- Ensure DATABASE_URL format is correct
+### Feed Parsing Errors
+- Check RSS feed URLs in `src/routes/pages.js`
+- Verify feeds are accessible from Render servers
+- Check error logs for specific feed failures
 
-## Local Testing
+## Updating the Site
 
-Test locally before deploying:
+1. Make changes locally
+2. Test with `npm run dev`
+3. Commit and push to GitHub
+4. Render auto-deploys on push to main branch
+
+## Database Migrations
+
+To create new migrations:
 
 ```bash
-# Install dependencies
-npm install
+# Create migration file
+npm run migrate -- create-table
 
-# Start development server (uses SQLite)
-npm run dev
-
-# Access admin panel
-open http://localhost:3000/admin/books
-
-# Create test posts
-# Then check home page: http://localhost:3000
+# Run all pending migrations
+npm run migrate
 ```
 
-## Production URL Structure
+Migration files should be in `data/migrations/` directory.
 
-- Home: `https://your-app.onrender.com/`
-- Admin: `https://your-app.onrender.com/admin/books`
-- Book Posts: `https://your-app.onrender.com/books/{slug}`
-- Create Post: `https://your-app.onrender.com/admin/books/new`
-- Edit Post: `https://your-app.onrender.com/admin/books/{id}/edit`
+## Monitoring
+
+Check logs in Render dashboard for:
+- Application errors
+- Feed parsing issues
+- Database connection status
+
+## Rollback
+
+To rollback to a previous version:
+1. Go to Render dashboard
+2. Find the deployment you want to rollback to
+3. Click "Rollback" button
+4. Confirm the action
+
+Render will re-deploy the previous version automatically.

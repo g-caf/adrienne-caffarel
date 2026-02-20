@@ -1,27 +1,27 @@
 services:
   # PostgreSQL Database
   - type: pserv
-    name: personal-website-db
+    name: adrienne-personal-site-db
     env: docker
     plan: free
     region: oregon
-    databaseName: personal_website
-    databaseUser: personal_website_user
+    databaseName: adrienne_personal_site
+    databaseUser: adrienne_user
     ipAllowList: []
 
   # Web Service
   - type: web
-    name: personal-website
+    name: adrienne-personal-site
     env: node
     region: oregon
     plan: free
-    buildCommand: npm install
+    buildCommand: npm install && npm run migrate
     startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
         fromDatabase:
-          name: personal-website-db
+          name: adrienne-personal-site-db
           property: connectionString
     healthCheckPath: /

@@ -69,8 +69,12 @@ const addTypeColumn = async () => {
       logger.info('type column already exists in book_posts table');
     }
   } catch (error) {
-    logger.error('Error adding type column:', error);
-    throw error;
+    if (error.code === 'SQLITE_ERROR' && error.message.includes('duplicate column')) {
+      logger.info('type column already exists (duplicate column error)');
+    } else {
+      logger.error('Error adding type column:', error);
+      throw error;
+    }
   }
 };
 
