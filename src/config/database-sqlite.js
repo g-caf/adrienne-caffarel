@@ -2,17 +2,23 @@ const sqlite3 = require('sqlite3').verbose();
 const { Pool } = require('pg');
 const logger = require('../utils/logger');
 const path = require('path');
+const fs = require('fs');
 
 // Determine which database to use based on environment
 const isProduction = process.env.NODE_ENV === 'production';
-const usePostgres = isProduction || process.env.DATABASE_URL;
+const hasDatabaseUrl = Boolean(process.env.DATABASE_URL && process.env.DATABASE_URL.trim());
+const usePostgres = hasDatabaseUrl;
 
 let db = null;
 let pool = null;
 
 // SQLite setup for local development
 if (!usePostgres) {
+  if (isProduction) {
+    logger.warn('DATABASE_URL is not set in production. Falling back to SQLite.');
+  }
   const dbPath = path.join(__dirname, '../../data/database.sqlite');
+  fs.mkdirSync(path.dirname(dbPath), { recursive: true });
   db = new sqlite3.Database(dbPath, (err) => {
     if (err) {
       logger.error('SQLite connection error:', err);
