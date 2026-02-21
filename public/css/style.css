@@ -164,9 +164,10 @@ html, body {
   text-decoration: none;
   display: flex;
   align-items: baseline;
-  gap: 0.18em;
+  gap: 0.34em;
   justify-content: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  white-space: nowrap;
 }
 
 .header-intro-text {
@@ -187,7 +188,7 @@ html, body {
   line-height: 1;
   min-width: 11ch;
   text-align: left;
-  margin-left: -0.04em;
+  margin-left: 0.04em;
   transform: translateY(0.04em);
 }
 
