@@ -1,0 +1,39 @@
+<%- include('partials/head', { title: 'Developing' }) %>
+<body>
+  <div class="page-container developing-page">
+    <%- include('partials/header') %>
+
+    <main>
+      <section class="developing-section">
+        <h2 class="developing-page-title">Developing</h2>
+
+        <div class="portfolio-block">
+          <div class="portfolio-block-header">
+            <h3 class="portfolio-block-title">Event Production</h3>
+            <div class="slider-controls" aria-label="Event production slider controls">
+              <button type="button" class="slider-btn" data-slider-prev aria-label="Previous video">Prev</button>
+              <button type="button" class="slider-btn" data-slider-next aria-label="Next video">Next</button>
+            </div>
+          </div>
+
+          <div class="video-slider" data-video-slider>
+            <% (eventProductionVideos || []).forEach((video) => { %>
+              <article class="video-slide">
+                <video controls preload="metadata" playsinline>
+                  <source src="<%= video.src %>" type="video/mp4">
+                </video>
+                <p class="video-slide-title"><%= video.title %></p>
+              </article>
+            <% }) %>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <%- include('partials/footer') %>
+  </div>
+
+  <script src="/js/animations.js"></script>
+  <script src="/js/developing-slider.js"></script>
+</body>
+</html>

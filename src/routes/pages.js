@@ -185,9 +185,21 @@ router.get('/designing', (req, res) => {
 });
 
 router.get('/developing', (req, res) => {
-  res.render('placeholder-page', {
+  const eventProductionVideos = [
+    {
+      title: 'Event Reel 01',
+      src: '/videos/event-production-01.mp4'
+    },
+    {
+      title: 'Event Reel 02',
+      src: '/videos/event-production-02.mp4'
+    }
+  ];
+
+  res.render('developing', {
     title: 'Developing',
-    pageTitle: 'Developing'
+    pageTitle: 'Developing',
+    eventProductionVideos
   });
 });
 
