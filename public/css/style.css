@@ -8,33 +8,17 @@
   --color-gray: #6B6B6B;      /* Gray text */
   --color-light-gray: #D4D4D4; /* Light gray borders */
   --landing-inline-pad: clamp(24px, 6vw, 72px);
-  --font-body: 'Erotique Trial Regular', serif;
-  --font-display: 'Erotique Trial Medium', serif;
 }
 
 /* Fonts */
-@font-face {
-  font-family: 'Erotique Trial Regular';
-  src: url('/fonts/ErotiqueTrial-Regular.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Erotique Trial Medium';
-  src: url('/fonts/ErotiqueTrial-Medium.ttf') format('truetype');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
+@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Crimson+Text:ital,wght@0,400;0,500;1,400&display=swap');
 
 html, body {
   margin: 0;
   padding: 0;
   background: var(--color-off-white);
   color: var(--color-black);
-  font-family: var(--font-body);
+  font-family: 'Bodoni Moda', serif;
   font-size: 16px;
   line-height: 1.6;
   font-weight: 400;
@@ -61,7 +45,7 @@ html, body {
 }
 
 .intro-text {
-  font-family: var(--font-display);
+  font-family: 'Crimson Text', serif;
   font-size: clamp(0.9rem, 6.4vmin, 5rem);
   line-height: 1.1;
   color: var(--color-red);
@@ -174,7 +158,7 @@ html, body {
 
 .site-title {
   margin: 0;
-  font-family: var(--font-display);
+  font-family: 'Crimson Text', serif;
   font-size: 1.2rem;
   color: var(--color-red);
   font-weight: 400;
@@ -394,7 +378,7 @@ main {
 }
 
 .article-title {
-  font-family: var(--font-display);
+  font-family: 'Crimson Text', serif;
   font-size: 1.6rem;
   font-weight: 400;
   color: white;
@@ -490,7 +474,7 @@ main {
 
 .library-title {
   margin: 0;
-  font-family: var(--font-display);
+  font-family: 'Crimson Text', serif;
   font-weight: 400;
   font-size: 1.18rem;
   line-height: 1.25;
@@ -628,7 +612,7 @@ footer a:hover {
 
 .simple-title {
   margin: 0 0 12px;
-  font-family: var(--font-display);
+  font-family: 'Crimson Text', serif;
   font-size: 2rem;
   font-weight: 400;
 }
