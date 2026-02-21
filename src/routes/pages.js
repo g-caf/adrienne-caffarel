@@ -185,13 +185,29 @@ router.get('/designing', (req, res) => {
 });
 
 router.get('/developing', (req, res) => {
-  const eventProductionVideos = [
+  const eventProductionMedia = [
     {
-      title: 'Event Reel 01',
+      type: 'video',
       src: '/videos/event-production-01.mp4'
     },
     {
-      title: 'Event Reel 02',
+      type: 'image',
+      src: '/images/developing/event-photo-01.jpg'
+    },
+    {
+      type: 'image',
+      src: '/images/developing/event-photo-02.jpg'
+    },
+    {
+      type: 'image',
+      src: '/images/developing/event-photo-03.jpg'
+    },
+    {
+      type: 'image',
+      src: '/images/developing/event-photo-04.jpg'
+    },
+    {
+      type: 'video',
       src: '/videos/event-production-02.mp4'
     }
   ];
@@ -199,7 +215,7 @@ router.get('/developing', (req, res) => {
   res.render('developing', {
     title: 'Developing',
     pageTitle: 'Developing',
-    eventProductionVideos
+    eventProductionMedia
   });
 });
 

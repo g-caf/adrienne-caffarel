@@ -5,6 +5,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
   if (!slider || !prevBtn || !nextBtn) return;
 
+  const videos = slider.querySelectorAll('video');
+  videos.forEach((video) => {
+    video.muted = true;
+    video.loop = true;
+    video.playsInline = true;
+    const playPromise = video.play();
+    if (playPromise && typeof playPromise.catch === 'function') {
+      playPromise.catch(() => {});
+    }
+  });
+
   function slideWidth() {
     const firstSlide = slider.querySelector('.video-slide');
     if (!firstSlide) return slider.clientWidth;
