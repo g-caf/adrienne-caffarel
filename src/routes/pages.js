@@ -169,4 +169,29 @@ router.get('/library', async (req, res, next) => {
   }
 });
 
+router.get('/designing', (req, res) => {
+  res.render('placeholder-page', {
+    title: 'Designing',
+    pageTitle: 'Designing'
+  });
+});
+
+router.get('/developing', (req, res) => {
+  res.render('placeholder-page', {
+    title: 'Developing',
+    pageTitle: 'Developing'
+  });
+});
+
+router.get('/reading', (req, res) => {
+  res.redirect('/library');
+});
+
+router.get('/writing', (req, res) => {
+  res.render('placeholder-page', {
+    title: 'Writing',
+    pageTitle: 'Writing'
+  });
+});
+
 module.exports = router;
