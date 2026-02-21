@@ -259,30 +259,22 @@ main {
   max-width: 100%;
   margin: 0;
   width: 100%;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  flex-direction: column;
+  position: static;
+  display: block;
 }
 
 .section-title {
   display: none;
 }
 
-/* Articles Grid - Full-height Tile Layout (like home-page) */
+/* Articles Grid - Square tile layout */
 .articles-grid {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0;
   list-style: none;
   margin: 0;
   padding: 0;
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
 }
 
 .article-card {
@@ -290,10 +282,7 @@ main {
   border: none;
   overflow: hidden;
   position: relative;
-  width: 100%;
-  height: 400px;
-  min-height: 400px;
-  max-height: 400px;
+  aspect-ratio: 1 / 1;
   display: flex;
   align-items: flex-end;
   cursor: pointer;
@@ -475,12 +464,6 @@ main {
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .article-card {
-    height: 350px;
-    min-height: 350px;
-    max-height: 350px;
-  }
-
   .article-title {
     font-size: 1.2rem;
   }
@@ -502,6 +485,10 @@ main {
     font-size: 1.2rem;
   }
 
+  .articles-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .library-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0;
@@ -509,12 +496,20 @@ main {
 }
 
 @media (max-width: 1200px) and (min-width: 769px) {
+  .articles-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
   .library-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 560px) {
+  .articles-grid {
+    grid-template-columns: 1fr;
+  }
+
   .library-grid {
     grid-template-columns: 1fr;
   }
