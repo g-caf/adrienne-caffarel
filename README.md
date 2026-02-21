@@ -60,6 +60,11 @@ DATABASE_URL=postgresql://user:password@localhost:5432/adrienne_personal_site
 
 # Logging
 LOG_LEVEL=info
+
+# Google Drive library sync
+GOOGLE_DRIVE_FOLDER_ID=1ppZKpX2eM0_yTVB1ebM3O1V7VTDrp_Ni
+GOOGLE_DRIVE_API_KEY=your_google_api_key_here
+LIBRARY_SYNC_INTERVAL_MINUTES=60
 ```
 
 ## Project Structure
@@ -96,6 +101,7 @@ See `render.yaml` for automated deployment configuration.
 ## Pages
 
 - **Home** (`/`) - Landing page with RSS feed aggregator
+- **Library** (`/library`) - Square-tile PDF library synced from Google Drive
 - **Designing** (`/designing`) - Portfolio section (future)
 - **Developing** (`/developing`) - Development portfolio section (future)
 - **Reading** (`/reading`) - Reading list section (future)
@@ -121,6 +127,23 @@ Edit feed list in `src/routes/pages.js` to customize.
 - `npm start` - Start production server
 - `npm run dev` - Start development server with nodemon
 - `npm run migrate` - Run database migrations
+
+## Library Metadata Overrides
+
+Optional file: `data/library-metadata.json`
+
+Use Drive file IDs as keys to override tile metadata:
+
+```json
+{
+  "drive_file_id_here": {
+    "title": "Clean Display Title",
+    "author": "Author Name",
+    "cover_image_url": "https://...",
+    "sort_order": 1
+  }
+}
+```
 
 ## Scripts
 

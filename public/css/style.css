@@ -7,6 +7,7 @@
   --color-black: #1a1a1a;     /* Black accents */
   --color-gray: #6B6B6B;      /* Gray text */
   --color-light-gray: #D4D4D4; /* Light gray borders */
+  --landing-inline-pad: clamp(16px, 4vw, 52px);
 }
 
 /* Fonts */
@@ -33,21 +34,24 @@ html, body {
   background: var(--color-off-white);
   position: relative;
   overflow: hidden;
+  padding-inline: var(--landing-inline-pad);
+  box-sizing: border-box;
 }
 
 .landing-container {
   text-align: center;
   z-index: 10;
+  width: 100%;
 }
 
 .intro-text {
   font-family: 'Crimson Text', serif;
-  font-size: clamp(2rem, 8vw, 5rem);
+  font-size: clamp(0.9rem, 6.4vmin, 5rem);
   line-height: 1.1;
   color: var(--color-red);
   margin: 0;
   font-weight: 500;
-  max-width: none;
+  max-width: calc(100vw - (2 * var(--landing-inline-pad)));
   display: flex;
   align-items: baseline;
   gap: 0.3em;

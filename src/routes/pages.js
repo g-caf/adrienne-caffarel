@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const Parser = require('rss-parser');
+const LibraryItem = require('../models/LibraryItem');
+const { ensureLibrarySynced, getLibrarySyncStatus } = require('../services/librarySync');
 
 const parser = new Parser({
   customFields: {
@@ -140,6 +142,27 @@ router.get('/', async (req, res, next) => {
     res.render('home', {
       title: 'Home',
       articles: transformedArticles
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Library page - Google Drive PDF library
+router.get('/library', async (req, res, next) => {
+  try {
+    const shouldForceSync = req.query.refresh === '1';
+    const syncResult = await ensureLibrarySynced({ force: shouldForceSync });
+    const items = await LibraryItem.findAll(
+      'CASE WHEN sort_order IS NULL THEN 1 ELSE 0 END ASC, sort_order ASC, COALESCE(author, \'\') ASC, title ASC'
+    );
+    const syncStatus = getLibrarySyncStatus();
+
+    res.render('library', {
+      title: 'Library',
+      items,
+      syncResult,
+      syncStatus
     });
   } catch (error) {
     next(error);

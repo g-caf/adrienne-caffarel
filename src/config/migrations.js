@@ -40,6 +40,88 @@ const createBookPostsTable = async () => {
   }
 };
 
+// SQL for creating library_items table (works for both SQLite and PostgreSQL)
+const createLibraryItemsTable = async () => {
+  const createTableSQL = db.usePostgres
+    ? `
+      CREATE TABLE IF NOT EXISTS library_items (
+        id SERIAL PRIMARY KEY,
+        drive_file_id VARCHAR(255) UNIQUE NOT NULL,
+        title VARCHAR(500) NOT NULL,
+        author VARCHAR(255),
+        cover_image_url VARCHAR(1000),
+        web_view_link VARCHAR(1000) NOT NULL,
+        mime_type VARCHAR(255),
+        modified_time TIMESTAMP,
+        file_size BIGINT,
+        sort_order INTEGER,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `
+    : `
+      CREATE TABLE IF NOT EXISTS library_items (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        drive_file_id TEXT UNIQUE NOT NULL,
+        title TEXT NOT NULL,
+        author TEXT,
+        cover_image_url TEXT,
+        web_view_link TEXT NOT NULL,
+        mime_type TEXT,
+        modified_time TEXT,
+        file_size INTEGER,
+        sort_order INTEGER,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+      );
+    `;
+
+  try {
+    await db.query(createTableSQL);
+    logger.info('library_items table created or already exists');
+  } catch (error) {
+    logger.error('Error creating library_items table:', error);
+    throw error;
+  }
+};
+
+// Add sort_order column to library_items table
+const addLibrarySortOrderColumn = async () => {
+  try {
+    const checkColumnSQL = db.usePostgres
+      ? `SELECT column_name FROM information_schema.columns
+         WHERE table_name='library_items' AND column_name='sort_order'`
+      : `PRAGMA table_info(library_items)`;
+
+    const result = await db.query(checkColumnSQL);
+
+    let columnExists = false;
+    if (db.usePostgres) {
+      columnExists = result.rows.length > 0;
+    } else {
+      columnExists = result.rows.some(col => col.name === 'sort_order');
+    }
+
+    if (!columnExists) {
+      const addColumnSQL = db.usePostgres
+        ? `ALTER TABLE library_items ADD COLUMN sort_order INTEGER`
+        : `ALTER TABLE library_items ADD COLUMN sort_order INTEGER`;
+
+      await db.query(addColumnSQL);
+      logger.info('Added sort_order column to library_items table');
+    } else {
+      logger.info('sort_order column already exists in library_items table');
+    }
+  } catch (error) {
+    if (error.code === 'SQLITE_ERROR' && error.message.includes('duplicate column')) {
+      logger.info('sort_order column already exists (duplicate column error)');
+    } else {
+      logger.error('Error adding sort_order column:', error);
+      throw error;
+    }
+  }
+};
+
 // Add type column to book_posts table
 const addTypeColumn = async () => {
   try {
@@ -119,6 +201,8 @@ const runMigrations = async () => {
   logger.info('Running database migrations...');
   try {
     await createBookPostsTable();
+    await createLibraryItemsTable();
+    await addLibrarySortOrderColumn();
     await addTypeColumn();
     await seedPages();
     logger.info('Migrations completed successfully');

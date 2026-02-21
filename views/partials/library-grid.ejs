@@ -1,0 +1,24 @@
+<%
+  const safeItems = Array.isArray(items) ? items : [];
+%>
+<% if (safeItems.length === 0) { %>
+  <li class="library-empty-item">No library items found yet.</li>
+<% } else { %>
+  <% safeItems.forEach(item => { %>
+    <li class="library-card">
+      <a href="<%= item.web_view_link %>" class="library-link" target="_blank" rel="noopener noreferrer">
+        <div class="library-image <%= item.cover_image_url ? '' : 'no-image' %>">
+          <% if (item.cover_image_url) { %>
+            <img src="<%= item.cover_image_url %>" alt="<%= item.title %>" loading="lazy">
+          <% } %>
+        </div>
+        <div class="library-content">
+          <h3 class="library-title"><%= item.title %></h3>
+          <% if (item.author) { %>
+            <p class="library-author">by <%= item.author %></p>
+          <% } %>
+        </div>
+      </a>
+    </li>
+  <% }); %>
+<% } %>
