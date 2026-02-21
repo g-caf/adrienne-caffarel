@@ -47,12 +47,13 @@ html, body {
   color: var(--color-red);
   margin: 0;
   font-weight: 500;
-  max-width: 95vw;
+  max-width: none;
   display: flex;
   align-items: baseline;
   gap: 0.3em;
   justify-content: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  white-space: nowrap;
 }
 
 .intro-text-part {
@@ -164,7 +165,7 @@ html, body {
   text-decoration: none;
   display: flex;
   align-items: baseline;
-  gap: 0.34em;
+  gap: 0.26em;
   justify-content: center;
   flex-wrap: nowrap;
   white-space: nowrap;
@@ -188,8 +189,7 @@ html, body {
   line-height: 1;
   min-width: 11ch;
   text-align: left;
-  margin-left: 0.04em;
-  transform: translateY(0.04em);
+  margin-left: 0.01em;
 }
 
 .header-word-flip span {
