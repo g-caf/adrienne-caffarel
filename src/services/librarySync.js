@@ -5,6 +5,8 @@ const logger = require('../utils/logger');
 
 const DEFAULT_SYNC_MINUTES = 60;
 const GOOGLE_DRIVE_API_BASE = 'https://www.googleapis.com/drive/v3/files';
+const FOLDER_MIME_TYPE = 'application/vnd.google-apps.folder';
+const PDF_MIME_TYPE = 'application/pdf';
 const metadataPath = path.join(__dirname, '../../data/library-metadata.json');
 
 let lastSyncStartedAt = 0;
@@ -37,14 +39,14 @@ function loadMetadataOverrides() {
   }
 }
 
-async function fetchDriveFiles({ folderId, apiKey }) {
+async function fetchFilesInFolder({ folderId, apiKey }) {
   const files = [];
   let pageToken = null;
 
   do {
     const params = new URLSearchParams({
       key: apiKey,
-      q: `'${folderId}' in parents and mimeType='application/pdf' and trashed=false`,
+      q: `'${folderId}' in parents and trashed=false`,
       fields: 'nextPageToken,files(id,name,webViewLink,thumbnailLink,owners(displayName),mimeType,modifiedTime,size)',
       orderBy: 'name',
       pageSize: '1000',
@@ -70,6 +72,37 @@ async function fetchDriveFiles({ folderId, apiKey }) {
   } while (pageToken);
 
   return files;
+}
+
+async function fetchDrivePdfFilesRecursive({ rootFolderId, apiKey }) {
+  const queue = [rootFolderId];
+  const visited = new Set();
+  const pdfFiles = [];
+
+  while (queue.length > 0) {
+    const currentFolderId = queue.shift();
+    if (!currentFolderId || visited.has(currentFolderId)) {
+      continue;
+    }
+    visited.add(currentFolderId);
+
+    const files = await fetchFilesInFolder({ folderId: currentFolderId, apiKey });
+
+    for (const file of files) {
+      if (!file || !file.mimeType) continue;
+
+      if (file.mimeType === FOLDER_MIME_TYPE) {
+        queue.push(file.id);
+        continue;
+      }
+
+      if (file.mimeType === PDF_MIME_TYPE) {
+        pdfFiles.push(file);
+      }
+    }
+  }
+
+  return pdfFiles;
 }
 
 function normalizeDriveFile(file, overrides) {
@@ -112,7 +145,7 @@ async function syncLibraryFromDrive() {
   }
 
   const overrides = loadMetadataOverrides();
-  const driveFiles = await fetchDriveFiles({ folderId, apiKey });
+  const driveFiles = await fetchDrivePdfFilesRecursive({ rootFolderId: folderId, apiKey });
   const normalizedItems = sortLibraryItems(
     driveFiles.map((file) => normalizeDriveFile(file, overrides))
   );

@@ -400,32 +400,8 @@ main {
   max-width: 1400px;
   margin: 0 auto;
   width: 100%;
-  padding: 24px 20px 40px;
+  padding: 0 20px 40px;
   box-sizing: border-box;
-}
-
-.library-header {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 18px;
-  border-bottom: 1px solid var(--color-black);
-  padding-bottom: 12px;
-}
-
-.library-heading {
-  margin: 0;
-  font-family: 'Crimson Text', serif;
-  font-size: 2rem;
-  font-weight: 400;
-  color: var(--color-black);
-}
-
-.library-note {
-  margin: 0;
-  color: var(--color-gray);
-  font-size: 0.9rem;
 }
 
 .library-grid {
@@ -434,7 +410,7 @@ main {
   padding: 0;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
+  gap: 0;
 }
 
 .library-card {
@@ -491,13 +467,6 @@ main {
   color: #fff;
 }
 
-.library-author {
-  margin: 4px 0 0;
-  color: rgba(255, 255, 255, 0.88);
-  font-size: 0.84rem;
-  letter-spacing: 0.2px;
-}
-
 .library-empty-item {
   color: var(--color-gray);
   padding: 20px 0;
@@ -535,16 +504,7 @@ main {
 
   .library-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
-  }
-
-  .library-header {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .library-heading {
-    font-size: 1.5rem;
+    gap: 0;
   }
 }
 

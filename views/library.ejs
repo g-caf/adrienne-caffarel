@@ -5,17 +5,6 @@
 
     <main>
       <section class="library-section">
-        <div class="library-header">
-          <h2 class="library-heading">Library</h2>
-          <% if (syncResult && syncResult.reason === 'missing_drive_config') { %>
-            <p class="library-note">Library sync is not configured yet.</p>
-          <% } else if (syncResult && syncResult.error) { %>
-            <p class="library-note">Library sync failed. Showing cached items.</p>
-          <% } else if (syncStatus && syncStatus.lastSyncCompletedAt) { %>
-            <p class="library-note">Updated <%= new Date(syncStatus.lastSyncCompletedAt).toLocaleString('en-US') %></p>
-          <% } %>
-        </div>
-
         <ul class="library-grid">
           <%- include('partials/library-grid', { items }) %>
         </ul>
