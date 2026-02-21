@@ -17,15 +17,20 @@ const parser = new Parser({
 
 // Curated RSS feeds for the personal site
 const rssFeeds = [
-  'https://techcrunch.com/feed/',
-  'https://hnrss.org/frontpage',
-  'https://www.theverge.com/rss/index.xml',
-  'https://feeds.arstechnica.com/arstechnica/index',
-  'https://www.wired.com/feed/rss',
-  'https://feeds.bbci.co.uk/news/rss.xml',
-  'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml',
-  'https://www.theatlantic.com/feed/all/',
-  'https://www.newyorker.com/feed/everything'
+  { url: 'https://techcrunch.com/feed/' },
+  { url: 'https://hnrss.org/frontpage' },
+  { url: 'https://www.theverge.com/rss/index.xml' },
+  { url: 'https://feeds.arstechnica.com/arstechnica/index' },
+  { url: 'https://www.wired.com/feed/rss' },
+  { url: 'https://www.aljazeera.com/xml/rss/all.xml' },
+  { url: 'https://feeds.bbci.co.uk/news/rss.xml' },
+  { url: 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml' },
+  { url: 'https://www.theatlantic.com/feed/all/' },
+  { url: 'https://www.newyorker.com/feed/everything' },
+  {
+    url: 'https://news.google.com/rss/search?q=site%3Areuters.com&hl=en-US&gl=US&ceid=US%3Aen',
+    label: 'Reuters'
+  }
 ];
 
 // Helper function to extract image from RSS item
@@ -104,17 +109,20 @@ router.get('/', async (req, res, next) => {
   try {
     const articles = [];
 
-    for (const url of rssFeeds) {
+    for (const feedConfig of rssFeeds) {
+      const url = typeof feedConfig === 'string' ? feedConfig : feedConfig.url;
       try {
         const feed = await parser.parseURL(url);
 
         // Extract publication name from feed
-        let publicationName = feed.title || feed.link || 'Unknown';
-        if (publicationName.includes('>')) {
-          publicationName = publicationName.split('>')[0].trim();
-        }
-        if (publicationName.includes('-')) {
-          publicationName = publicationName.split('-')[0].trim();
+        let publicationName = (feedConfig && feedConfig.label) || feed.title || feed.link || 'Unknown';
+        if (!(feedConfig && feedConfig.label)) {
+          if (publicationName.includes('>')) {
+            publicationName = publicationName.split('>')[0].trim();
+          }
+          if (publicationName.includes('-')) {
+            publicationName = publicationName.split('-')[0].trim();
+          }
         }
 
         articles.push(...feed.items.map(item => ({
