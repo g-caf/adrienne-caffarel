@@ -138,14 +138,14 @@ html, body {
   position: sticky;
   top: 0;
   background: var(--color-off-white);
-  border-bottom: 2px solid var(--color-black);
-  padding: 15px 20px;
+  border-bottom: 2px solid var(--color-red);
+  padding: 0 20px;
   z-index: 100;
   transition: all 0.3s ease;
 }
 
 .site-header.sticky {
-  padding: 10px 20px;
+  padding: 0 20px;
 }
 
 .header-content {
@@ -277,8 +277,8 @@ html, body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 69px;
-  height: 69px;
+  width: 78px;
+  height: 78px;
   opacity: 0.9;
   transition: opacity 0.2s ease, transform 0.2s ease;
 }
@@ -531,8 +531,8 @@ main {
   }
 
   .header-about-link {
-    width: 57px;
-    height: 57px;
+    width: 64px;
+    height: 64px;
   }
 
   .articles-grid {
@@ -845,21 +845,6 @@ footer a:hover {
   transform-origin: 13px 10px;
 }
 
-.writing-lock-icon.is-opening .lock-shackle {
-  animation: lockOpen 0.24s ease forwards;
-}
-
-@keyframes lockOpen {
-  0% {
-    transform: rotate(0deg) translateX(0);
-    opacity: 1;
-  }
-  100% {
-    transform: rotate(-28deg) translateX(-1px);
-    opacity: 0.88;
-  }
-}
-
 .writing-gate-error {
   margin: 0 0 14px;
   color: #8f1218;
@@ -916,7 +901,7 @@ footer a:hover {
   cursor: pointer;
   margin-top: 0;
   min-width: 98px;
-  transition: width 0.2s ease, padding 0.2s ease, border-radius 0.2s ease, filter 0.2s ease;
+  transition: width 0.72s ease, padding 0.72s ease, border-radius 0.72s ease, filter 0.32s ease;
 }
 
 .writing-gate-actions {

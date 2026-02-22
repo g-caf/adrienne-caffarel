@@ -1,7 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
   const form = document.querySelector('[data-writing-gate-form]');
   const submitButton = document.querySelector('[data-writing-submit]');
-  const lockIcon = document.querySelector('[data-writing-lock]');
 
   if (!form || !submitButton) return;
 
@@ -27,12 +26,9 @@ document.addEventListener('DOMContentLoaded', function() {
     event.preventDefault();
     submitButton.classList.add('is-submitting');
     submitButton.disabled = true;
-    if (lockIcon) {
-      lockIcon.classList.add('is-opening');
-    }
 
     setTimeout(function() {
       form.submit();
-    }, 220);
+    }, 1300);
   });
 });

@@ -314,4 +314,19 @@ router.post('/writing/unlock', async (req, res, next) => {
   }
 });
 
+router.get('/writing/reset', (req, res) => {
+  const cookieParts = [
+    'writing_access=',
+    'Max-Age=0',
+    'Path=/',
+    'HttpOnly',
+    'SameSite=Lax'
+  ];
+  if (process.env.NODE_ENV === 'production') {
+    cookieParts.push('Secure');
+  }
+  res.setHeader('Set-Cookie', cookieParts.join('; '));
+  return res.redirect('/writing');
+});
+
 module.exports = router;
