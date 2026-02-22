@@ -5,10 +5,13 @@ document.addEventListener('DOMContentLoaded', function() {
   const headerFlipElement = document.querySelector('.header-word-flip');
   const landingPage = document.querySelector('.landing-page');
   const pageContainer = document.querySelector('.page-container');
+  const landingDownArrow = document.querySelector('.landing-down-arrow');
   const WORD_DURATION_MS = 2500;
-  const LANDING_CYCLES = 3;
+  const AUTO_COLLAPSE_CYCLES = 2;
 
   let currentWordIndex = 0;
+  let hasShownDownArrow = false;
+  let isCollapsing = false;
 
   function renderWord(target, word) {
     if (!target) return;
@@ -36,7 +39,12 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function collapseToHeader() {
-    if (!landingPage) return;
+    if (!landingPage || isCollapsing) return;
+    isCollapsing = true;
+
+    if (landingDownArrow) {
+      landingDownArrow.classList.remove('visible');
+    }
 
     landingPage.style.transition = 'all 0.8s ease-in-out';
     landingPage.style.minHeight = '60px';
@@ -64,18 +72,31 @@ document.addEventListener('DOMContentLoaded', function() {
     return;
   }
 
+  function showDownArrow() {
+    if (!landingDownArrow || hasShownDownArrow) return;
+    hasShownDownArrow = true;
+    landingDownArrow.classList.add('visible');
+    landingDownArrow.addEventListener('click', collapseToHeader);
+  }
+
   function cycleWords() {
+    if (isCollapsing) return;
+
     const currentWord = words[currentWordIndex % words.length] + '.';
     renderWord(flipElement, currentWord);
     renderWord(headerFlipElement, currentWord);
     currentWordIndex++;
 
-    if (currentWordIndex < words.length * LANDING_CYCLES) {
+    if (currentWordIndex === words.length) {
+      showDownArrow();
+    }
+
+    if (currentWordIndex < words.length * AUTO_COLLAPSE_CYCLES) {
       setTimeout(cycleWords, WORD_DURATION_MS);
       return;
     }
 
-    setTimeout(collapseToHeader, WORD_DURATION_MS);
+    collapseToHeader();
   }
 
   cycleWords();

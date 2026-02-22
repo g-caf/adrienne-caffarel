@@ -114,6 +114,40 @@ html, body {
   box-shadow: 0 0 8px rgba(164, 25, 31, 0.3);
 }
 
+.landing-down-arrow {
+  position: absolute;
+  left: 50%;
+  bottom: 26px;
+  transform: translateX(-50%) translateY(6px);
+  width: 54px;
+  height: 24px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  pointer-events: none;
+}
+
+.landing-down-arrow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--color-red);
+  clip-path: polygon(50% 100%, 98% 24%, 88% 14%, 50% 78%, 12% 14%, 2% 24%);
+}
+
+.landing-down-arrow.visible {
+  opacity: 0.92;
+  transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+}
+
+.landing-down-arrow:hover {
+  opacity: 1;
+}
+
 @keyframes slideInHorizontal {
   0% {
     width: 0;
