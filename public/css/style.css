@@ -277,8 +277,8 @@ html, body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 46px;
-  height: 46px;
+  width: 69px;
+  height: 69px;
   opacity: 0.9;
   transition: opacity 0.2s ease, transform 0.2s ease;
 }
@@ -531,8 +531,8 @@ main {
   }
 
   .header-about-link {
-    width: 38px;
-    height: 38px;
+    width: 57px;
+    height: 57px;
   }
 
   .articles-grid {
