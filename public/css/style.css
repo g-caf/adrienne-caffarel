@@ -766,11 +766,11 @@ footer a:hover {
 }
 
 .writing-gate-card {
-  width: min(680px, calc(100vw - 32px));
+  width: min(560px, calc(100vw - 32px));
   background: rgba(245, 241, 237, 0.96);
   border: 1px solid rgba(164, 25, 31, 0.34);
   box-shadow: 0 14px 38px rgba(26, 26, 26, 0.1);
-  padding: 34px 30px;
+  padding: 26px 24px;
   color: var(--color-red);
   position: relative;
   overflow: hidden;
@@ -797,7 +797,7 @@ footer a:hover {
 .writing-riddle-text {
   margin: 0 0 20px;
   font-family: var(--font-display, 'Crimson Text', serif);
-  font-size: clamp(1.25rem, 2.2vw, 1.65rem);
+  font-size: clamp(1.2rem, 2.1vw, 1.45rem);
   line-height: 1.25;
   letter-spacing: 0.2px;
   position: relative;
@@ -840,11 +840,11 @@ footer a:hover {
 }
 
 .writing-gate-submit {
-  justify-self: start;
+  justify-self: center;
   border: 1px solid var(--color-red);
-  background: transparent;
-  color: var(--color-red);
-  padding: 7px 14px;
+  background: var(--color-red);
+  color: var(--color-off-white);
+  padding: 8px 18px;
   font-family: inherit;
   font-size: 0.9rem;
   text-transform: lowercase;
@@ -854,7 +854,7 @@ footer a:hover {
 }
 
 .writing-gate-submit:hover {
-  background: rgba(164, 25, 31, 0.08);
+  filter: brightness(0.95);
 }
 
 .writing-honeypot {
@@ -890,6 +890,6 @@ footer a:hover {
 
   .writing-gate-card {
     width: min(680px, calc(100vw - 20px));
-    padding: 24px 18px;
+    padding: 22px 16px;
   }
 }
