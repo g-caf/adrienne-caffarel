@@ -85,6 +85,41 @@ const createLibraryItemsTable = async () => {
   }
 };
 
+// SQL for creating writing_submissions table (works for both SQLite and PostgreSQL)
+const createWritingSubmissionsTable = async () => {
+  const createTableSQL = db.usePostgres
+    ? `
+      CREATE TABLE IF NOT EXISTS writing_submissions (
+        id SERIAL PRIMARY KEY,
+        first_name VARCHAR(255) NOT NULL,
+        last_name VARCHAR(255) NOT NULL,
+        email VARCHAR(500) NOT NULL,
+        source_ip VARCHAR(100),
+        user_agent TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `
+    : `
+      CREATE TABLE IF NOT EXISTS writing_submissions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        first_name TEXT NOT NULL,
+        last_name TEXT NOT NULL,
+        email TEXT NOT NULL,
+        source_ip TEXT,
+        user_agent TEXT,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+      );
+    `;
+
+  try {
+    await db.query(createTableSQL);
+    logger.info('writing_submissions table created or already exists');
+  } catch (error) {
+    logger.error('Error creating writing_submissions table:', error);
+    throw error;
+  }
+};
+
 // Add sort_order column to library_items table
 const addLibrarySortOrderColumn = async () => {
   try {
@@ -202,6 +237,7 @@ const runMigrations = async () => {
   try {
     await createBookPostsTable();
     await createLibraryItemsTable();
+    await createWritingSubmissionsTable();
     await addLibrarySortOrderColumn();
     await addTypeColumn();
     await seedPages();

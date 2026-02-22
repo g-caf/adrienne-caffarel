@@ -749,3 +749,147 @@ footer a:hover {
     right: 6px;
   }
 }
+
+/* Writing gate + content */
+.writing-gated {
+  background:
+    linear-gradient(rgba(245, 241, 237, 0.92), rgba(245, 241, 237, 0.92)),
+    url('/images/writing/delft-red-01.webp') center/520px auto repeat;
+}
+
+.writing-gate-wrap {
+  min-height: calc(100vh - 90px);
+  display: grid;
+  place-items: center;
+  padding: 28px 16px 40px;
+  box-sizing: border-box;
+}
+
+.writing-gate-card {
+  width: min(680px, calc(100vw - 32px));
+  background: rgba(245, 241, 237, 0.96);
+  border: 1px solid rgba(164, 25, 31, 0.34);
+  box-shadow: 0 14px 38px rgba(26, 26, 26, 0.1);
+  padding: 34px 30px;
+  color: var(--color-red);
+  position: relative;
+  overflow: hidden;
+}
+
+.writing-gate-card::before,
+.writing-gate-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.writing-gate-card::before {
+  background: url('/images/writing/delft-red-02.webp') center/380px auto repeat;
+  opacity: 0.06;
+}
+
+.writing-gate-card::after {
+  border: 1px solid rgba(164, 25, 31, 0.2);
+  inset: 10px;
+}
+
+.writing-riddle-text {
+  margin: 0 0 20px;
+  font-family: var(--font-display, 'Crimson Text', serif);
+  font-size: clamp(1.25rem, 2.2vw, 1.65rem);
+  line-height: 1.25;
+  letter-spacing: 0.2px;
+  position: relative;
+  z-index: 1;
+}
+
+.writing-gate-error {
+  margin: 0 0 14px;
+  color: #8f1218;
+  font-size: 0.92rem;
+  position: relative;
+  z-index: 1;
+}
+
+.writing-gate-form {
+  display: grid;
+  gap: 8px;
+  position: relative;
+  z-index: 1;
+}
+
+.writing-gate-form label {
+  font-size: 0.95rem;
+  color: var(--color-red);
+}
+
+.writing-gate-form input {
+  border: 0;
+  border-bottom: 1px solid rgba(164, 25, 31, 0.55);
+  background: transparent;
+  color: var(--color-red);
+  padding: 6px 2px;
+  font: inherit;
+  margin-bottom: 8px;
+}
+
+.writing-gate-form input:focus {
+  outline: none;
+  border-bottom-color: var(--color-red);
+}
+
+.writing-gate-submit {
+  justify-self: start;
+  border: 1px solid var(--color-red);
+  background: transparent;
+  color: var(--color-red);
+  padding: 7px 14px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  text-transform: lowercase;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  margin-top: 4px;
+}
+
+.writing-gate-submit:hover {
+  background: rgba(164, 25, 31, 0.08);
+}
+
+.writing-honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.writing-content-section {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 42px 20px 64px;
+}
+
+.writing-content-title {
+  margin: 0 0 8px;
+  font-family: var(--font-display, 'Crimson Text', serif);
+  font-size: 2rem;
+  font-weight: 400;
+}
+
+.writing-content-note {
+  margin: 0;
+  color: var(--color-gray);
+}
+
+@media (max-width: 768px) {
+  .writing-gate-wrap {
+    padding: 20px 10px 30px;
+  }
+
+  .writing-gate-card {
+    width: min(680px, calc(100vw - 20px));
+    padding: 24px 18px;
+  }
+}

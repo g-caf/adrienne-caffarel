@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Parser = require('rss-parser');
 const LibraryItem = require('../models/LibraryItem');
+const WritingSubmission = require('../models/WritingSubmission');
 const { ensureLibrarySynced, getLibrarySyncStatus } = require('../services/librarySync');
 
 const parser = new Parser({
@@ -102,6 +103,27 @@ function extractImage(item) {
   }
 
   return imageUrl;
+}
+
+function parseCookies(req) {
+  const cookieHeader = req.headers.cookie || '';
+  return cookieHeader
+    .split(';')
+    .map((cookie) => cookie.trim())
+    .filter(Boolean)
+    .reduce((acc, cookie) => {
+      const separatorIndex = cookie.indexOf('=');
+      if (separatorIndex === -1) return acc;
+      const name = cookie.substring(0, separatorIndex).trim();
+      const value = decodeURIComponent(cookie.substring(separatorIndex + 1).trim());
+      acc[name] = value;
+      return acc;
+    }, {});
+}
+
+function hasWritingAccess(req) {
+  const cookies = parseCookies(req);
+  return cookies.writing_access === 'granted';
 }
 
 // Home page - main RSS feed aggregator
@@ -224,10 +246,65 @@ router.get('/reading', (req, res) => {
 });
 
 router.get('/writing', (req, res) => {
-  res.render('placeholder-page', {
+  if (!hasWritingAccess(req)) {
+    return res.render('writing-gate', {
+      title: 'Writing',
+      errorMessage: null,
+      formData: { first_name: '', last_name: '', email: '' }
+    });
+  }
+
+  res.render('writing-content', {
     title: 'Writing',
     pageTitle: 'Writing'
   });
+});
+
+router.post('/writing/unlock', async (req, res, next) => {
+  try {
+    const first_name = (req.body.first_name || '').trim();
+    const last_name = (req.body.last_name || '').trim();
+    const email = (req.body.email || '').trim().toLowerCase();
+    const honeypot = (req.body.riddle_answer || '').trim();
+
+    if (honeypot) {
+      return res.redirect('/writing');
+    }
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!first_name || !last_name || !emailPattern.test(email)) {
+      return res.status(400).render('writing-gate', {
+        title: 'Writing',
+        errorMessage: 'Please complete all three riddles with a valid email address.',
+        formData: { first_name, last_name, email }
+      });
+    }
+
+    await WritingSubmission.create({
+      first_name,
+      last_name,
+      email,
+      source_ip: req.ip,
+      user_agent: req.headers['user-agent'] || null
+    });
+
+    const maxAgeSeconds = 60 * 60 * 24 * 30; // 30 days
+    const cookieParts = [
+      `writing_access=granted`,
+      `Max-Age=${maxAgeSeconds}`,
+      'Path=/',
+      'HttpOnly',
+      'SameSite=Lax'
+    ];
+    if (process.env.NODE_ENV === 'production') {
+      cookieParts.push('Secure');
+    }
+    res.setHeader('Set-Cookie', cookieParts.join('; '));
+
+    return res.redirect('/writing');
+  } catch (error) {
+    next(error);
+  }
 });
 
 module.exports = router;

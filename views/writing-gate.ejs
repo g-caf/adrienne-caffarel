@@ -1,0 +1,36 @@
+<%- include('partials/head', { title: 'Writing' }) %>
+<body>
+  <div class="page-container writing-page writing-gated">
+    <%- include('partials/header') %>
+
+    <main>
+      <section class="writing-gate-wrap">
+        <div class="writing-gate-card">
+          <p class="writing-riddle-text">if you want to read you must answer my riddles three.</p>
+
+          <% if (errorMessage) { %>
+            <p class="writing-gate-error"><%= errorMessage %></p>
+          <% } %>
+
+          <form method="post" action="/writing/unlock" class="writing-gate-form" novalidate>
+            <input type="text" name="riddle_answer" class="writing-honeypot" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+            <label for="first_name">first name:</label>
+            <input id="first_name" name="first_name" type="text" value="<%= formData.first_name %>" required>
+
+            <label for="last_name">last name:</label>
+            <input id="last_name" name="last_name" type="text" value="<%= formData.last_name %>" required>
+
+            <label for="email">email address:</label>
+            <input id="email" name="email" type="email" value="<%= formData.email %>" required>
+
+            <button type="submit" class="writing-gate-submit">enter writing</button>
+          </form>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/js/animations.js"></script>
+</body>
+</html>
