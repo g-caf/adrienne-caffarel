@@ -810,6 +810,29 @@ footer a:hover {
   fill: currentColor;
 }
 
+.writing-lock-icon .lock-body {
+  fill: currentColor;
+}
+
+.writing-lock-icon .lock-shackle {
+  transform-origin: 13px 10px;
+}
+
+.writing-lock-icon.is-opening .lock-shackle {
+  animation: lockOpen 0.24s ease forwards;
+}
+
+@keyframes lockOpen {
+  0% {
+    transform: rotate(0deg) translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(-28deg) translateX(-1px);
+    opacity: 0.88;
+  }
+}
+
 .writing-gate-error {
   margin: 0 0 14px;
   color: #8f1218;
@@ -865,6 +888,8 @@ footer a:hover {
   letter-spacing: 0.7px;
   cursor: pointer;
   margin-top: 0;
+  min-width: 98px;
+  transition: width 0.2s ease, padding 0.2s ease, border-radius 0.2s ease, filter 0.2s ease;
 }
 
 .writing-gate-actions {
@@ -872,6 +897,21 @@ footer a:hover {
   display: flex;
   justify-content: center;
   margin-top: 6px;
+}
+
+.writing-gate-submit.is-submitting {
+  min-width: 42px;
+  width: 42px;
+  padding: 8px 0;
+  border-radius: 999px;
+  font-size: 0;
+  letter-spacing: 0;
+}
+
+.writing-gate-submit.is-submitting::before {
+  content: '\2665';
+  font-size: 0.98rem;
+  color: var(--color-off-white);
 }
 
 .writing-gate-submit:hover {

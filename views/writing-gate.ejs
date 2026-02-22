@@ -6,9 +6,10 @@
     <main>
       <section class="writing-gate-wrap">
         <div class="writing-gate-card">
-          <div class="writing-lock-icon" aria-hidden="true">
+          <div class="writing-lock-icon" data-writing-lock aria-hidden="true">
             <svg viewBox="0 0 24 24" role="img" focusable="false">
-              <path d="M17 10h-1V7.75a4 4 0 0 0-8 0V10H7a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2Zm-7-2.25a2 2 0 0 1 4 0V10h-4V7.75Zm7 10.25H7v-6h10v6Z"/>
+              <path class="lock-body" d="M7 10h10a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2Z"/>
+              <path class="lock-shackle" d="M9 10V7.75a3 3 0 1 1 6 0V10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
             </svg>
           </div>
 
@@ -16,7 +17,7 @@
             <p class="writing-gate-error"><%= errorMessage %></p>
           <% } %>
 
-          <form method="post" action="/writing/unlock" class="writing-gate-form" novalidate>
+          <form method="post" action="/writing/unlock" class="writing-gate-form" data-writing-gate-form novalidate>
             <input type="text" name="riddle_answer" class="writing-honeypot" tabindex="-1" autocomplete="off" aria-hidden="true">
 
             <label for="first_name">first name:</label>
@@ -29,7 +30,7 @@
             <input id="email" name="email" type="email" value="<%= formData.email %>" required>
 
             <div class="writing-gate-actions">
-              <button type="submit" class="writing-gate-submit">SUBMIT</button>
+              <button type="submit" class="writing-gate-submit" data-writing-submit>SUBMIT</button>
             </div>
           </form>
         </div>
@@ -37,6 +38,7 @@
     </main>
   </div>
 
+  <script src="/js/writing-gate.js"></script>
   <script src="/js/animations.js"></script>
 </body>
 </html>
