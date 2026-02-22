@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
+
 /* Adrienne's Personal Website - Design System */
 
 /* Color Palette */
@@ -766,11 +768,11 @@ footer a:hover {
 }
 
 .writing-gate-card {
-  width: min(560px, calc(100vw - 32px));
+  width: min(336px, calc(100vw - 32px));
   background: rgba(245, 241, 237, 0.96);
   border: 1px solid rgba(164, 25, 31, 0.34);
   box-shadow: 0 14px 38px rgba(26, 26, 26, 0.1);
-  padding: 26px 24px;
+  padding: 18px 16px;
   color: var(--color-red);
   position: relative;
   overflow: hidden;
@@ -795,11 +797,12 @@ footer a:hover {
 }
 
 .writing-riddle-text {
-  margin: 0 0 20px;
-  font-family: var(--font-display, 'Crimson Text', serif);
-  font-size: clamp(1.2rem, 2.1vw, 1.45rem);
+  margin: 0 0 14px;
+  font-family: 'Great Vibes', cursive;
+  font-size: clamp(1.7rem, 4.8vw, 2.1rem);
   line-height: 1.25;
   letter-spacing: 0.2px;
+  text-align: center;
   position: relative;
   z-index: 1;
 }
@@ -814,14 +817,15 @@ footer a:hover {
 
 .writing-gate-form {
   display: grid;
-  gap: 8px;
+  gap: 6px;
   position: relative;
   z-index: 1;
 }
 
 .writing-gate-form label {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   color: var(--color-red);
+  text-align: center;
 }
 
 .writing-gate-form input {
@@ -829,9 +833,10 @@ footer a:hover {
   border-bottom: 1px solid rgba(164, 25, 31, 0.55);
   background: transparent;
   color: var(--color-red);
-  padding: 6px 2px;
+  padding: 5px 2px;
   font: inherit;
   margin-bottom: 8px;
+  text-align: center;
 }
 
 .writing-gate-form input:focus {
@@ -847,10 +852,10 @@ footer a:hover {
   padding: 8px 18px;
   font-family: inherit;
   font-size: 0.9rem;
-  text-transform: lowercase;
-  letter-spacing: 0.2px;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
   cursor: pointer;
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 .writing-gate-submit:hover {
@@ -889,7 +894,7 @@ footer a:hover {
   }
 
   .writing-gate-card {
-    width: min(680px, calc(100vw - 20px));
-    padding: 22px 16px;
+    width: min(336px, calc(100vw - 20px));
+    padding: 18px 14px;
   }
 }
