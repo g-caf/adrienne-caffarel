@@ -172,14 +172,14 @@ html, body {
   position: sticky;
   top: 0;
   background: var(--color-off-white);
-  border-bottom: 2px solid var(--color-red);
-  padding: 0 8px;
+  border-bottom: 2px solid var(--color-black);
+  padding: 0 14px;
   z-index: 100;
   transition: all 0.3s ease;
 }
 
 .site-header.sticky {
-  padding: 0 8px;
+  padding: 0 14px;
 }
 
 .header-content {
@@ -191,7 +191,7 @@ html, body {
 }
 
 .site-title {
-  margin: 0;
+  margin: 0 0 0 4px;
   font-family: 'Crimson Text', serif;
   font-size: 1.2rem;
   color: var(--color-red);
