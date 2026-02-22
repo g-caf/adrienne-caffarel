@@ -234,6 +234,13 @@ router.get('/designing', (req, res) => {
   });
 });
 
+router.get('/about', (req, res) => {
+  res.render('placeholder-page', {
+    title: 'About',
+    pageTitle: 'About'
+  });
+});
+
 router.get('/developing', (req, res) => {
   res.render('placeholder-page', {
     title: 'Developing',
