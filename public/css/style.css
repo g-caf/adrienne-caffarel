@@ -794,22 +794,27 @@ footer a:hover {
   inset: 10px;
 }
 
-.writing-riddle-text {
-  margin: 0 0 14px;
-  font-family: var(--font-display, 'Crimson Text', serif);
-  font-size: clamp(1.35rem, 3vw, 1.7rem);
-  font-style: italic;
-  line-height: 1.25;
-  letter-spacing: 0.2px;
-  text-align: center;
+.writing-lock-icon {
+  width: 24px;
+  height: 24px;
+  margin: 0 auto 12px;
+  color: var(--color-red);
   position: relative;
   z-index: 1;
+}
+
+.writing-lock-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
 }
 
 .writing-gate-error {
   margin: 0 0 14px;
   color: #8f1218;
   font-size: 0.92rem;
+  text-align: center;
   position: relative;
   z-index: 1;
 }
@@ -817,14 +822,17 @@ footer a:hover {
 .writing-gate-form {
   display: grid;
   gap: 6px;
+  justify-items: center;
   position: relative;
   z-index: 1;
+  padding-bottom: 8px;
 }
 
 .writing-gate-form label {
   font-size: 0.9rem;
   color: var(--color-red);
   text-align: center;
+  width: 100%;
 }
 
 .writing-gate-form input {
@@ -836,6 +844,8 @@ footer a:hover {
   font: inherit;
   margin-bottom: 8px;
   text-align: center;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .writing-gate-form input:focus {
@@ -854,7 +864,14 @@ footer a:hover {
   text-transform: uppercase;
   letter-spacing: 0.7px;
   cursor: pointer;
-  margin-top: 2px;
+  margin-top: 0;
+}
+
+.writing-gate-actions {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 6px;
 }
 
 .writing-gate-submit:hover {

@@ -6,7 +6,11 @@
     <main>
       <section class="writing-gate-wrap">
         <div class="writing-gate-card">
-          <p class="writing-riddle-text">Answer my riddles three —</p>
+          <div class="writing-lock-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" role="img" focusable="false">
+              <path d="M17 10h-1V7.75a4 4 0 0 0-8 0V10H7a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2Zm-7-2.25a2 2 0 0 1 4 0V10h-4V7.75Zm7 10.25H7v-6h10v6Z"/>
+            </svg>
+          </div>
 
           <% if (errorMessage) { %>
             <p class="writing-gate-error"><%= errorMessage %></p>
@@ -24,7 +28,9 @@
             <label for="email">email address:</label>
             <input id="email" name="email" type="email" value="<%= formData.email %>" required>
 
-            <button type="submit" class="writing-gate-submit">SUBMIT</button>
+            <div class="writing-gate-actions">
+              <button type="submit" class="writing-gate-submit">SUBMIT</button>
+            </div>
           </form>
         </div>
       </section>
