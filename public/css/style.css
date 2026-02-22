@@ -139,18 +139,18 @@ html, body {
   top: 0;
   background: var(--color-off-white);
   border-bottom: 2px solid var(--color-red);
-  padding: 0 20px;
+  padding: 0 8px;
   z-index: 100;
   transition: all 0.3s ease;
 }
 
 .site-header.sticky {
-  padding: 0 20px;
+  padding: 0 8px;
 }
 
 .header-content {
-  max-width: 1400px;
-  margin: 0 auto;
+  max-width: none;
+  margin: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
