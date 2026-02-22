@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
-
 /* Adrienne's Personal Website - Design System */
 
 /* Color Palette */
@@ -798,8 +796,9 @@ footer a:hover {
 
 .writing-riddle-text {
   margin: 0 0 14px;
-  font-family: 'Great Vibes', cursive;
-  font-size: clamp(1.7rem, 4.8vw, 2.1rem);
+  font-family: var(--font-display, 'Crimson Text', serif);
+  font-size: clamp(1.35rem, 3vw, 1.7rem);
+  font-style: italic;
   line-height: 1.25;
   letter-spacing: 0.2px;
   text-align: center;
