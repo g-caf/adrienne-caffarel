@@ -178,13 +178,6 @@ router.get('/library', async (req, res, next) => {
 });
 
 router.get('/designing', (req, res) => {
-  res.render('placeholder-page', {
-    title: 'Designing',
-    pageTitle: 'Designing'
-  });
-});
-
-router.get('/developing', (req, res) => {
   const eventProductionMedia = [
     {
       type: 'video',
@@ -213,9 +206,16 @@ router.get('/developing', (req, res) => {
   ];
 
   res.render('developing', {
-    title: 'Developing',
-    pageTitle: 'Developing',
+    title: 'Designing',
+    pageTitle: 'Designing',
     eventProductionMedia
+  });
+});
+
+router.get('/developing', (req, res) => {
+  res.render('placeholder-page', {
+    title: 'Developing',
+    pageTitle: 'Developing'
   });
 });
 
