@@ -1,4 +1,5 @@
 const express = require('express');
+const crypto = require('crypto');
 const router = express.Router();
 const Parser = require('rss-parser');
 const LibraryItem = require('../models/LibraryItem');
@@ -15,6 +16,10 @@ const parser = new Parser({
     ]
   }
 });
+
+const ADMIN_AUTH_WINDOW_MS = 15 * 60 * 1000;
+const ADMIN_AUTH_MAX_ATTEMPTS = 10;
+const adminAuthAttempts = new Map();
 
 // Curated RSS feeds for the personal site
 const rssFeeds = [
@@ -124,6 +129,102 @@ function parseCookies(req) {
 function hasWritingAccess(req) {
   const cookies = parseCookies(req);
   return cookies.writing_access === 'granted';
+}
+
+function normalizeIp(ip) {
+  if (!ip) return '';
+  if (ip.startsWith('::ffff:')) return ip.slice(7);
+  return ip;
+}
+
+function safeEqual(a, b) {
+  const aBuffer = Buffer.from(a || '', 'utf8');
+  const bBuffer = Buffer.from(b || '', 'utf8');
+  if (aBuffer.length !== bBuffer.length) return false;
+  return crypto.timingSafeEqual(aBuffer, bBuffer);
+}
+
+function parseAdminAllowlist() {
+  return (process.env.ADMIN_ALLOWED_IPS || '')
+    .split(',')
+    .map((ip) => normalizeIp(ip.trim()))
+    .filter(Boolean);
+}
+
+function requireWritingSubmissionsAdmin(req, res, next) {
+  const expectedUser = process.env.ADMIN_USERNAME || '';
+  const expectedPass = process.env.ADMIN_PASSWORD || '';
+
+  // Keep endpoint disabled unless explicit credentials are configured.
+  if (!expectedUser || !expectedPass) {
+    return res.status(503).json({ error: 'Admin endpoint is not configured.' });
+  }
+
+  const allowedIps = parseAdminAllowlist();
+  const requestIp = normalizeIp(req.ip) || 'unknown';
+  if (allowedIps.length > 0 && !allowedIps.includes(requestIp)) {
+    return res.status(403).json({ error: 'Forbidden.' });
+  }
+
+  const now = Date.now();
+  const authState = adminAuthAttempts.get(requestIp);
+  if (authState) {
+    const elapsed = now - authState.firstAttemptAt;
+    if (elapsed > ADMIN_AUTH_WINDOW_MS) {
+      adminAuthAttempts.delete(requestIp);
+    } else if (authState.attempts >= ADMIN_AUTH_MAX_ATTEMPTS) {
+      return res.status(429).json({ error: 'Too many authentication attempts. Try again later.' });
+    }
+  }
+
+  const header = req.headers.authorization || '';
+  if (!header.startsWith('Basic ')) {
+    registerAdminAuthFailure(requestIp);
+    res.setHeader('WWW-Authenticate', 'Basic realm="Writing Admin", charset="UTF-8"');
+    return res.status(401).json({ error: 'Authentication required.' });
+  }
+
+  let username = '';
+  let password = '';
+  try {
+    const decoded = Buffer.from(header.slice(6), 'base64').toString('utf8');
+    const splitIndex = decoded.indexOf(':');
+    if (splitIndex === -1) {
+      throw new Error('Malformed basic auth payload');
+    }
+    username = decoded.slice(0, splitIndex);
+    password = decoded.slice(splitIndex + 1);
+  } catch (error) {
+    registerAdminAuthFailure(requestIp);
+    res.setHeader('WWW-Authenticate', 'Basic realm="Writing Admin", charset="UTF-8"');
+    return res.status(401).json({ error: 'Invalid authentication header.' });
+  }
+
+  if (!safeEqual(username, expectedUser) || !safeEqual(password, expectedPass)) {
+    registerAdminAuthFailure(requestIp);
+    res.setHeader('WWW-Authenticate', 'Basic realm="Writing Admin", charset="UTF-8"');
+    return res.status(401).json({ error: 'Invalid credentials.' });
+  }
+
+  adminAuthAttempts.delete(requestIp);
+  res.setHeader('Cache-Control', 'no-store');
+  return next();
+}
+
+function registerAdminAuthFailure(ip) {
+  const now = Date.now();
+  const state = adminAuthAttempts.get(ip);
+  if (!state || now - state.firstAttemptAt > ADMIN_AUTH_WINDOW_MS) {
+    adminAuthAttempts.set(ip, { attempts: 1, firstAttemptAt: now });
+    return;
+  }
+  state.attempts += 1;
+  adminAuthAttempts.set(ip, state);
+}
+
+function escapeCsv(value) {
+  const stringValue = value == null ? '' : String(value);
+  return `"${stringValue.replace(/"/g, '""')}"`;
 }
 
 // Home page - main RSS feed aggregator
@@ -327,6 +428,54 @@ router.get('/writing/reset', (req, res) => {
   }
   res.setHeader('Set-Cookie', cookieParts.join('; '));
   return res.redirect('/writing');
+});
+
+router.get('/admin/writing-submissions', requireWritingSubmissionsAdmin, async (req, res, next) => {
+  try {
+    const limit = req.query.limit ? parseInt(req.query.limit, 10) : 250;
+    const submissions = await WritingSubmission.findRecent(limit);
+    return res.status(200).json({
+      total: submissions.length,
+      submissions
+    });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.get('/admin/writing-submissions.csv', requireWritingSubmissionsAdmin, async (req, res, next) => {
+  try {
+    const limit = req.query.limit ? parseInt(req.query.limit, 10) : 1000;
+    const submissions = await WritingSubmission.findRecent(limit);
+    const lines = [
+      ['id', 'created_at', 'first_name', 'last_name', 'email', 'source_ip', 'user_agent']
+        .map(escapeCsv)
+        .join(',')
+    ];
+
+    for (const row of submissions) {
+      lines.push(
+        [
+          row.id,
+          row.created_at,
+          row.first_name,
+          row.last_name,
+          row.email,
+          row.source_ip,
+          row.user_agent
+        ].map(escapeCsv).join(',')
+      );
+    }
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="writing-submissions-${new Date().toISOString().slice(0, 10)}.csv"`
+    );
+    return res.status(200).send(lines.join('\n'));
+  } catch (error) {
+    return next(error);
+  }
 });
 
 module.exports = router;

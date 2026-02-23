@@ -107,6 +107,26 @@ See `render.yaml` for automated deployment configuration.
 - **Reading** (`/reading`) - Reading list section (future)
 - **Writing** (`/writing`) - Essays and writing section (future)
 
+## Writing Gate Submissions Admin
+
+Writing gate form submissions are stored in the `writing_submissions` database table.
+
+Secure endpoints:
+- `GET /admin/writing-submissions` (JSON)
+- `GET /admin/writing-submissions.csv` (CSV download)
+
+Security controls:
+- Disabled unless `ADMIN_USERNAME` and `ADMIN_PASSWORD` are set
+- HTTP Basic authentication required
+- Optional IP allowlist with `ADMIN_ALLOWED_IPS`
+- Brute-force throttling after repeated failed auth attempts
+
+Example:
+```bash
+curl -u "$ADMIN_USERNAME:$ADMIN_PASSWORD" "https://your-domain/admin/writing-submissions?limit=100"
+curl -u "$ADMIN_USERNAME:$ADMIN_PASSWORD" "https://your-domain/admin/writing-submissions.csv?limit=1000" -o writing-submissions.csv
+```
+
 ## RSS Feeds
 
 Currently configured feeds:
