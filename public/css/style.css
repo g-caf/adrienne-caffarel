@@ -707,7 +707,8 @@ footer a:hover {
   display: grid;
   grid-template-columns: minmax(180px, 0.58fr) minmax(760px, 2.42fr);
   align-items: start;
-  gap: clamp(20px, 2.4vw, 34px);
+  column-gap: clamp(28px, 3.2vw, 46px);
+  row-gap: 0;
 }
 
 .about-hand img {
@@ -720,6 +721,7 @@ footer a:hover {
   display: flex;
   flex-direction: column;
   gap: clamp(20px, 2.6vw, 34px);
+  min-width: 0;
 }
 
 .about-intro p {
@@ -739,7 +741,8 @@ footer a:hover {
   display: grid;
   grid-template-columns: minmax(420px, 1fr) minmax(320px, 0.9fr);
   gap: clamp(42px, 6vw, 120px);
-  align-items: center;
+  align-items: start;
+  margin-top: clamp(16px, 2.2vw, 30px);
 }
 
 .about-middle h3 {
@@ -764,11 +767,11 @@ footer a:hover {
 }
 
 .about-education-block {
-  margin-top: 2px;
+  margin-top: 0;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .about-education {
@@ -783,6 +786,7 @@ footer a:hover {
 
 .about-outro {
   margin: auto 0 0;
+  padding-top: clamp(8px, 1.4vw, 18px);
   text-align: center;
 }
 
@@ -808,6 +812,11 @@ footer a:hover {
     gap: 24px;
   }
 
+  .about-outro {
+    margin-top: 20px;
+    padding-top: 0;
+  }
+
   .about-education-block {
     align-items: flex-start;
   }
@@ -829,7 +838,8 @@ footer a:hover {
 
   .about-top {
     grid-template-columns: minmax(180px, 0.58fr) minmax(450px, 2.1fr);
-    gap: clamp(18px, 2.8vw, 30px);
+    column-gap: clamp(22px, 3vw, 34px);
+    row-gap: 0;
   }
 
   .about-hand img {
