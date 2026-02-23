@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="<%= pageDescription || 'Adrienne Caffarel is designing, developing, reading, and writing.' %>">
-    <title>Adrienne Caffarel: <%= title %></title>
+    <meta name="description" content="<%= (typeof pageDescription !== 'undefined' && pageDescription) ? pageDescription : 'Adrienne Caffarel is designing, developing, reading, and writing.' %>">
+    <title>Adrienne Caffarel: <%= (typeof title !== 'undefined' && title) ? title : 'Home' %></title>
     <link rel="shortcut icon" href="/favicon.ico?v=20260223">
     <link rel="icon" type="image/x-icon" href="/favicon.ico?v=20260223">
     <link rel="icon" type="image/png" sizes="64x64" href="/favicon-64x64.png?v=20260223">
