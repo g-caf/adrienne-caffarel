@@ -36,12 +36,28 @@ html, body {
   overflow: hidden;
   padding-inline: var(--landing-inline-pad);
   box-sizing: border-box;
+  z-index: 20;
+}
+
+.landing-page.is-collapsing {
+  position: fixed;
+  inset: 0;
+  opacity: 0;
+  transform: translateY(-6vh) scale(0.985);
+  transition: opacity 0.62s ease, transform 0.74s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
 }
 
 .landing-container {
   text-align: center;
   z-index: 10;
   width: 100%;
+  transition: opacity 0.5s ease, transform 0.62s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.landing-page.is-collapsing .landing-container {
+  opacity: 0;
+  transform: translateY(-22px) scale(0.94);
 }
 
 .intro-text {
@@ -165,6 +181,37 @@ html, body {
   flex-direction: column;
   min-height: 100vh;
   background: var(--color-off-white);
+}
+
+.page-container.preload-hidden {
+  display: none;
+}
+
+.page-container.is-entering {
+  display: flex;
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.58s ease, transform 0.72s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.page-container.is-entering.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.page-container.is-entering .site-header,
+.page-container.is-entering main,
+.page-container.is-entering footer {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.42s ease, transform 0.55s ease;
+}
+
+.page-container.is-entering.is-visible .site-header,
+.page-container.is-entering.is-visible main,
+.page-container.is-entering.is-visible footer {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* Sticky header when collapsed */

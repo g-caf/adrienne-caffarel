@@ -46,24 +46,27 @@ document.addEventListener('DOMContentLoaded', function() {
       landingDownArrow.classList.remove('visible');
     }
 
-    landingPage.style.transition = 'all 0.8s ease-in-out';
-    landingPage.style.minHeight = '60px';
-    landingPage.style.alignItems = 'flex-start';
-    landingPage.style.paddingTop = '10px';
-
-    const landingContainer = document.querySelector('.landing-container');
-    if (landingContainer) {
-      landingContainer.style.transform = 'scale(0.3)';
-      landingContainer.style.opacity = '0';
+    if (pageContainer) {
+      pageContainer.classList.remove('preload-hidden');
+      pageContainer.classList.add('is-entering');
     }
+
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        landingPage.classList.add('is-collapsing');
+        if (pageContainer) {
+          pageContainer.classList.add('is-visible');
+        }
+      });
+    });
 
     setTimeout(function() {
       landingPage.style.display = 'none';
       if (pageContainer) {
-        pageContainer.style.display = 'flex';
+        pageContainer.classList.remove('is-entering');
       }
       startHeaderAnimation();
-    }, 800);
+    }, 760);
   }
 
   // If there is no landing animation on this page, keep header animation running.
