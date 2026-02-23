@@ -689,79 +689,168 @@ footer a:hover {
 }
 
 .about-section {
-  max-width: 980px;
+  max-width: 1320px;
   margin: 0 auto;
-  padding: 48px 20px 64px;
+  padding: 38px 44px 56px;
+  min-height: calc(100vh - 130px);
   color: var(--color-red);
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: clamp(1rem, 0.64vw + 0.75rem, 2rem);
+  line-height: 1.38;
   position: relative;
-}
-
-.about-title {
-  margin: 0 0 18px;
-  font-family: 'Crimson Text', serif;
-  font-size: clamp(1.8rem, 3vw, 2.4rem);
-  font-weight: 500;
-  text-transform: lowercase;
-  letter-spacing: 0.01em;
-  color: #000;
-}
-
-.about-body {
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  font-family: 'Bodoni Moda', serif;
+  gap: clamp(24px, 3vw, 42px);
 }
 
-.about-body p {
+.about-top {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.9fr) minmax(520px, 1.7fr);
+  align-items: start;
+  gap: clamp(28px, 3.8vw, 56px);
+}
+
+.about-hand img {
+  width: clamp(260px, 26vw, 430px);
+  height: auto;
+  display: block;
+}
+
+.about-intro {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(20px, 2.6vw, 34px);
+}
+
+.about-intro p {
   margin: 0;
-  text-align: justify;
-  text-justify: inter-word;
+  text-align: left;
 }
 
-.about-body h3 {
-  margin: 10px 0 6px;
-  font-size: 1.1rem;
-  font-weight: 500;
-  font-family: 'Crimson Text', serif;
+.about-intro strong,
+.about-middle h3 strong,
+.about-outro strong,
+.about-education strong {
+  font-weight: 700;
+}
+
+.about-middle {
+  display: grid;
+  grid-template-columns: minmax(420px, 1fr) minmax(320px, 0.9fr);
+  gap: clamp(42px, 6vw, 120px);
+  align-items: start;
+}
+
+.about-middle h3 {
+  margin: 0 0 8px;
+  font-size: 1em;
+  font-weight: 400;
+  text-transform: none;
+  font-family: inherit;
 }
 
 .about-tools {
-  list-style: none;
-  padding: 0;
   margin: 0;
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 8px 18px;
+  padding-left: 1.1em;
+  columns: 1;
+  column-gap: 0;
 }
 
 .about-tools li {
   margin: 0;
-  position: relative;
-  padding-left: 28px;
+  line-height: 1.34;
+  break-inside: avoid;
 }
 
-.about-tools li::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0.08em;
-  width: clamp(14px, 1.8vw, 22px);
-  height: clamp(14px, 1.8vw, 22px);
-  background: url('/images/about/pointing-hand.png') center/contain no-repeat;
+.about-education-block {
+  margin-top: 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  min-height: 100%;
+}
+
+.about-education {
+  margin-top: auto;
 }
 
 .about-education p {
   margin: 0;
+  text-align: right;
+  line-height: 1.32;
+}
+
+.about-outro {
+  margin: auto 0 0;
+  text-align: center;
 }
 
 @media (max-width: 720px) {
   .about-section {
-    padding: 40px 18px 56px;
+    padding: 30px 18px 48px;
+    min-height: auto;
+    font-size: 1rem;
+    line-height: 1.48;
   }
 
-  .about-tools {
-    grid-template-columns: 1fr 1fr;
+  .about-top {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .about-hand img {
+    width: min(75vw, 300px);
+  }
+
+  .about-middle {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .about-education-block {
+    align-items: flex-start;
+  }
+
+  .about-education {
+    margin-top: 0;
+  }
+
+  .about-education p {
+    text-align: left;
+  }
+}
+
+@media (min-width: 721px) and (max-width: 1024px) {
+  .about-section {
+    padding: 34px 26px 54px;
+    font-size: clamp(0.94rem, 0.72vw + 0.66rem, 1.24rem);
+  }
+
+  .about-top {
+    grid-template-columns: minmax(210px, 0.8fr) minmax(420px, 1.5fr);
+    gap: clamp(22px, 3.4vw, 44px);
+  }
+
+  .about-hand img {
+    width: clamp(220px, 30vw, 330px);
+  }
+
+  .about-middle {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .about-education-block {
+    align-items: flex-start;
+  }
+
+  .about-education {
+    margin-top: 0;
+  }
+
+  .about-education p {
+    text-align: left;
   }
 }
 
