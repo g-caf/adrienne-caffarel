@@ -10,6 +10,9 @@ const logger = require('./utils/logger');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const configuredSiteUrl = (process.env.SITE_URL || '').trim().replace(/\/+$/, '');
+
+app.set('trust proxy', 1);
 
 // Configure EJS template engine
 app.set('views', path.join(__dirname, '..', 'views'));
@@ -27,6 +30,14 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use(compression());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Shared SEO locals
+app.use((req, res, next) => {
+  const forwardedProto = (req.headers['x-forwarded-proto'] || '').split(',')[0].trim();
+  const protocol = forwardedProto || req.protocol || 'https';
+  res.locals.siteUrl = configuredSiteUrl || `${protocol}://${req.get('host')}`;
+  next();
+});
 
 // Routes - public only
 app.use('/', pagesRouter);

@@ -131,6 +131,38 @@ function hasWritingAccess(req) {
   return cookies.writing_access === 'granted';
 }
 
+function getSiteUrl(req) {
+  const configured = (process.env.SITE_URL || '').trim().replace(/\/+$/, '');
+  if (configured) return configured;
+  const forwardedProto = (req.headers['x-forwarded-proto'] || '').split(',')[0].trim();
+  const protocol = forwardedProto || req.protocol || 'https';
+  return `${protocol}://${req.get('host')}`;
+}
+
+function getPageSeo(req, { title, path, description }) {
+  const siteUrl = getSiteUrl(req);
+  const canonicalUrl = `${siteUrl}${path}`;
+
+  return {
+    title,
+    canonicalPath: path,
+    canonicalUrl,
+    pageDescription: description,
+    seoJsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      name: `Adrienne Caffarel: ${title}`,
+      description,
+      url: canonicalUrl,
+      isPartOf: {
+        '@type': 'WebSite',
+        name: 'Adrienne Caffarel',
+        url: siteUrl
+      }
+    }
+  };
+}
+
 function normalizeIp(ip) {
   if (!ip) return '';
   if (ip.startsWith('::ffff:')) return ip.slice(7);
@@ -227,6 +259,44 @@ function escapeCsv(value) {
   return `"${stringValue.replace(/"/g, '""')}"`;
 }
 
+router.get('/robots.txt', (req, res) => {
+  const siteUrl = getSiteUrl(req);
+  const body = [
+    'User-agent: *',
+    'Allow: /',
+    '',
+    `Sitemap: ${siteUrl}/sitemap.xml`
+  ].join('\n');
+
+  res.type('text/plain');
+  return res.status(200).send(body);
+});
+
+router.get('/sitemap.xml', (req, res) => {
+  const siteUrl = getSiteUrl(req);
+  const now = new Date().toISOString();
+  const urls = ['/', '/about', '/library', '/designing', '/developing', '/writing'];
+
+  const xml = [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    ...urls.map((path) =>
+      [
+        '  <url>',
+        `    <loc>${siteUrl}${path}</loc>`,
+        `    <lastmod>${now}</lastmod>`,
+        `    <changefreq>${path === '/' ? 'hourly' : 'weekly'}</changefreq>`,
+        `    <priority>${path === '/' ? '1.0' : '0.8'}</priority>`,
+        '  </url>'
+      ].join('\n')
+    ),
+    '</urlset>'
+  ].join('\n');
+
+  res.type('application/xml');
+  return res.status(200).send(xml);
+});
+
 // Home page - main RSS feed aggregator
 router.get('/', async (req, res, next) => {
   try {
@@ -270,8 +340,31 @@ router.get('/', async (req, res, next) => {
       image_url: extractImage(item)
     }));
 
-    res.render('home', {
+    const seo = getPageSeo(req, {
       title: 'Home',
+      path: '/',
+      description: 'Adrienne Caffarel is designing, developing, reading, and writing.'
+    });
+    const siteUrl = getSiteUrl(req);
+
+    seo.seoJsonLd = [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'Person',
+        name: 'Adrienne Caffarel',
+        url: siteUrl
+      },
+      {
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: 'Adrienne Caffarel',
+        url: siteUrl
+      },
+      seo.seoJsonLd
+    ];
+
+    res.render('home', {
+      ...seo,
       articles: transformedArticles
     });
   } catch (error) {
@@ -289,8 +382,14 @@ router.get('/library', async (req, res, next) => {
     );
     const syncStatus = getLibrarySyncStatus();
 
-    res.render('library', {
+    const seo = getPageSeo(req, {
       title: 'Library',
+      path: '/library',
+      description: 'Adrienne Caffarel: reading library and curated book collection.'
+    });
+
+    res.render('library', {
+      ...seo,
       items,
       syncResult,
       syncStatus
@@ -328,23 +427,41 @@ router.get('/designing', (req, res) => {
     }
   ];
 
-  res.render('developing', {
+  const seo = getPageSeo(req, {
     title: 'Designing',
+    path: '/designing',
+    description: 'Adrienne Caffarel: design work and event production portfolio.'
+  });
+
+  res.render('developing', {
+    ...seo,
     pageTitle: 'Designing',
     eventProductionMedia
   });
 });
 
 router.get('/about', (req, res) => {
-  res.render('about', {
+  const seo = getPageSeo(req, {
     title: 'About',
+    path: '/about',
+    description: 'About Adrienne Caffarel: background, tools, and education.'
+  });
+
+  res.render('about', {
+    ...seo,
     pageTitle: 'About'
   });
 });
 
 router.get('/developing', (req, res) => {
-  res.render('placeholder-page', {
+  const seo = getPageSeo(req, {
     title: 'Developing',
+    path: '/developing',
+    description: 'Adrienne Caffarel: software development projects and experiments.'
+  });
+
+  res.render('placeholder-page', {
+    ...seo,
     pageTitle: 'Developing'
   });
 });
@@ -354,16 +471,22 @@ router.get('/reading', (req, res) => {
 });
 
 router.get('/writing', (req, res) => {
+  const seo = getPageSeo(req, {
+    title: 'Writing',
+    path: '/writing',
+    description: 'Adrienne Caffarel: writing and essays.'
+  });
+
   if (!hasWritingAccess(req)) {
     return res.render('writing-gate', {
-      title: 'Writing',
+      ...seo,
       errorMessage: null,
       formData: { first_name: '', last_name: '', email: '' }
     });
   }
 
   res.render('writing-content', {
-    title: 'Writing',
+    ...seo,
     pageTitle: 'Writing'
   });
 });
@@ -382,7 +505,11 @@ router.post('/writing/unlock', async (req, res, next) => {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!first_name || !last_name || !emailPattern.test(email)) {
       return res.status(400).render('writing-gate', {
-        title: 'Writing',
+        ...getPageSeo(req, {
+          title: 'Writing',
+          path: '/writing',
+          description: 'Adrienne Caffarel: writing and essays.'
+        }),
         errorMessage: 'Please complete all three riddles with a valid email address.',
         formData: { first_name, last_name, email }
       });

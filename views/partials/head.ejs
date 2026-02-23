@@ -1,10 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <%
+      const resolvedTitle = (typeof title !== 'undefined' && title) ? title : 'Home';
+      const resolvedDescription = (typeof pageDescription !== 'undefined' && pageDescription)
+        ? pageDescription
+        : 'Adrienne Caffarel is designing, developing, reading, and writing.';
+      const resolvedCanonicalPath = (typeof canonicalPath !== 'undefined' && canonicalPath) ? canonicalPath : '/';
+      const resolvedSiteUrl = (typeof siteUrl !== 'undefined' && siteUrl) ? siteUrl : '';
+      const resolvedCanonicalUrl = (typeof canonicalUrl !== 'undefined' && canonicalUrl)
+        ? canonicalUrl
+        : (resolvedSiteUrl ? `${resolvedSiteUrl}${resolvedCanonicalPath}` : resolvedCanonicalPath);
+      const resolvedOgType = resolvedCanonicalPath === '/' ? 'website' : 'article';
+      const resolvedSeoJsonLd = (typeof seoJsonLd !== 'undefined') ? seoJsonLd : null;
+    %>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="<%= (typeof pageDescription !== 'undefined' && pageDescription) ? pageDescription : 'Adrienne Caffarel is designing, developing, reading, and writing.' %>">
-    <title>Adrienne Caffarel: <%= (typeof title !== 'undefined' && title) ? title : 'Home' %></title>
+    <meta name="description" content="<%= resolvedDescription %>">
+    <meta property="og:title" content="Adrienne Caffarel: <%= resolvedTitle %>">
+    <meta property="og:description" content="<%= resolvedDescription %>">
+    <meta property="og:type" content="<%= resolvedOgType %>">
+    <meta property="og:url" content="<%= resolvedCanonicalUrl %>">
+    <meta property="og:site_name" content="Adrienne Caffarel">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Adrienne Caffarel: <%= resolvedTitle %>">
+    <meta name="twitter:description" content="<%= resolvedDescription %>">
+    <link rel="canonical" href="<%= resolvedCanonicalUrl %>">
+    <title>Adrienne Caffarel: <%= resolvedTitle %></title>
     <link rel="shortcut icon" href="/favicon.ico?v=20260223">
     <link rel="icon" type="image/x-icon" href="/favicon.ico?v=20260223">
     <link rel="icon" type="image/png" sizes="64x64" href="/favicon-64x64.png?v=20260223">
@@ -12,5 +34,14 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=20260223">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=20260223">
     <link rel="manifest" href="/site.webmanifest?v=20260223">
+    <% if (resolvedSeoJsonLd) { %>
+      <% if (Array.isArray(resolvedSeoJsonLd)) { %>
+        <% resolvedSeoJsonLd.forEach((schema) => { %>
+    <script type="application/ld+json"><%- JSON.stringify(schema) %></script>
+        <% }) %>
+      <% } else { %>
+    <script type="application/ld+json"><%- JSON.stringify(resolvedSeoJsonLd) %></script>
+      <% } %>
+    <% } %>
     <link rel="stylesheet" href="/css/style.css">
 </head>
