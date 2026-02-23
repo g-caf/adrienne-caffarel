@@ -703,6 +703,7 @@ footer a:hover {
   font-weight: 500;
   text-transform: lowercase;
   letter-spacing: 0.01em;
+  color: #000;
 }
 
 .about-body {
@@ -714,6 +715,8 @@ footer a:hover {
 
 .about-body p {
   margin: 0;
+  text-align: justify;
+  text-justify: inter-word;
 }
 
 .about-body h3 {
@@ -728,28 +731,28 @@ footer a:hover {
   padding: 0;
   margin: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 8px 18px;
 }
 
 .about-tools li {
   margin: 0;
+  position: relative;
+  padding-left: 28px;
+}
+
+.about-tools li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.08em;
+  width: clamp(14px, 1.8vw, 22px);
+  height: clamp(14px, 1.8vw, 22px);
+  background: url('/images/about/pointing-hand.png') center/contain no-repeat;
 }
 
 .about-education p {
   margin: 0;
-}
-
-.about-bullet {
-  margin-top: 24px;
-  display: flex;
-  justify-content: flex-end;
-}
-
-.about-bullet img {
-  width: clamp(140px, 18vw, 220px);
-  height: auto;
-  display: block;
 }
 
 @media (max-width: 720px) {
@@ -758,11 +761,7 @@ footer a:hover {
   }
 
   .about-tools {
-    grid-template-columns: 1fr;
-  }
-
-  .about-bullet {
-    justify-content: flex-start;
+    grid-template-columns: 1fr 1fr;
   }
 }
 
