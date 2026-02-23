@@ -683,6 +683,89 @@ footer a:hover {
   color: var(--color-gray);
 }
 
+/* About page */
+.about-page .site-header {
+  position: sticky;
+}
+
+.about-section {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 48px 20px 64px;
+  color: var(--color-red);
+  position: relative;
+}
+
+.about-title {
+  margin: 0 0 18px;
+  font-family: 'Crimson Text', serif;
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  font-weight: 500;
+  text-transform: lowercase;
+  letter-spacing: 0.01em;
+}
+
+.about-body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  font-family: 'Bodoni Moda', serif;
+}
+
+.about-body p {
+  margin: 0;
+}
+
+.about-body h3 {
+  margin: 10px 0 6px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  font-family: 'Crimson Text', serif;
+}
+
+.about-tools {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 8px 18px;
+}
+
+.about-tools li {
+  margin: 0;
+}
+
+.about-education p {
+  margin: 0;
+}
+
+.about-bullet {
+  margin-top: 24px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.about-bullet img {
+  width: clamp(140px, 18vw, 220px);
+  height: auto;
+  display: block;
+}
+
+@media (max-width: 720px) {
+  .about-section {
+    padding: 40px 18px 56px;
+  }
+
+  .about-tools {
+    grid-template-columns: 1fr;
+  }
+
+  .about-bullet {
+    justify-content: flex-start;
+  }
+}
+
 /* Developing page */
 .developing-section {
   max-width: 1280px;

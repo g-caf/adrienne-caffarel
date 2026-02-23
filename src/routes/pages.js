@@ -235,7 +235,7 @@ router.get('/designing', (req, res) => {
 });
 
 router.get('/about', (req, res) => {
-  res.render('placeholder-page', {
+  res.render('about', {
     title: 'About',
     pageTitle: 'About'
   });
