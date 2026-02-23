@@ -695,7 +695,7 @@ footer a:hover {
   min-height: calc(100vh - 130px);
   color: var(--color-red);
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: clamp(1rem, 0.64vw + 0.75rem, 2rem);
+  font-size: clamp(0.86rem, 0.36vw + 0.66rem, 1.28rem);
   line-height: 1.38;
   position: relative;
   display: flex;
@@ -790,7 +790,7 @@ footer a:hover {
   .about-section {
     padding: 30px 18px 48px;
     min-height: auto;
-    font-size: 1rem;
+    font-size: 0.9rem;
     line-height: 1.48;
   }
 
@@ -824,7 +824,7 @@ footer a:hover {
 @media (min-width: 721px) and (max-width: 1024px) {
   .about-section {
     padding: 34px 26px 54px;
-    font-size: clamp(0.94rem, 0.72vw + 0.66rem, 1.24rem);
+    font-size: clamp(0.84rem, 0.42vw + 0.64rem, 1.02rem);
   }
 
   .about-top {
