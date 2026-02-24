@@ -1358,20 +1358,34 @@ footer a:hover {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
-.dev-snake-svg {
-  display: block;
-  width: 100%;
+.dev-snake-marquee {
+  display: flex;
+  width: max-content;
   height: 100%;
+  animation: dev-snake-marquee-move 34s linear infinite;
+}
+
+.dev-snake-svg {
+  display: inline-block;
+  width: 100vw;
+  min-width: 100vw;
+  height: 100%;
+  flex: 0 0 100vw;
 }
 
 .dev-snake-text {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: clamp(0.62rem, 0.24vw + 0.58rem, 0.84rem);
   font-weight: 700;
-  color: var(--color-red);
+  fill: var(--color-red);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   dominant-baseline: middle;
+}
+
+@keyframes dev-snake-marquee-move {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100vw); }
 }
 
 .dev-site-main {
@@ -1431,10 +1445,14 @@ footer a:hover {
     height: 78px;
     margin-top: 22px;
   }
+
+  .dev-snake-marquee {
+    animation-duration: 38s;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dev-snake-text animate {
-    display: none;
+  .dev-snake-marquee {
+    animation: none;
   }
 }
