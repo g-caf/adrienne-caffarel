@@ -1245,3 +1245,152 @@ footer a:hover {
     padding: 18px 14px;
   }
 }
+
+/* Developing showcase page */
+.dev-showcase {
+  max-width: 1380px;
+  margin: 0 auto;
+  padding: clamp(26px, 3vw, 46px) clamp(18px, 3vw, 40px) clamp(42px, 4vw, 64px);
+  color: var(--color-red);
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: clamp(0.9rem, 0.5vw + 0.72rem, 1.14rem);
+  line-height: 1.38;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(36px, 4vw, 60px);
+}
+
+.dev-intro-grid {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) minmax(520px, 1.12fr);
+  gap: clamp(26px, 4vw, 56px);
+}
+
+.dev-intro-copy {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(18px, 2.4vw, 32px);
+}
+
+.dev-intro-copy p {
+  margin: 0;
+  text-align: left;
+}
+
+.dev-intro-copy strong,
+.dev-app-title,
+.dev-features-label {
+  font-weight: 700;
+}
+
+.dev-app-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(20px, 2.4vw, 34px);
+  align-items: start;
+}
+
+.dev-app-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dev-app-title {
+  margin: 0;
+  font-size: clamp(1rem, 0.52vw + 0.8rem, 1.42rem);
+  line-height: 1.24;
+}
+
+.dev-app-replaced {
+  margin: 0;
+  font-size: 1em;
+}
+
+.dev-media-frame {
+  margin-top: 6px;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border: 1.5px solid rgba(164, 25, 31, 0.62);
+  background:
+    linear-gradient(145deg, rgba(164, 25, 31, 0.08), rgba(164, 25, 31, 0.02)),
+    repeating-linear-gradient(
+      -45deg,
+      rgba(164, 25, 31, 0.08),
+      rgba(164, 25, 31, 0.08) 12px,
+      rgba(245, 241, 237, 0.5) 12px,
+      rgba(245, 241, 237, 0.5) 24px
+    );
+}
+
+.dev-features-label {
+  margin: 8px 0 0;
+  font-size: 1em;
+}
+
+.dev-features-list {
+  margin: 0;
+  padding-left: 1.15em;
+  display: grid;
+  gap: 2px;
+}
+
+.dev-site-block {
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+}
+
+.dev-site-banner {
+  margin: 0;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  line-height: 1.16;
+}
+
+.dev-features-list-site {
+  max-width: 420px;
+}
+
+@media (max-width: 1100px) {
+  .dev-intro-grid {
+    grid-template-columns: minmax(180px, 0.64fr) minmax(0, 1fr);
+  }
+
+  .dev-app-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .dev-showcase {
+    font-size: 0.94rem;
+    line-height: 1.45;
+    gap: 30px;
+    padding: 24px 14px 44px;
+  }
+
+  .dev-intro-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .dev-intro-spacer {
+    display: none;
+  }
+
+  .dev-app-grid {
+    grid-template-columns: 1fr;
+    gap: 26px;
+  }
+
+  .dev-app-title {
+    font-size: 1.12rem;
+  }
+
+  .dev-site-banner {
+    font-size: 0.92rem;
+    letter-spacing: 0.015em;
+  }
+}

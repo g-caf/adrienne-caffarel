@@ -1,0 +1,69 @@
+<%- include('partials/head', { title }) %>
+<body>
+  <div class="page-container developing-page">
+    <%- include('partials/header') %>
+
+    <main>
+      <section class="dev-showcase">
+        <div class="dev-intro-grid">
+          <div class="dev-intro-spacer" aria-hidden="true"></div>
+          <div class="dev-intro-copy">
+            <p>
+              <strong>I LEVERAGE</strong> AI-native development tools (Amp, Gemini, Codex) to build full-stack web
+              applications, translating product ideas into working systems through iterative, language-driven workflows.
+              My process combines natural language code generation with coordination across frontend, backend, and
+              external services. I have experience integrating APIs, managing environments via CLI, and connecting
+              distributed architectures, with a focus on rapid prototyping and strong aesthetic and functional cohesion.
+            </p>
+            <p>
+              <strong>THE EXPERIENCE</strong> of being an operations professional has informed what I’ve built and how I’ve built
+              it. I don’t like paying for expensive software subscriptions. I don’t like irrelevant features. I like smooth,
+              minimal, reliable software that doesn’t force me to create an account and won’t deluge me with marketing
+              emails.
+            </p>
+          </div>
+        </div>
+
+        <div class="dev-app-grid">
+          <% (developingApps || []).forEach((app) => { %>
+            <article class="dev-app-card">
+              <h3 class="dev-app-title"><%= app.title %></h3>
+              <p class="dev-app-replaced">Enterprise Application Replaced: <%= app.replaced %></p>
+
+              <div class="dev-media-frame" aria-label="Video placeholder frame"></div>
+
+              <h4 class="dev-features-label">FEATURES:</h4>
+              <ul class="dev-features-list">
+                <% (app.features || []).forEach((feature) => { %>
+                  <li><%= feature %></li>
+                <% }) %>
+              </ul>
+            </article>
+          <% }) %>
+        </div>
+
+        <section class="dev-site-block" aria-labelledby="moon-tide-title">
+          <p class="dev-site-banner" aria-hidden="true">
+            I ALSO BUILT THIS WEBSITE I ALSO BUILT THIS WEBSITE I ALSO BUILT THIS WEBSITE I ALSO BUILT THIS WEBSITE
+          </p>
+          <h3 id="moon-tide-title" class="dev-app-title">Moon Tide Springs Sales Website</h3>
+          <div class="dev-media-frame" aria-label="Video placeholder frame"></div>
+
+          <h4 class="dev-features-label">FEATURES:</h4>
+          <ul class="dev-features-list dev-features-list-site">
+            <li>Tablet based UI for guest check-in</li>
+            <li>Admin dashboard</li>
+            <li>Customizable contacts list</li>
+            <li>Custom notification settings</li>
+            <li>Slack integration</li>
+          </ul>
+        </section>
+      </section>
+    </main>
+
+    <%- include('partials/footer') %>
+  </div>
+
+  <script src="/js/animations.js"></script>
+</body>
+</html>

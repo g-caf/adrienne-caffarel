@@ -460,9 +460,44 @@ router.get('/developing', (req, res) => {
     description: 'Adrienne Caffarel: software development projects and experiments.'
   });
 
-  res.render('placeholder-page', {
+  const developingApps = [
+    {
+      title: 'Event & Guest Management Platform',
+      replaced: 'Tripleseat',
+      features: [
+        'Custom landing page builder',
+        'Custom RSVP form',
+        'Event admin dashboard',
+        'Invite builder & mailer',
+        '.ics calendar attachments'
+      ]
+    },
+    {
+      title: 'PDF Editor & Signing Tool',
+      replaced: 'Adobe Acrobat',
+      features: [
+        'Signature panel',
+        'PDF merging and splitting',
+        'Form field detection'
+      ]
+    },
+    {
+      title: 'Reception Check-in App',
+      replaced: 'Envoy',
+      features: [
+        'Tablet based UI for guest check-in',
+        'Admin dashboard',
+        'Customizable contacts list',
+        'Custom notification settings',
+        'Slack integration'
+      ]
+    }
+  ];
+
+  res.render('developing-page', {
     ...seo,
-    pageTitle: 'Developing'
+    pageTitle: 'Developing',
+    developingApps
   });
 });
 
