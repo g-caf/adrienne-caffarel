@@ -1348,88 +1348,30 @@ footer a:hover {
   align-items: start;
 }
 
-.developing-page main {
-  padding-bottom: clamp(90px, 10vw, 128px);
-}
-
 .dev-snake-ribbon {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: clamp(58px, 7vw, 80px);
+  position: relative;
+  width: 100%;
+  margin-top: clamp(28px, 4vw, 56px);
+  height: clamp(86px, 10vw, 124px);
   overflow: hidden;
-  pointer-events: none;
-  z-index: 60;
-  background: #f5f1ed;
-  border-top: 1px solid rgba(164, 25, 31, 0.42);
+  background: transparent;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
-.dev-snake-track {
-  position: absolute;
-  top: 50%;
-  left: 0;
+.dev-snake-svg {
   display: block;
-  white-space: nowrap;
-  transform: translateY(-50%);
-  animation: dev-ribbon-scroll 20s linear infinite;
+  width: 100%;
+  height: 100%;
 }
 
-.dev-snake-track-b {
-  left: 100%;
-}
-
-.dev-snake-line {
-  display: inline-block;
-  color: var(--color-red);
+.dev-snake-text {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: clamp(0.62rem, 0.24vw + 0.58rem, 0.84rem);
   font-weight: 700;
+  color: var(--color-red);
   text-transform: uppercase;
-  letter-spacing: 0.055em;
-  font-size: clamp(0.62rem, 0.22vw + 0.56rem, 0.82rem);
-  line-height: 1;
-  white-space: pre;
-}
-
-.dev-snake-curves {
-  position: absolute;
-  inset: 0;
-}
-
-.dev-snake-curve {
-  position: absolute;
-  left: 0;
-  width: 200%;
-  pointer-events: none;
-}
-
-.dev-snake-curve-top {
-  top: 0;
-  height: 50%;
-  background: radial-gradient(circle at 18px 100%, transparent 13px, rgba(164, 25, 31, 0.72) 13px, rgba(164, 25, 31, 0.72) 14.5px, transparent 14.5px) 0 100% / 36px 100% repeat-x;
-  animation: dev-curve-scroll-top 3.6s linear infinite;
-}
-
-.dev-snake-curve-bottom {
-  bottom: 0;
-  height: 50%;
-  background: radial-gradient(circle at 18px 0, transparent 13px, rgba(164, 25, 31, 0.72) 13px, rgba(164, 25, 31, 0.72) 14.5px, transparent 14.5px) 18px 0 / 36px 100% repeat-x;
-  animation: dev-curve-scroll-bottom 3.6s linear infinite;
-}
-
-@keyframes dev-ribbon-scroll {
-  from { transform: translate(0, -50%); }
-  to { transform: translate(-100%, -50%); }
-}
-
-@keyframes dev-curve-scroll-top {
-  from { background-position-x: 0; }
-  to { background-position-x: -36px; }
-}
-
-@keyframes dev-curve-scroll-bottom {
-  from { background-position-x: 18px; }
-  to { background-position-x: 54px; }
+  letter-spacing: 0.05em;
+  dominant-baseline: middle;
 }
 
 .dev-site-main {
@@ -1485,22 +1427,14 @@ footer a:hover {
     gap: 12px;
   }
 
-  .developing-page main {
-    padding-bottom: 84px;
-  }
-
   .dev-snake-ribbon {
-    height: 58px;
-  }
-
-  .dev-snake-line {
-    letter-spacing: 0.045em;
+    height: 78px;
+    margin-top: 22px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dev-snake-track,
-  .dev-snake-curve {
-    animation: none;
+  .dev-snake-text animate {
+    display: none;
   }
 }
