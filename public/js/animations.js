@@ -1,5 +1,52 @@
 // Landing page animation
 document.addEventListener('DOMContentLoaded', function() {
+  function initDevelopingSnakeRibbon() {
+    const textPath = document.querySelector('.dev-snake-text-path');
+    if (!textPath || textPath.dataset.flowInit === '1') return;
+
+    textPath.dataset.flowInit = '1';
+    const phrase = 'I ALSO BUILT THIS WEBSITE  ';
+    textPath.textContent = phrase.repeat(80);
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) return;
+
+    const svg = textPath.ownerSVGElement;
+    if (!svg) return;
+
+    const tempText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    tempText.setAttribute('class', 'dev-snake-text');
+    const tempTextPath = document.createElementNS('http://www.w3.org/2000/svg', 'textPath');
+    tempTextPath.setAttribute('href', '#dev-snake-path');
+    tempTextPath.textContent = phrase;
+    tempText.appendChild(tempTextPath);
+    svg.appendChild(tempText);
+    const phraseLength = Math.max(1, tempText.getComputedTextLength());
+    svg.removeChild(tempText);
+
+    let lastTs = null;
+    let offset = 0;
+    const unitsPerSecond = phraseLength / 2.6;
+
+    function tick(ts) {
+      if (lastTs === null) {
+        lastTs = ts;
+      }
+      const dt = (ts - lastTs) / 1000;
+      lastTs = ts;
+      offset -= unitsPerSecond * dt;
+      if (offset <= -phraseLength) {
+        offset += phraseLength;
+      }
+      textPath.setAttribute('startOffset', offset.toFixed(2));
+      window.requestAnimationFrame(tick);
+    }
+
+    window.requestAnimationFrame(tick);
+  }
+
+  initDevelopingSnakeRibbon();
+
   const words = ['designing', 'developing', 'reading', 'writing'];
   const flipElement = document.querySelector('.word-flip');
   const headerFlipElement = document.querySelector('.header-word-flip');
