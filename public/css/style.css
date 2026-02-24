@@ -1349,7 +1349,7 @@ footer a:hover {
 }
 
 .developing-page main {
-  padding-bottom: clamp(68px, 8vw, 110px);
+  padding-bottom: clamp(90px, 10vw, 128px);
 }
 
 .dev-snake-ribbon {
@@ -1357,61 +1357,64 @@ footer a:hover {
   left: 0;
   right: 0;
   bottom: 0;
-  height: clamp(44px, 6vw, 64px);
+  height: clamp(58px, 7vw, 80px);
   overflow: hidden;
   pointer-events: none;
   z-index: 60;
-  background: linear-gradient(to top, rgba(245, 241, 237, 0.96), rgba(245, 241, 237, 0.72) 52%, rgba(245, 241, 237, 0));
+  background: #f5f1ed;
+  border-top: 1px solid rgba(164, 25, 31, 0.42);
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 .dev-snake-track {
   position: absolute;
-  top: 52%;
+  top: 50%;
   left: 0;
-  display: flex;
-  align-items: center;
-  gap: clamp(18px, 1.8vw, 34px);
+  display: block;
   white-space: nowrap;
   transform: translateY(-50%);
-  animation: dev-ribbon-scroll 24s linear infinite;
+  animation: dev-ribbon-scroll 20s linear infinite;
 }
 
 .dev-snake-track-b {
   left: 100%;
 }
 
-.dev-snake-seg {
-  display: inline-flex;
-  align-items: center;
-  gap: clamp(10px, 1vw, 16px);
+.dev-snake-line {
+  display: inline-block;
   color: var(--color-red);
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  font-size: clamp(0.62rem, 0.26vw + 0.56rem, 0.86rem);
-  animation: dev-ribbon-bob 2.8s ease-in-out infinite;
+  letter-spacing: 0.055em;
+  font-size: clamp(0.62rem, 0.22vw + 0.56rem, 0.82rem);
+  line-height: 1;
+  white-space: pre;
 }
 
-.dev-snake-seg::before,
-.dev-snake-seg::after {
-  content: "";
-  width: clamp(14px, 1.1vw, 18px);
-  height: clamp(7px, 0.55vw, 10px);
-  border-top: 1.5px solid currentColor;
-  border-radius: 999px;
-  opacity: 0.95;
+.dev-snake-curves {
+  position: absolute;
+  inset: 0;
 }
 
-.dev-snake-seg:nth-child(2n) {
-  animation-delay: -0.7s;
+.dev-snake-curve {
+  position: absolute;
+  left: 0;
+  width: 200%;
+  pointer-events: none;
 }
 
-.dev-snake-seg:nth-child(3n) {
-  animation-delay: -1.4s;
+.dev-snake-curve-top {
+  top: 0;
+  height: 50%;
+  background: radial-gradient(circle at 18px 100%, transparent 13px, rgba(164, 25, 31, 0.72) 13px, rgba(164, 25, 31, 0.72) 14.5px, transparent 14.5px) 0 100% / 36px 100% repeat-x;
+  animation: dev-curve-scroll-top 3.6s linear infinite;
 }
 
-.dev-snake-seg:nth-child(4n) {
-  animation-delay: -2.1s;
+.dev-snake-curve-bottom {
+  bottom: 0;
+  height: 50%;
+  background: radial-gradient(circle at 18px 0, transparent 13px, rgba(164, 25, 31, 0.72) 13px, rgba(164, 25, 31, 0.72) 14.5px, transparent 14.5px) 18px 0 / 36px 100% repeat-x;
+  animation: dev-curve-scroll-bottom 3.6s linear infinite;
 }
 
 @keyframes dev-ribbon-scroll {
@@ -1419,9 +1422,14 @@ footer a:hover {
   to { transform: translate(-100%, -50%); }
 }
 
-@keyframes dev-ribbon-bob {
-  0%, 100% { transform: translateY(6px) rotate(-2deg); }
-  50% { transform: translateY(-6px) rotate(2deg); }
+@keyframes dev-curve-scroll-top {
+  from { background-position-x: 0; }
+  to { background-position-x: -36px; }
+}
+
+@keyframes dev-curve-scroll-bottom {
+  from { background-position-x: 18px; }
+  to { background-position-x: 54px; }
 }
 
 .dev-site-main {
@@ -1478,25 +1486,21 @@ footer a:hover {
   }
 
   .developing-page main {
-    padding-bottom: 72px;
+    padding-bottom: 84px;
   }
 
   .dev-snake-ribbon {
-    height: 48px;
+    height: 58px;
   }
 
-  .dev-snake-track {
-    gap: 14px;
-  }
-
-  .dev-snake-seg {
-    letter-spacing: 0.05em;
+  .dev-snake-line {
+    letter-spacing: 0.045em;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .dev-snake-track,
-  .dev-snake-seg {
+  .dev-snake-curve {
     animation: none;
   }
 }
