@@ -1358,10 +1358,19 @@ footer a:hover {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
-.dev-snake-svg {
-  display: block;
-  width: 100%;
+.dev-snake-marquee {
+  display: flex;
+  width: 200%;
   height: 100%;
+  animation: dev-snake-flow 24s linear infinite;
+}
+
+.dev-snake-svg {
+  display: inline-block;
+  width: 50%;
+  min-width: 50%;
+  height: 100%;
+  flex: 0 0 50%;
 }
 
 .dev-snake-text {
@@ -1372,6 +1381,11 @@ footer a:hover {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   dominant-baseline: middle;
+}
+
+@keyframes dev-snake-flow {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
 }
 
 .dev-site-main {
@@ -1431,10 +1445,14 @@ footer a:hover {
     height: 78px;
     margin-top: 22px;
   }
+
+  .dev-snake-marquee {
+    animation-duration: 28s;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dev-snake-text animate {
-    display: none;
+  .dev-snake-marquee {
+    animation: none;
   }
 }
