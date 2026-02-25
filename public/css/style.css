@@ -743,30 +743,27 @@ footer a:hover {
 }
 
 .about-section {
-  max-width: 1320px;
+  max-width: 1380px;
   margin: 0 auto;
-  padding: 38px 44px 56px;
-  min-height: calc(100vh - 130px);
+  padding: clamp(24px, 2.8vw, 42px) clamp(16px, 2.8vw, 34px) clamp(34px, 3.8vw, 54px);
   color: var(--color-red);
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: clamp(0.86rem, 0.36vw + 0.66rem, 1.28rem);
-  line-height: 1.38;
-  position: relative;
+  font-size: clamp(0.66rem, 0.22vw + 0.58rem, 0.82rem);
+  line-height: 1.35;
   display: flex;
   flex-direction: column;
-  gap: clamp(12px, 1.8vw, 24px);
+  gap: clamp(24px, 3vw, 44px);
 }
 
 .about-top {
   display: grid;
-  grid-template-columns: minmax(170px, auto) minmax(0, 1fr);
+  grid-template-columns: minmax(220px, 0.5fr) minmax(540px, 1fr);
   align-items: start;
-  column-gap: clamp(28px, 3.2vw, 46px);
-  row-gap: 0;
+  gap: clamp(16px, 2.4vw, 34px);
 }
 
 .about-hand img {
-  width: clamp(190px, 18.5vw, 300px);
+  width: min(100%, clamp(180px, 19vw, 280px));
   height: auto;
   display: block;
 }
@@ -774,16 +771,13 @@ footer a:hover {
 .about-intro {
   display: flex;
   flex-direction: column;
-  gap: clamp(20px, 2.6vw, 34px);
-  min-width: 0;
-  max-width: min(100%, 760px);
-  margin: 0 auto;
+  gap: clamp(14px, 1.8vw, 22px);
+  max-width: 700px;
 }
 
 .about-intro p {
   margin: 0;
-  text-align: justify;
-  text-justify: inter-word;
+  text-align: left;
 }
 
 .about-intro strong,
@@ -795,14 +789,14 @@ footer a:hover {
 
 .about-middle {
   display: grid;
-  grid-template-columns: minmax(420px, 1fr) minmax(320px, 1fr);
-  gap: clamp(42px, 6vw, 120px);
-  align-items: stretch;
-  margin-top: clamp(16px, 2.2vw, 30px);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(18px, 2vw, 28px);
+  align-items: start;
+  margin-top: clamp(20px, 4vh, 60px);
 }
 
 .about-middle h3 {
-  margin: 0 0 8px;
+  margin: 0 0 7px;
   font-size: 1em;
   font-weight: 400;
   text-transform: none;
@@ -811,119 +805,72 @@ footer a:hover {
 
 .about-tools {
   margin: 0;
-  padding-left: 1.1em;
-  columns: 1;
-  column-gap: 0;
+  padding-left: 1.15em;
+  display: grid;
+  gap: 1px;
 }
 
 .about-tools li {
   margin: 0;
-  line-height: 1.34;
-  break-inside: avoid;
+  line-height: 1.35;
 }
 
 .about-education-block {
-  margin-top: 0;
   display: grid;
-  grid-template-rows: auto 1fr;
-  align-items: flex-end;
-  justify-items: end;
+  gap: 6px;
 }
 
 .about-education {
-  margin-top: clamp(14px, 1.8vw, 26px);
-  align-self: center;
+  margin-top: 0;
+  display: grid;
+  gap: 2px;
 }
 
 .about-education p {
   margin: 0;
-  text-align: right;
-  line-height: 1.32;
+  text-align: left;
+  line-height: 1.35;
 }
 
 .about-outro {
-  margin: clamp(14px, 2vw, 28px) 0 0;
-  padding-top: 0;
-  text-align: center;
+  margin: clamp(10px, 1.5vw, 20px) 0 0;
+  text-align: left;
 }
 
-@media (max-width: 720px) {
-  .about-section {
-    padding: 30px 18px 48px;
-    min-height: auto;
-    font-size: 0.9rem;
-    line-height: 1.48;
-  }
-
+@media (max-width: 1100px) {
   .about-top {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-
-  .about-hand img {
-    width: min(75vw, 300px);
+    grid-template-columns: minmax(180px, 0.44fr) minmax(0, 1fr);
   }
 
   .about-middle {
     grid-template-columns: 1fr;
-    gap: 24px;
+  }
+}
+
+@media (max-width: 760px) {
+  .about-section {
+    font-size: 0.8rem;
+    line-height: 1.45;
+    gap: 22px;
+    padding: 22px 12px 42px;
+  }
+
+  .about-top {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .about-hand {
+    display: none;
+  }
+
+  .about-middle {
+    gap: 22px;
+    margin-top: 28px;
   }
 
   .about-outro {
-    margin-top: 20px;
-    padding-top: 0;
-  }
-
-  .about-education-block {
-    align-items: flex-start;
-  }
-
-  .about-education {
-    margin-top: 0;
-    align-self: auto;
-  }
-
-  .about-education p {
-    text-align: left;
-  }
-}
-
-@media (min-width: 721px) and (max-width: 1024px) {
-  .about-section {
-    padding: 34px 26px 54px;
-    font-size: clamp(0.84rem, 0.42vw + 0.64rem, 1.02rem);
-  }
-
-  .about-top {
-    grid-template-columns: minmax(150px, auto) minmax(0, 1fr);
-    column-gap: clamp(22px, 3vw, 34px);
-    row-gap: 0;
-  }
-
-  .about-hand img {
-    width: clamp(170px, 24vw, 250px);
-  }
-
-  .about-middle {
-    grid-template-columns: 1fr;
-    gap: 28px;
-    align-items: start;
-  }
-
-  .about-education-block {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-items: start;
-  }
-
-  .about-education {
     margin-top: 8px;
-    align-self: auto;
-  }
-
-  .about-education p {
-    text-align: left;
   }
 }
 
