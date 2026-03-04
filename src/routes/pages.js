@@ -4,7 +4,7 @@ const router = express.Router();
 const Parser = require('rss-parser');
 const MarkdownIt = require('markdown-it');
 const LibraryItem = require('../models/LibraryItem');
-const BookPost = require('../models/BookPost');
+const WritingEntry = require('../models/WritingEntry');
 const WritingSubmission = require('../models/WritingSubmission');
 const { ensureLibrarySynced, getLibrarySyncStatus } = require('../services/librarySync');
 
@@ -266,65 +266,17 @@ function escapeCsv(value) {
   return `"${stringValue.replace(/"/g, '""')}"`;
 }
 
-function getDefaultWritingData() {
-  return {
-    orienting: '',
-    thinking: 'Private essays archive. New pieces coming soon.'
-  };
+const WRITING_SECTIONS = new Set(['orienting', 'thinking']);
+
+function getSectionOrNull(value) {
+  const normalized = (value || '').trim().toLowerCase();
+  return WRITING_SECTIONS.has(normalized) ? normalized : null;
 }
 
-function parseWritingData(rawContent) {
-  const defaults = getDefaultWritingData();
-  const raw = (rawContent || '').trim();
-
-  if (!raw) return defaults;
-
-  try {
-    const parsed = JSON.parse(raw);
-    if (!parsed || typeof parsed !== 'object') throw new Error('Invalid writing JSON shape');
-
-    const orienting = parsed.orienting;
-    const thinking = parsed.thinking;
-    const orientingValue = typeof orienting === 'string'
-      ? orienting
-      : (orienting && typeof orienting === 'object' ? orienting.content : '');
-    const thinkingValue = typeof thinking === 'string'
-      ? thinking
-      : (thinking && typeof thinking === 'object' ? thinking.content : '');
-
-    return {
-      orienting: (orientingValue || defaults.orienting).toString().trim(),
-      thinking: (thinkingValue || defaults.thinking).toString().trim()
-    };
-  } catch (error) {
-    // Backward compatibility: treat legacy plain text as Thinking body.
-    return {
-      orienting: defaults.orienting,
-      thinking: raw
-    };
-  }
-}
-
-function serializeWritingData(writingData) {
-  return JSON.stringify(writingData);
-}
-
-async function findOrCreateWritingPage() {
-  const existing = await BookPost.findBySlug('writing');
-  if (existing) return existing;
-
-  const initialData = serializeWritingData(getDefaultWritingData());
-  const created = await BookPost.create({
-    title: 'Writing',
-    subtitle: null,
-    slug: 'writing',
-    content: initialData,
-    image_url: null,
-    published_date: new Date().toISOString().slice(0, 10),
-    type: 'page'
-  });
-
-  return created;
+function summarizeBody(body) {
+  const plain = (body || '').replace(/\s+/g, ' ').trim();
+  if (!plain) return '';
+  return plain.length > 120 ? `${plain.slice(0, 120)}...` : plain;
 }
 
 router.get('/robots.txt', (req, res) => {
@@ -589,14 +541,18 @@ router.get('/writing', async (req, res, next) => {
       });
     }
 
-    const writingPage = await findOrCreateWritingPage();
-    const writingData = parseWritingData(writingPage.content);
+    const orientingEntry = await WritingEntry.findLatestBySection('orienting');
+    const thinkingEntry = await WritingEntry.findLatestBySection('thinking');
+    const orientingBody = orientingEntry ? orientingEntry.body : '';
+    const thinkingBody = thinkingEntry
+      ? thinkingEntry.body
+      : 'Private essays archive. New pieces coming soon.';
 
     return res.render('writing-content', {
       ...seo,
-      pageTitle: writingPage.title || 'Writing',
-      orientingHtml: markdown.render(writingData.orienting || ''),
-      thinkingHtml: markdown.render(writingData.thinking || '')
+      pageTitle: 'Writing',
+      orientingHtml: markdown.render(orientingBody),
+      thinkingHtml: markdown.render(thinkingBody)
     });
   } catch (error) {
     return next(error);
@@ -606,19 +562,27 @@ router.get('/writing', async (req, res, next) => {
 router.get('/admin', requireWritingSubmissionsAdmin, async (req, res, next) => {
   try {
     const limit = req.query.limit ? parseInt(req.query.limit, 10) : 250;
-    const writingPage = await findOrCreateWritingPage();
-    const writingData = parseWritingData(writingPage.content);
     const submissions = await WritingSubmission.findRecent(limit);
-    const uniqueEmailCount = new Set(
-      submissions
-        .map((row) => (row.email || '').toLowerCase())
-        .filter(Boolean)
-    ).size;
-    const last24HoursCutoff = Date.now() - (24 * 60 * 60 * 1000);
-    const last24HoursCount = submissions.filter((row) => {
-      const createdMs = Date.parse(row.created_at);
-      return Number.isFinite(createdMs) && createdMs >= last24HoursCutoff;
-    }).length;
+    const entryLimit = req.query.entry_limit ? parseInt(req.query.entry_limit, 10) : 50;
+    const orientingEntries = await WritingEntry.findRecentBySection('orienting', entryLimit);
+    const thinkingEntries = await WritingEntry.findRecentBySection('thinking', entryLimit);
+
+    const orientingEditId = req.query.orienting_edit ? parseInt(req.query.orienting_edit, 10) : null;
+    const thinkingEditId = req.query.thinking_edit ? parseInt(req.query.thinking_edit, 10) : null;
+
+    const orientingEditingEntry = Number.isFinite(orientingEditId)
+      ? await WritingEntry.findById(orientingEditId)
+      : null;
+    const thinkingEditingEntry = Number.isFinite(thinkingEditId)
+      ? await WritingEntry.findById(thinkingEditId)
+      : null;
+
+    const orientingDraft = orientingEditingEntry && orientingEditingEntry.section === 'orienting'
+      ? orientingEditingEntry.body
+      : '';
+    const thinkingDraft = thinkingEditingEntry && thinkingEditingEntry.section === 'thinking'
+      ? thinkingEditingEntry.body
+      : '';
 
     return res.render('admin-dashboard', {
       ...getPageSeo(req, {
@@ -627,13 +591,28 @@ router.get('/admin', requireWritingSubmissionsAdmin, async (req, res, next) => {
         description: 'Manage writing page content and writing gate submissions.'
       }),
       saved: req.query.saved === '1',
+      savedSection: getSectionOrNull(req.query.section),
       limit,
-      writingPage,
-      writingData,
       total: submissions.length,
-      uniqueEmailCount,
-      last24HoursCount,
-      submissions
+      submissions,
+      orientingEntries: orientingEntries.map((entry) => ({
+        ...entry,
+        summary: summarizeBody(entry.body)
+      })),
+      thinkingEntries: thinkingEntries.map((entry) => ({
+        ...entry,
+        summary: summarizeBody(entry.body)
+      })),
+      orientingDraft,
+      thinkingDraft,
+      orientingEditingId:
+        orientingEditingEntry && orientingEditingEntry.section === 'orienting'
+          ? orientingEditingEntry.id
+          : null,
+      thinkingEditingId:
+        thinkingEditingEntry && thinkingEditingEntry.section === 'thinking'
+          ? thinkingEditingEntry.id
+          : null
     });
   } catch (error) {
     return next(error);
@@ -642,25 +621,28 @@ router.get('/admin', requireWritingSubmissionsAdmin, async (req, res, next) => {
 
 router.post('/admin/writing-content', requireWritingSubmissionsAdmin, async (req, res, next) => {
   try {
-    const writingPage = await findOrCreateWritingPage();
-    const title = (req.body.title || '').trim() || 'Writing';
-    const writingData = {
-      orienting: (req.body.orienting_content || '').trim(),
-      thinking: (req.body.thinking_content || '').trim() || 'Private essays archive. New pieces coming soon.'
-    };
-    const content = serializeWritingData(writingData);
+    const section = getSectionOrNull(req.body.section);
+    if (!section) {
+      return res.status(400).json({ error: 'Invalid section.' });
+    }
 
-    await BookPost.update(writingPage.id, {
-      title,
-      subtitle: writingPage.subtitle || null,
-      slug: 'writing',
-      content,
-      image_url: writingPage.image_url || null,
-      published_date: writingPage.published_date || new Date().toISOString().slice(0, 10),
-      type: 'page'
-    });
+    const body = (req.body.content || '').trim();
+    if (!body) {
+      return res.status(400).json({ error: 'Content is required.' });
+    }
 
-    return res.redirect('/admin?saved=1');
+    const entryId = req.body.entry_id ? parseInt(req.body.entry_id, 10) : null;
+    if (Number.isFinite(entryId)) {
+      const existing = await WritingEntry.findById(entryId);
+      if (!existing || existing.section !== section) {
+        return res.status(404).json({ error: 'Entry not found.' });
+      }
+      await WritingEntry.update(entryId, { body });
+    } else {
+      await WritingEntry.create({ section, body });
+    }
+
+    return res.redirect(`/admin?saved=1&section=${encodeURIComponent(section)}`);
   } catch (error) {
     return next(error);
   }

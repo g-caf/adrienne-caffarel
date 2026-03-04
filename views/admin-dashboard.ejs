@@ -11,35 +11,100 @@
         </header>
 
         <% if (saved) { %>
-          <p class="admin-editor-flash">Saved changes.</p>
+          <p class="admin-editor-flash">Saved <%= savedSection || 'entry' %>.</p>
         <% } %>
 
-        <form method="post" action="/admin/writing-content" class="admin-editor-form">
-          <div class="admin-writing-grid">
-            <div>
+        <div class="admin-writing-grid">
+          <section class="admin-writing-feed">
+            <h3 class="writing-column-heading">Orienting</h3>
+            <form method="post" action="/admin/writing-content" class="admin-editor-form">
+              <input type="hidden" name="section" value="orienting">
+              <% if (orientingEditingId) { %>
+                <input type="hidden" name="entry_id" value="<%= orientingEditingId %>">
+              <% } %>
               <label for="admin-orienting-content">Orienting (Markdown)</label>
-              <textarea
-                id="admin-orienting-content"
-                name="orienting_content"
-                rows="14"
-              ><%= (writingData && writingData.orienting) || '' %></textarea>
-            </div>
+              <textarea id="admin-orienting-content" name="content" rows="14" required><%= orientingDraft || '' %></textarea>
+              <div class="admin-editor-actions">
+                <button type="submit"><%= orientingEditingId ? 'Update' : 'Post' %></button>
+                <% if (orientingEditingId) { %>
+                  <a href="/admin">Clear</a>
+                <% } %>
+              </div>
+            </form>
 
-            <div>
+            <div class="admin-submissions-table-wrap admin-writing-table-wrap">
+              <table class="admin-submissions-table admin-writing-table">
+                <thead>
+                  <tr>
+                    <th>Posted</th>
+                    <th>Excerpt</th>
+                    <th>Edit</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% if (!orientingEntries || orientingEntries.length === 0) { %>
+                    <tr>
+                      <td colspan="3" class="admin-submissions-empty">No orienting posts yet.</td>
+                    </tr>
+                  <% } %>
+                  <% (orientingEntries || []).forEach((row) => { %>
+                    <tr>
+                      <td><%= row.created_at || '' %></td>
+                      <td><%= row.summary %></td>
+                      <td><a href="/admin?orienting_edit=<%= row.id %>">Edit</a></td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="admin-writing-feed">
+            <h3 class="writing-column-heading">Thinking</h3>
+            <form method="post" action="/admin/writing-content" class="admin-editor-form">
+              <input type="hidden" name="section" value="thinking">
+              <% if (thinkingEditingId) { %>
+                <input type="hidden" name="entry_id" value="<%= thinkingEditingId %>">
+              <% } %>
               <label for="admin-thinking-content">Thinking (Markdown)</label>
-              <textarea
-                id="admin-thinking-content"
-                name="thinking_content"
-                rows="14"
-                required
-              ><%= (writingData && writingData.thinking) || 'Private essays archive. New pieces coming soon.' %></textarea>
+              <textarea id="admin-thinking-content" name="content" rows="14" required><%= thinkingDraft || '' %></textarea>
+              <div class="admin-editor-actions">
+                <button type="submit"><%= thinkingEditingId ? 'Update' : 'Post' %></button>
+                <% if (thinkingEditingId) { %>
+                  <a href="/admin">Clear</a>
+                <% } %>
+              </div>
+            </form>
+
+            <div class="admin-submissions-table-wrap admin-writing-table-wrap">
+              <table class="admin-submissions-table admin-writing-table">
+                <thead>
+                  <tr>
+                    <th>Posted</th>
+                    <th>Excerpt</th>
+                    <th>Edit</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% if (!thinkingEntries || thinkingEntries.length === 0) { %>
+                    <tr>
+                      <td colspan="3" class="admin-submissions-empty">No thinking posts yet.</td>
+                    </tr>
+                  <% } %>
+                  <% (thinkingEntries || []).forEach((row) => { %>
+                    <tr>
+                      <td><%= row.created_at || '' %></td>
+                      <td><%= row.summary %></td>
+                      <td><a href="/admin?thinking_edit=<%= row.id %>">Edit</a></td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
             </div>
-          </div>
+          </section>
+        </div>
 
-          <button type="submit">Post</button>
-        </form>
-
-        <section class="admin-submissions-simple">
+        <section class="admin-submissions-simple admin-submissions-public">
           <h3 class="writing-column-heading">Gate Submissions</h3>
           <p class="admin-submissions-meta"><%= total %> loaded.</p>
           <div class="admin-submissions-table-wrap">

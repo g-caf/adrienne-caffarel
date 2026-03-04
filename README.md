@@ -113,8 +113,8 @@ Writing gate form submissions are stored in the `writing_submissions` database t
 content can be edited from a single authenticated dashboard.
 
 Secure endpoints:
-- `GET /admin` (HTML dashboard: edit writing content + view submissions)
-- `POST /admin/writing-content` (save writing page content)
+- `GET /admin` (HTML dashboard: post/edit Orienting and Thinking feeds + view submissions)
+- `POST /admin/writing-content` (create/update a post for one writing feed section)
 - `GET /admin/writing-submissions` (JSON export)
 - `GET /admin/writing-submissions.csv` (CSV download)
 

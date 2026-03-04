@@ -1814,3 +1814,39 @@ footer a:hover {
     grid-template-columns: 1fr;
   }
 }
+
+/* Writing admin/feed overrides */
+.writing-column-markdown,
+.writing-column-markdown p,
+.writing-column-markdown li,
+.writing-column-markdown blockquote {
+  text-align: justify;
+}
+
+.admin-writing-feed {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-writing-feed .admin-submissions-table {
+  min-width: 0;
+}
+
+.admin-writing-table-wrap {
+  box-shadow: none;
+}
+
+.admin-editor-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.admin-editor-actions a {
+  color: var(--color-red);
+}
+
+.admin-writing-page .admin-submissions-table th,
+.admin-writing-page .admin-submissions-table td {
+  text-align: justify;
+}
