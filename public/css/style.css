@@ -1223,21 +1223,12 @@ footer a:hover {
   height: 100%;
   overflow-y: auto;
   padding-right: 8px;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(164, 25, 31, 0.32) transparent;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .writing-column::-webkit-scrollbar {
-  width: 8px;
-}
-
-.writing-column::-webkit-scrollbar-thumb {
-  background: rgba(164, 25, 31, 0.32);
-  border-radius: 999px;
-}
-
-.writing-column::-webkit-scrollbar-track {
-  background: transparent;
+  display: none;
 }
 
 .writing-column-header {
