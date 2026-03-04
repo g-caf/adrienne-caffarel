@@ -1195,6 +1195,12 @@ footer a:hover {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: clamp(0.74rem, 0.22vw + 0.64rem, 0.92rem);
   line-height: 1.52;
+  min-height: 0;
+}
+
+.writing-page main {
+  flex: 1;
+  min-height: 0;
 }
 
 .writing-mobile-tabs {
@@ -1206,12 +1212,15 @@ footer a:hover {
   grid-template-columns: minmax(280px, 0.95fr) minmax(380px, 1.65fr);
   gap: clamp(28px, 4vw, 72px);
   align-items: stretch;
-  min-height: calc(100vh - 172px);
-  max-height: calc(100vh - 172px);
+  height: calc(100vh - 196px);
+  min-height: 420px;
+  max-height: calc(100vh - 196px);
+  overflow: hidden;
 }
 
 .writing-column {
   min-height: 0;
+  height: 100%;
   overflow-y: auto;
   padding-right: 8px;
   scrollbar-width: thin;
@@ -1318,6 +1327,7 @@ footer a:hover {
 
   .writing-columns {
     display: block;
+    height: auto;
     min-height: auto;
     max-height: none;
     border: 1px solid rgba(164, 25, 31, 0.35);
