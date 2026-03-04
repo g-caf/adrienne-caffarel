@@ -13,7 +13,7 @@
             role="tab"
             aria-selected="true"
           >
-            <%= (orienting && orienting.heading) || 'Orienting' %>
+            Orienting
           </button>
           <button
             type="button"
@@ -22,33 +22,23 @@
             role="tab"
             aria-selected="false"
           >
-            <%= (thinking && thinking.heading) || 'Thinking' %>
+            Thinking
           </button>
         </div>
 
         <div class="writing-columns" data-writing-columns>
           <article class="writing-column writing-column-orienting is-active" data-writing-pane="orienting">
             <header class="writing-column-header">
-              <h2 class="writing-column-heading"><%= (orienting && orienting.heading) || 'Orienting' %></h2>
+              <h2 class="writing-column-heading">Orienting</h2>
             </header>
-            <% if (orienting && orienting.lede) { %>
-              <p class="writing-column-lede"><%= orienting.lede %></p>
-            <% } %>
-            <% (orienting && orienting.paragraphs ? orienting.paragraphs : []).forEach((paragraph) => { %>
-              <p class="writing-column-paragraph"><%= paragraph %></p>
-            <% }) %>
+            <div class="writing-column-markdown"><%- orientingHtml || '' %></div>
           </article>
 
           <article class="writing-column writing-column-thinking" data-writing-pane="thinking">
             <header class="writing-column-header writing-column-header-right">
-              <h2 class="writing-column-heading"><%= (thinking && thinking.heading) || 'Thinking' %></h2>
+              <h2 class="writing-column-heading">Thinking</h2>
             </header>
-            <% if (thinking && thinking.title) { %>
-              <p class="writing-column-subtitle"><%= thinking.title %></p>
-            <% } %>
-            <% (thinking && thinking.paragraphs ? thinking.paragraphs : []).forEach((paragraph) => { %>
-              <p class="writing-column-paragraph"><%= paragraph %></p>
-            <% }) %>
+            <div class="writing-column-markdown"><%- thinkingHtml || '' %></div>
           </article>
         </div>
       </section>

@@ -1,103 +1,47 @@
 <%- include('partials/head', { title, pageDescription, canonicalPath, canonicalUrl, seoJsonLd, siteUrl }) %>
 <body>
-  <div class="page-container admin-submissions-page">
-    <main class="admin-submissions-main">
-      <section class="admin-submissions-shell">
-        <header class="admin-submissions-header">
-          <div>
-            <p class="admin-submissions-kicker">Admin</p>
-            <h1>Writing Dashboard</h1>
-          </div>
-          <div class="admin-submissions-links">
-            <a href="/writing" target="_blank" rel="noopener noreferrer">Open Writing Page</a>
-            <a href="/admin/writing-submissions.csv?limit=1000">Download CSV</a>
-          </div>
+  <div class="page-container writing-page admin-writing-page">
+    <%- include('partials/header') %>
+
+    <main>
+      <section class="writing-content-section writing-editorial admin-writing-shell">
+        <header class="admin-writing-header">
+          <h2 class="writing-column-heading">Writing Admin</h2>
+          <p><a href="/admin/writing-submissions.csv?limit=1000">Download CSV</a></p>
         </header>
 
-        <section class="admin-editor-panel">
-          <h2>Writing Page Content</h2>
-          <% if (saved) { %>
-            <p class="admin-editor-flash">Saved changes.</p>
-          <% } %>
-          <form method="post" action="/admin/writing-content" class="admin-editor-form">
-            <label for="admin-writing-title">Title</label>
-            <input
-              id="admin-writing-title"
-              name="title"
-              type="text"
-              required
-              value="<%= (writingPage && writingPage.title) || 'Writing' %>"
-            >
+        <% if (saved) { %>
+          <p class="admin-editor-flash">Saved changes.</p>
+        <% } %>
 
-            <label for="admin-orienting-heading">Orienting Heading</label>
-            <input
-              id="admin-orienting-heading"
-              name="orienting_heading"
-              type="text"
-              required
-              value="<%= (writingData && writingData.orienting && writingData.orienting.heading) || 'Orienting' %>"
-            >
+        <form method="post" action="/admin/writing-content" class="admin-editor-form">
+          <div class="admin-writing-grid">
+            <div>
+              <label for="admin-orienting-content">Orienting (Markdown)</label>
+              <textarea
+                id="admin-orienting-content"
+                name="orienting_content"
+                rows="14"
+              ><%= (writingData && writingData.orienting) || '' %></textarea>
+            </div>
 
-            <label for="admin-orienting-lede">Orienting Lead Line</label>
-            <input
-              id="admin-orienting-lede"
-              name="orienting_lede"
-              type="text"
-              value="<%= (writingData && writingData.orienting && writingData.orienting.lede) || '' %>"
-            >
-
-            <label for="admin-orienting-content">Orienting Body</label>
-            <textarea
-              id="admin-orienting-content"
-              name="orienting_content"
-              rows="8"
-            ><%= (writingData && writingData.orienting && writingData.orienting.content) || '' %></textarea>
-
-            <label for="admin-thinking-heading">Thinking Heading</label>
-            <input
-              id="admin-thinking-heading"
-              name="thinking_heading"
-              type="text"
-              required
-              value="<%= (writingData && writingData.thinking && writingData.thinking.heading) || 'Thinking' %>"
-            >
-
-            <label for="admin-thinking-title">Thinking Title</label>
-            <input
-              id="admin-thinking-title"
-              name="thinking_title"
-              type="text"
-              value="<%= (writingData && writingData.thinking && writingData.thinking.title) || '' %>"
-            >
-
-            <label for="admin-thinking-content">Thinking Body</label>
-            <textarea
-              id="admin-thinking-content"
-              name="thinking_content"
-              rows="9"
-              required
-            ><%= (writingData && writingData.thinking && writingData.thinking.content) || 'Private essays archive. New pieces coming soon.' %></textarea>
-
-            <button type="submit">Save Writing Page</button>
-          </form>
-        </section>
-
-        <section>
-          <div class="admin-submissions-stats">
-            <article class="admin-submissions-stat">
-              <p>Total Loaded</p>
-              <strong><%= total %></strong>
-            </article>
-            <article class="admin-submissions-stat">
-              <p>Unique Emails</p>
-              <strong><%= uniqueEmailCount %></strong>
-            </article>
-            <article class="admin-submissions-stat">
-              <p>Last 24 Hours</p>
-              <strong><%= last24HoursCount %></strong>
-            </article>
+            <div>
+              <label for="admin-thinking-content">Thinking (Markdown)</label>
+              <textarea
+                id="admin-thinking-content"
+                name="thinking_content"
+                rows="14"
+                required
+              ><%= (writingData && writingData.thinking) || 'Private essays archive. New pieces coming soon.' %></textarea>
+            </div>
           </div>
 
+          <button type="submit">Post</button>
+        </form>
+
+        <section class="admin-submissions-simple">
+          <h3 class="writing-column-heading">Gate Submissions</h3>
+          <p class="admin-submissions-meta"><%= total %> loaded.</p>
           <div class="admin-submissions-table-wrap">
             <table class="admin-submissions-table">
               <thead>
@@ -105,14 +49,12 @@
                   <th>Submitted</th>
                   <th>Name</th>
                   <th>Email</th>
-                  <th>IP</th>
-                  <th>User Agent</th>
                 </tr>
               </thead>
               <tbody>
                 <% if (!submissions || submissions.length === 0) { %>
                   <tr>
-                    <td colspan="5" class="admin-submissions-empty">No submissions yet.</td>
+                    <td colspan="3" class="admin-submissions-empty">No submissions yet.</td>
                   </tr>
                 <% } %>
                 <% (submissions || []).forEach((row) => { %>
@@ -120,8 +62,6 @@
                     <td><%= row.created_at || '' %></td>
                     <td><%= [row.first_name, row.last_name].filter(Boolean).join(' ') %></td>
                     <td><a href="mailto:<%= row.email %>"><%= row.email %></a></td>
-                    <td><%= row.source_ip || '' %></td>
-                    <td class="admin-submissions-agent"><%= row.user_agent || '' %></td>
                   </tr>
                 <% }) %>
               </tbody>
@@ -130,6 +70,8 @@
         </section>
       </section>
     </main>
+
+    <%- include('partials/footer') %>
   </div>
 </body>
 </html>

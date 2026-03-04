@@ -2,6 +2,7 @@ const express = require('express');
 const crypto = require('crypto');
 const router = express.Router();
 const Parser = require('rss-parser');
+const MarkdownIt = require('markdown-it');
 const LibraryItem = require('../models/LibraryItem');
 const BookPost = require('../models/BookPost');
 const WritingSubmission = require('../models/WritingSubmission');
@@ -16,6 +17,11 @@ const parser = new Parser({
       ['content:encoded', 'content:encoded']
     ]
   }
+});
+const markdown = new MarkdownIt({
+  html: false,
+  linkify: true,
+  breaks: true
 });
 
 const ADMIN_AUTH_WINDOW_MS = 15 * 60 * 1000;
@@ -260,27 +266,10 @@ function escapeCsv(value) {
   return `"${stringValue.replace(/"/g, '""')}"`;
 }
 
-function toParagraphs(content) {
-  const normalized = (content || '').replace(/\r\n/g, '\n').trim();
-  if (!normalized) return [];
-  return normalized
-    .split(/\n\s*\n/)
-    .map((part) => part.trim())
-    .filter(Boolean);
-}
-
 function getDefaultWritingData() {
   return {
-    orienting: {
-      heading: 'Orienting',
-      lede: '',
-      content: ''
-    },
-    thinking: {
-      heading: 'Thinking',
-      title: '',
-      content: 'Private essays archive. New pieces coming soon.'
-    }
+    orienting: '',
+    thinking: 'Private essays archive. New pieces coming soon.'
   };
 }
 
@@ -294,29 +283,24 @@ function parseWritingData(rawContent) {
     const parsed = JSON.parse(raw);
     if (!parsed || typeof parsed !== 'object') throw new Error('Invalid writing JSON shape');
 
-    const orienting = parsed.orienting && typeof parsed.orienting === 'object' ? parsed.orienting : {};
-    const thinking = parsed.thinking && typeof parsed.thinking === 'object' ? parsed.thinking : {};
+    const orienting = parsed.orienting;
+    const thinking = parsed.thinking;
+    const orientingValue = typeof orienting === 'string'
+      ? orienting
+      : (orienting && typeof orienting === 'object' ? orienting.content : '');
+    const thinkingValue = typeof thinking === 'string'
+      ? thinking
+      : (thinking && typeof thinking === 'object' ? thinking.content : '');
 
     return {
-      orienting: {
-        heading: (orienting.heading || defaults.orienting.heading).toString().trim(),
-        lede: (orienting.lede || '').toString().trim(),
-        content: (orienting.content || '').toString().trim()
-      },
-      thinking: {
-        heading: (thinking.heading || defaults.thinking.heading).toString().trim(),
-        title: (thinking.title || '').toString().trim(),
-        content: (thinking.content || defaults.thinking.content).toString().trim()
-      }
+      orienting: (orientingValue || defaults.orienting).toString().trim(),
+      thinking: (thinkingValue || defaults.thinking).toString().trim()
     };
   } catch (error) {
     // Backward compatibility: treat legacy plain text as Thinking body.
     return {
-      ...defaults,
-      thinking: {
-        ...defaults.thinking,
-        content: raw
-      }
+      orienting: defaults.orienting,
+      thinking: raw
     };
   }
 }
@@ -611,16 +595,8 @@ router.get('/writing', async (req, res, next) => {
     return res.render('writing-content', {
       ...seo,
       pageTitle: writingPage.title || 'Writing',
-      orienting: {
-        heading: writingData.orienting.heading,
-        lede: writingData.orienting.lede,
-        paragraphs: toParagraphs(writingData.orienting.content)
-      },
-      thinking: {
-        heading: writingData.thinking.heading,
-        title: writingData.thinking.title,
-        paragraphs: toParagraphs(writingData.thinking.content)
-      }
+      orientingHtml: markdown.render(writingData.orienting || ''),
+      thinkingHtml: markdown.render(writingData.thinking || '')
     });
   } catch (error) {
     return next(error);
@@ -669,16 +645,8 @@ router.post('/admin/writing-content', requireWritingSubmissionsAdmin, async (req
     const writingPage = await findOrCreateWritingPage();
     const title = (req.body.title || '').trim() || 'Writing';
     const writingData = {
-      orienting: {
-        heading: (req.body.orienting_heading || '').trim() || 'Orienting',
-        lede: (req.body.orienting_lede || '').trim(),
-        content: (req.body.orienting_content || '').trim()
-      },
-      thinking: {
-        heading: (req.body.thinking_heading || '').trim() || 'Thinking',
-        title: (req.body.thinking_title || '').trim(),
-        content: (req.body.thinking_content || '').trim() || 'Private essays archive. New pieces coming soon.'
-      }
+      orienting: (req.body.orienting_content || '').trim(),
+      thinking: (req.body.thinking_content || '').trim() || 'Private essays archive. New pieces coming soon.'
     };
     const content = serializeWritingData(writingData);
 
