@@ -1233,6 +1233,11 @@ footer a:hover {
 
 .writing-column-header {
   margin: 0 0 14px;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--color-off-white);
+  padding: 0 0 8px;
 }
 
 .writing-column-header-right {
@@ -1242,7 +1247,7 @@ footer a:hover {
 .writing-column-heading {
   margin: 0;
   color: var(--color-red);
-  font-family: 'Bodoni Moda', serif;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: clamp(1.1rem, 0.75vw + 0.9rem, 1.5rem);
   letter-spacing: 0.03em;
   text-transform: uppercase;
@@ -1334,6 +1339,12 @@ footer a:hover {
 
   .writing-column-header-right {
     text-align: left;
+  }
+
+  .writing-column-header {
+    position: static;
+    background: transparent;
+    padding: 0;
   }
 }
 
