@@ -736,9 +736,16 @@ router.get('/admin/writing-submissions', requireWritingSubmissionsAdmin, async (
   try {
     const limit = req.query.limit ? parseInt(req.query.limit, 10) : 250;
     const submissions = await WritingSubmission.findRecent(limit);
+    const sanitizedSubmissions = submissions.map((row) => ({
+      id: row.id,
+      created_at: row.created_at,
+      first_name: row.first_name,
+      last_name: row.last_name,
+      email: row.email
+    }));
     return res.status(200).json({
-      total: submissions.length,
-      submissions
+      total: sanitizedSubmissions.length,
+      submissions: sanitizedSubmissions
     });
   } catch (error) {
     return next(error);
@@ -760,7 +767,7 @@ router.get('/admin/writing-submissions.csv', requireWritingSubmissionsAdmin, asy
     const limit = req.query.limit ? parseInt(req.query.limit, 10) : 1000;
     const submissions = await WritingSubmission.findRecent(limit);
     const lines = [
-      ['id', 'created_at', 'first_name', 'last_name', 'email', 'source_ip', 'user_agent']
+      ['id', 'created_at', 'first_name', 'last_name', 'email']
         .map(escapeCsv)
         .join(',')
     ];
@@ -772,9 +779,7 @@ router.get('/admin/writing-submissions.csv', requireWritingSubmissionsAdmin, asy
           row.created_at,
           row.first_name,
           row.last_name,
-          row.email,
-          row.source_ip,
-          row.user_agent
+          row.email
         ].map(escapeCsv).join(',')
       );
     }
