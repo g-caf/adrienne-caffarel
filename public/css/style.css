@@ -852,26 +852,11 @@ footer a:hover {
   gap: 8px;
 }
 
-.about-loading-indicator {
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  background: var(--color-red);
-  box-shadow:
-    -12px 0 0 rgba(164, 25, 31, 0.35),
-    12px 0 0 rgba(164, 25, 31, 0.35);
-  animation: aboutLoadingPulse 1.05s ease-in-out infinite;
-}
-
-@keyframes aboutLoadingPulse {
-  0%, 100% {
-    transform: scale(0.72);
-    opacity: 0.5;
-  }
-  45% {
-    transform: scale(1);
-    opacity: 1;
-  }
+.about-loading-gif {
+  width: 12px;
+  height: 12px;
+  display: inline-block;
+  object-fit: contain;
 }
 
 .about-outro {
