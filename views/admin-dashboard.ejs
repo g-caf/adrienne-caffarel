@@ -1,0 +1,94 @@
+<%- include('partials/head', { title, pageDescription, canonicalPath, canonicalUrl, seoJsonLd, siteUrl }) %>
+<body>
+  <div class="page-container admin-submissions-page">
+    <main class="admin-submissions-main">
+      <section class="admin-submissions-shell">
+        <header class="admin-submissions-header">
+          <div>
+            <p class="admin-submissions-kicker">Admin</p>
+            <h1>Writing Dashboard</h1>
+          </div>
+          <div class="admin-submissions-links">
+            <a href="/writing" target="_blank" rel="noopener noreferrer">Open Writing Page</a>
+            <a href="/admin/writing-submissions.csv?limit=1000">Download CSV</a>
+          </div>
+        </header>
+
+        <section class="admin-editor-panel">
+          <h2>Writing Page Content</h2>
+          <% if (saved) { %>
+            <p class="admin-editor-flash">Saved changes.</p>
+          <% } %>
+          <form method="post" action="/admin/writing-content" class="admin-editor-form">
+            <label for="admin-writing-title">Title</label>
+            <input
+              id="admin-writing-title"
+              name="title"
+              type="text"
+              required
+              value="<%= (writingPage && writingPage.title) || 'Writing' %>"
+            >
+
+            <label for="admin-writing-content">Body</label>
+            <textarea
+              id="admin-writing-content"
+              name="content"
+              rows="9"
+              required
+            ><%= (writingPage && writingPage.content) || 'Private essays archive. New pieces coming soon.' %></textarea>
+
+            <button type="submit">Save Writing Page</button>
+          </form>
+        </section>
+
+        <section>
+          <div class="admin-submissions-stats">
+            <article class="admin-submissions-stat">
+              <p>Total Loaded</p>
+              <strong><%= total %></strong>
+            </article>
+            <article class="admin-submissions-stat">
+              <p>Unique Emails</p>
+              <strong><%= uniqueEmailCount %></strong>
+            </article>
+            <article class="admin-submissions-stat">
+              <p>Last 24 Hours</p>
+              <strong><%= last24HoursCount %></strong>
+            </article>
+          </div>
+
+          <div class="admin-submissions-table-wrap">
+            <table class="admin-submissions-table">
+              <thead>
+                <tr>
+                  <th>Submitted</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>IP</th>
+                  <th>User Agent</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (!submissions || submissions.length === 0) { %>
+                  <tr>
+                    <td colspan="5" class="admin-submissions-empty">No submissions yet.</td>
+                  </tr>
+                <% } %>
+                <% (submissions || []).forEach((row) => { %>
+                  <tr>
+                    <td><%= row.created_at || '' %></td>
+                    <td><%= [row.first_name, row.last_name].filter(Boolean).join(' ') %></td>
+                    <td><a href="mailto:<%= row.email %>"><%= row.email %></a></td>
+                    <td><%= row.source_ip || '' %></td>
+                    <td class="admin-submissions-agent"><%= row.user_agent || '' %></td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

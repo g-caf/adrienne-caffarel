@@ -1,12 +1,17 @@
-<%- include('partials/head', { title: 'Writing' }) %>
+<%- include('partials/head', { title: pageTitle || 'Writing', pageDescription, canonicalPath, canonicalUrl, seoJsonLd, siteUrl }) %>
 <body>
   <div class="page-container writing-page">
     <%- include('partials/header') %>
 
     <main>
       <section class="writing-content-section">
-        <h2 class="writing-content-title">Writing</h2>
-        <p class="writing-content-note">Private essays archive. New pieces coming soon.</p>
+        <h2 class="writing-content-title"><%= pageTitle || 'Writing' %></h2>
+        <% if (!contentParagraphs || contentParagraphs.length === 0) { %>
+          <p class="writing-content-note">Private essays archive. New pieces coming soon.</p>
+        <% } %>
+        <% (contentParagraphs || []).forEach((paragraph) => { %>
+          <p class="writing-content-note"><%= paragraph %></p>
+        <% }) %>
       </section>
     </main>
 

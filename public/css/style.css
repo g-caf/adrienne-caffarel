@@ -1471,6 +1471,67 @@ footer a:hover {
   gap: 10px;
 }
 
+.admin-editor-panel {
+  border: 1px solid rgba(164, 25, 31, 0.28);
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 12px 30px rgba(26, 26, 26, 0.08);
+  padding: 16px;
+}
+
+.admin-editor-panel h2 {
+  margin: 0 0 8px;
+  color: var(--color-red);
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.admin-editor-flash {
+  margin: 0 0 10px;
+  font-size: 0.85rem;
+  color: #216d2c;
+  background: rgba(33, 109, 44, 0.12);
+  border: 1px solid rgba(33, 109, 44, 0.2);
+  padding: 6px 8px;
+}
+
+.admin-editor-form {
+  display: grid;
+  gap: 8px;
+}
+
+.admin-editor-form label {
+  color: var(--color-red);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.admin-editor-form input,
+.admin-editor-form textarea {
+  border: 1px solid rgba(164, 25, 31, 0.28);
+  padding: 9px 10px;
+  font: inherit;
+  color: var(--color-black);
+  background: rgba(255, 255, 255, 0.95);
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.admin-editor-form textarea {
+  resize: vertical;
+  min-height: 160px;
+}
+
+.admin-editor-form button {
+  justify-self: start;
+  border: 1px solid var(--color-red);
+  background: var(--color-red);
+  color: var(--color-off-white);
+  padding: 8px 13px;
+  cursor: pointer;
+}
+
 .admin-submissions-stat {
   border: 1px solid rgba(164, 25, 31, 0.26);
   background: rgba(255, 255, 255, 0.72);

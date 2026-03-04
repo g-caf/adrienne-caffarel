@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const router = express.Router();
 const Parser = require('rss-parser');
 const LibraryItem = require('../models/LibraryItem');
+const BookPost = require('../models/BookPost');
 const WritingSubmission = require('../models/WritingSubmission');
 const { ensureLibrarySynced, getLibrarySyncStatus } = require('../services/librarySync');
 
@@ -259,6 +260,32 @@ function escapeCsv(value) {
   return `"${stringValue.replace(/"/g, '""')}"`;
 }
 
+function toParagraphs(content) {
+  const normalized = (content || '').replace(/\r\n/g, '\n').trim();
+  if (!normalized) return [];
+  return normalized
+    .split(/\n\s*\n/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+
+async function findOrCreateWritingPage() {
+  const existing = await BookPost.findBySlug('writing');
+  if (existing) return existing;
+
+  const created = await BookPost.create({
+    title: 'Writing',
+    subtitle: null,
+    slug: 'writing',
+    content: 'Private essays archive. New pieces coming soon.',
+    image_url: null,
+    published_date: new Date().toISOString().slice(0, 10),
+    type: 'page'
+  });
+
+  return created;
+}
+
 router.get('/robots.txt', (req, res) => {
   const siteUrl = getSiteUrl(req);
   const body = [
@@ -505,25 +532,90 @@ router.get('/reading', (req, res) => {
   res.redirect('/library');
 });
 
-router.get('/writing', (req, res) => {
-  const seo = getPageSeo(req, {
-    title: 'Writing',
-    path: '/writing',
-    description: 'Adrienne Caffarel: writing and essays.'
-  });
-
-  if (!hasWritingAccess(req)) {
-    return res.render('writing-gate', {
-      ...seo,
-      errorMessage: null,
-      formData: { first_name: '', last_name: '', email: '' }
+router.get('/writing', async (req, res, next) => {
+  try {
+    const seo = getPageSeo(req, {
+      title: 'Writing',
+      path: '/writing',
+      description: 'Adrienne Caffarel: writing and essays.'
     });
-  }
 
-  res.render('writing-content', {
-    ...seo,
-    pageTitle: 'Writing'
-  });
+    if (!hasWritingAccess(req)) {
+      return res.render('writing-gate', {
+        ...seo,
+        errorMessage: null,
+        formData: { first_name: '', last_name: '', email: '' }
+      });
+    }
+
+    const writingPage = await findOrCreateWritingPage();
+    const contentParagraphs = toParagraphs(writingPage.content);
+
+    return res.render('writing-content', {
+      ...seo,
+      pageTitle: writingPage.title || 'Writing',
+      contentParagraphs
+    });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.get('/admin', requireWritingSubmissionsAdmin, async (req, res, next) => {
+  try {
+    const limit = req.query.limit ? parseInt(req.query.limit, 10) : 250;
+    const writingPage = await findOrCreateWritingPage();
+    const submissions = await WritingSubmission.findRecent(limit);
+    const uniqueEmailCount = new Set(
+      submissions
+        .map((row) => (row.email || '').toLowerCase())
+        .filter(Boolean)
+    ).size;
+    const last24HoursCutoff = Date.now() - (24 * 60 * 60 * 1000);
+    const last24HoursCount = submissions.filter((row) => {
+      const createdMs = Date.parse(row.created_at);
+      return Number.isFinite(createdMs) && createdMs >= last24HoursCutoff;
+    }).length;
+
+    return res.render('admin-dashboard', {
+      ...getPageSeo(req, {
+        title: 'Admin Dashboard',
+        path: '/admin',
+        description: 'Manage writing page content and writing gate submissions.'
+      }),
+      saved: req.query.saved === '1',
+      limit,
+      writingPage,
+      total: submissions.length,
+      uniqueEmailCount,
+      last24HoursCount,
+      submissions
+    });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.post('/admin/writing-content', requireWritingSubmissionsAdmin, async (req, res, next) => {
+  try {
+    const writingPage = await findOrCreateWritingPage();
+    const title = (req.body.title || '').trim() || 'Writing';
+    const content = (req.body.content || '').trim() || 'Private essays archive. New pieces coming soon.';
+
+    await BookPost.update(writingPage.id, {
+      title,
+      subtitle: writingPage.subtitle || null,
+      slug: 'writing',
+      content,
+      image_url: writingPage.image_url || null,
+      published_date: writingPage.published_date || new Date().toISOString().slice(0, 10),
+      type: 'page'
+    });
+
+    return res.redirect('/admin?saved=1');
+  } catch (error) {
+    return next(error);
+  }
 });
 
 router.post('/writing/unlock', async (req, res, next) => {
@@ -607,31 +699,9 @@ router.get('/admin/writing-submissions', requireWritingSubmissionsAdmin, async (
 
 router.get('/admin/writing-submissions/dashboard', requireWritingSubmissionsAdmin, async (req, res, next) => {
   try {
-    const limit = req.query.limit ? parseInt(req.query.limit, 10) : 250;
-    const submissions = await WritingSubmission.findRecent(limit);
-    const uniqueEmailCount = new Set(
-      submissions
-        .map((row) => (row.email || '').toLowerCase())
-        .filter(Boolean)
-    ).size;
-    const last24HoursCutoff = Date.now() - (24 * 60 * 60 * 1000);
-    const last24HoursCount = submissions.filter((row) => {
-      const createdMs = Date.parse(row.created_at);
-      return Number.isFinite(createdMs) && createdMs >= last24HoursCutoff;
-    }).length;
-
-    return res.render('writing-submissions-dashboard', {
-      ...getPageSeo(req, {
-        title: 'Writing Submissions Dashboard',
-        path: '/admin/writing-submissions/dashboard',
-        description: 'Admin dashboard for writing gate form submissions.'
-      }),
-      limit,
-      total: submissions.length,
-      uniqueEmailCount,
-      last24HoursCount,
-      submissions
-    });
+    const limit = req.query.limit ? parseInt(req.query.limit, 10) : null;
+    const destination = limit ? `/admin?limit=${encodeURIComponent(limit)}` : '/admin';
+    return res.redirect(destination);
   } catch (error) {
     return next(error);
   }

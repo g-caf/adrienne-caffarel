@@ -107,13 +107,15 @@ See `render.yaml` for automated deployment configuration.
 - **Reading** (`/reading`) - Reading list section (future)
 - **Writing** (`/writing`) - Essays and writing section (future)
 
-## Writing Gate Submissions Admin
+## Admin Dashboard
 
-Writing gate form submissions are stored in the `writing_submissions` database table.
+Writing gate form submissions are stored in the `writing_submissions` database table, and writing-page
+content can be edited from a single authenticated dashboard.
 
 Secure endpoints:
-- `GET /admin/writing-submissions/dashboard` (HTML dashboard)
-- `GET /admin/writing-submissions` (JSON)
+- `GET /admin` (HTML dashboard: edit writing content + view submissions)
+- `POST /admin/writing-content` (save writing page content)
+- `GET /admin/writing-submissions` (JSON export)
 - `GET /admin/writing-submissions.csv` (CSV download)
 
 Security controls:

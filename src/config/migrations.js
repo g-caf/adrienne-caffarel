@@ -201,7 +201,8 @@ const seedPages = async () => {
     const pages = [
       { slug: 'about', title: "Who's Writing This?", type: 'page' },
       { slug: 'contact', title: 'Can I Email Her?', type: 'page' },
-      { slug: 'reading', title: "What Else Is She Reading?", type: 'page' }
+      { slug: 'reading', title: "What Else Is She Reading?", type: 'page' },
+      { slug: 'writing', title: 'Writing', type: 'page' }
     ];
 
     for (const page of pages) {
