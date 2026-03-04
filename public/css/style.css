@@ -1399,3 +1399,157 @@ footer a:hover {
     margin-top: 22px;
   }
 }
+
+/* Writing submissions admin dashboard */
+.admin-submissions-page {
+  background:
+    linear-gradient(150deg, rgba(164, 25, 31, 0.08), rgba(245, 241, 237, 0.96) 45%),
+    var(--color-off-white);
+}
+
+.admin-submissions-main {
+  padding: clamp(20px, 3vw, 42px);
+}
+
+.admin-submissions-shell {
+  max-width: 1320px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.admin-submissions-header {
+  border: 1px solid rgba(164, 25, 31, 0.28);
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 10px 30px rgba(26, 26, 26, 0.08);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 20px;
+}
+
+.admin-submissions-kicker {
+  margin: 0 0 4px;
+  letter-spacing: 1.2px;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  color: var(--color-red);
+}
+
+.admin-submissions-header h1 {
+  margin: 0;
+  font-size: clamp(1.2rem, 1.4vw + 0.9rem, 1.8rem);
+  color: var(--color-red);
+  line-height: 1.1;
+}
+
+.admin-submissions-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.admin-submissions-links a {
+  border: 1px solid var(--color-red);
+  color: var(--color-red);
+  text-decoration: none;
+  padding: 7px 11px;
+  font-size: 0.82rem;
+  line-height: 1;
+}
+
+.admin-submissions-links a:hover {
+  background: var(--color-red);
+  color: var(--color-off-white);
+}
+
+.admin-submissions-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.admin-submissions-stat {
+  border: 1px solid rgba(164, 25, 31, 0.26);
+  background: rgba(255, 255, 255, 0.72);
+  padding: 12px 14px;
+  box-shadow: 0 10px 26px rgba(26, 26, 26, 0.06);
+}
+
+.admin-submissions-stat p {
+  margin: 0 0 3px;
+  font-size: 0.78rem;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--color-gray);
+}
+
+.admin-submissions-stat strong {
+  color: var(--color-red);
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.admin-submissions-table-wrap {
+  border: 1px solid rgba(164, 25, 31, 0.28);
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 12px 30px rgba(26, 26, 26, 0.08);
+  overflow: auto;
+}
+
+.admin-submissions-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1020px;
+  font-size: 0.86rem;
+}
+
+.admin-submissions-table th,
+.admin-submissions-table td {
+  border-bottom: 1px solid rgba(164, 25, 31, 0.12);
+  text-align: left;
+  vertical-align: top;
+  padding: 9px 10px;
+}
+
+.admin-submissions-table thead th {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--color-red);
+  font-size: 0.74rem;
+  background: rgba(164, 25, 31, 0.06);
+}
+
+.admin-submissions-table tbody tr:hover {
+  background: rgba(164, 25, 31, 0.04);
+}
+
+.admin-submissions-table a {
+  color: var(--color-red);
+}
+
+.admin-submissions-agent {
+  max-width: 520px;
+  word-break: break-word;
+  color: #5d5d5d;
+}
+
+.admin-submissions-empty {
+  text-align: center;
+  color: var(--color-gray);
+  padding: 22px;
+}
+
+@media (max-width: 900px) {
+  .admin-submissions-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-submissions-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

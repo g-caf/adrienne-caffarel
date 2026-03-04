@@ -1,0 +1,65 @@
+<%- include('partials/head', { title, pageDescription, canonicalPath, canonicalUrl, seoJsonLd, siteUrl }) %>
+<body>
+  <div class="page-container admin-submissions-page">
+    <main class="admin-submissions-main">
+      <section class="admin-submissions-shell">
+        <header class="admin-submissions-header">
+          <div>
+            <p class="admin-submissions-kicker">Writing Gate</p>
+            <h1>Submissions Dashboard</h1>
+          </div>
+          <div class="admin-submissions-links">
+            <a href="/admin/writing-submissions?limit=<%= limit %>" target="_blank" rel="noopener noreferrer">JSON</a>
+            <a href="/admin/writing-submissions.csv?limit=1000">Download CSV</a>
+          </div>
+        </header>
+
+        <div class="admin-submissions-stats">
+          <article class="admin-submissions-stat">
+            <p>Total Loaded</p>
+            <strong><%= total %></strong>
+          </article>
+          <article class="admin-submissions-stat">
+            <p>Unique Emails</p>
+            <strong><%= uniqueEmailCount %></strong>
+          </article>
+          <article class="admin-submissions-stat">
+            <p>Last 24 Hours</p>
+            <strong><%= last24HoursCount %></strong>
+          </article>
+        </div>
+
+        <div class="admin-submissions-table-wrap">
+          <table class="admin-submissions-table">
+            <thead>
+              <tr>
+                <th>Submitted</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>IP</th>
+                <th>User Agent</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (!submissions || submissions.length === 0) { %>
+                <tr>
+                  <td colspan="5" class="admin-submissions-empty">No submissions yet.</td>
+                </tr>
+              <% } %>
+              <% (submissions || []).forEach((row) => { %>
+                <tr>
+                  <td><%= row.created_at || '' %></td>
+                  <td><%= [row.first_name, row.last_name].filter(Boolean).join(' ') %></td>
+                  <td><a href="mailto:<%= row.email %>"><%= row.email %></a></td>
+                  <td><%= row.source_ip || '' %></td>
+                  <td class="admin-submissions-agent"><%= row.user_agent || '' %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

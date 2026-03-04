@@ -112,6 +112,7 @@ See `render.yaml` for automated deployment configuration.
 Writing gate form submissions are stored in the `writing_submissions` database table.
 
 Secure endpoints:
+- `GET /admin/writing-submissions/dashboard` (HTML dashboard)
 - `GET /admin/writing-submissions` (JSON)
 - `GET /admin/writing-submissions.csv` (CSV download)
 

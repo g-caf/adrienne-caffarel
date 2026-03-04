@@ -605,6 +605,38 @@ router.get('/admin/writing-submissions', requireWritingSubmissionsAdmin, async (
   }
 });
 
+router.get('/admin/writing-submissions/dashboard', requireWritingSubmissionsAdmin, async (req, res, next) => {
+  try {
+    const limit = req.query.limit ? parseInt(req.query.limit, 10) : 250;
+    const submissions = await WritingSubmission.findRecent(limit);
+    const uniqueEmailCount = new Set(
+      submissions
+        .map((row) => (row.email || '').toLowerCase())
+        .filter(Boolean)
+    ).size;
+    const last24HoursCutoff = Date.now() - (24 * 60 * 60 * 1000);
+    const last24HoursCount = submissions.filter((row) => {
+      const createdMs = Date.parse(row.created_at);
+      return Number.isFinite(createdMs) && createdMs >= last24HoursCutoff;
+    }).length;
+
+    return res.render('writing-submissions-dashboard', {
+      ...getPageSeo(req, {
+        title: 'Writing Submissions Dashboard',
+        path: '/admin/writing-submissions/dashboard',
+        description: 'Admin dashboard for writing gate form submissions.'
+      }),
+      limit,
+      total: submissions.length,
+      uniqueEmailCount,
+      last24HoursCount,
+      submissions
+    });
+  } catch (error) {
+    return next(error);
+  }
+});
+
 router.get('/admin/writing-submissions.csv', requireWritingSubmissionsAdmin, async (req, res, next) => {
   try {
     const limit = req.query.limit ? parseInt(req.query.limit, 10) : 1000;
