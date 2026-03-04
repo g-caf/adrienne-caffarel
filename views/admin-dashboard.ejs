@@ -29,13 +29,54 @@
               value="<%= (writingPage && writingPage.title) || 'Writing' %>"
             >
 
-            <label for="admin-writing-content">Body</label>
+            <label for="admin-orienting-heading">Orienting Heading</label>
+            <input
+              id="admin-orienting-heading"
+              name="orienting_heading"
+              type="text"
+              required
+              value="<%= (writingData && writingData.orienting && writingData.orienting.heading) || 'Orienting' %>"
+            >
+
+            <label for="admin-orienting-lede">Orienting Lead Line</label>
+            <input
+              id="admin-orienting-lede"
+              name="orienting_lede"
+              type="text"
+              value="<%= (writingData && writingData.orienting && writingData.orienting.lede) || '' %>"
+            >
+
+            <label for="admin-orienting-content">Orienting Body</label>
             <textarea
-              id="admin-writing-content"
-              name="content"
+              id="admin-orienting-content"
+              name="orienting_content"
+              rows="8"
+            ><%= (writingData && writingData.orienting && writingData.orienting.content) || '' %></textarea>
+
+            <label for="admin-thinking-heading">Thinking Heading</label>
+            <input
+              id="admin-thinking-heading"
+              name="thinking_heading"
+              type="text"
+              required
+              value="<%= (writingData && writingData.thinking && writingData.thinking.heading) || 'Thinking' %>"
+            >
+
+            <label for="admin-thinking-title">Thinking Title</label>
+            <input
+              id="admin-thinking-title"
+              name="thinking_title"
+              type="text"
+              value="<%= (writingData && writingData.thinking && writingData.thinking.title) || '' %>"
+            >
+
+            <label for="admin-thinking-content">Thinking Body</label>
+            <textarea
+              id="admin-thinking-content"
+              name="thinking_content"
               rows="9"
               required
-            ><%= (writingPage && writingPage.content) || 'Private essays archive. New pieces coming soon.' %></textarea>
+            ><%= (writingData && writingData.thinking && writingData.thinking.content) || 'Private essays archive. New pieces coming soon.' %></textarea>
 
             <button type="submit">Save Writing Page</button>
           </form>

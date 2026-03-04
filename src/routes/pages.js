@@ -269,15 +269,72 @@ function toParagraphs(content) {
     .filter(Boolean);
 }
 
+function getDefaultWritingData() {
+  return {
+    orienting: {
+      heading: 'Orienting',
+      lede: '',
+      content: ''
+    },
+    thinking: {
+      heading: 'Thinking',
+      title: '',
+      content: 'Private essays archive. New pieces coming soon.'
+    }
+  };
+}
+
+function parseWritingData(rawContent) {
+  const defaults = getDefaultWritingData();
+  const raw = (rawContent || '').trim();
+
+  if (!raw) return defaults;
+
+  try {
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object') throw new Error('Invalid writing JSON shape');
+
+    const orienting = parsed.orienting && typeof parsed.orienting === 'object' ? parsed.orienting : {};
+    const thinking = parsed.thinking && typeof parsed.thinking === 'object' ? parsed.thinking : {};
+
+    return {
+      orienting: {
+        heading: (orienting.heading || defaults.orienting.heading).toString().trim(),
+        lede: (orienting.lede || '').toString().trim(),
+        content: (orienting.content || '').toString().trim()
+      },
+      thinking: {
+        heading: (thinking.heading || defaults.thinking.heading).toString().trim(),
+        title: (thinking.title || '').toString().trim(),
+        content: (thinking.content || defaults.thinking.content).toString().trim()
+      }
+    };
+  } catch (error) {
+    // Backward compatibility: treat legacy plain text as Thinking body.
+    return {
+      ...defaults,
+      thinking: {
+        ...defaults.thinking,
+        content: raw
+      }
+    };
+  }
+}
+
+function serializeWritingData(writingData) {
+  return JSON.stringify(writingData);
+}
+
 async function findOrCreateWritingPage() {
   const existing = await BookPost.findBySlug('writing');
   if (existing) return existing;
 
+  const initialData = serializeWritingData(getDefaultWritingData());
   const created = await BookPost.create({
     title: 'Writing',
     subtitle: null,
     slug: 'writing',
-    content: 'Private essays archive. New pieces coming soon.',
+    content: initialData,
     image_url: null,
     published_date: new Date().toISOString().slice(0, 10),
     type: 'page'
@@ -549,12 +606,21 @@ router.get('/writing', async (req, res, next) => {
     }
 
     const writingPage = await findOrCreateWritingPage();
-    const contentParagraphs = toParagraphs(writingPage.content);
+    const writingData = parseWritingData(writingPage.content);
 
     return res.render('writing-content', {
       ...seo,
       pageTitle: writingPage.title || 'Writing',
-      contentParagraphs
+      orienting: {
+        heading: writingData.orienting.heading,
+        lede: writingData.orienting.lede,
+        paragraphs: toParagraphs(writingData.orienting.content)
+      },
+      thinking: {
+        heading: writingData.thinking.heading,
+        title: writingData.thinking.title,
+        paragraphs: toParagraphs(writingData.thinking.content)
+      }
     });
   } catch (error) {
     return next(error);
@@ -565,6 +631,7 @@ router.get('/admin', requireWritingSubmissionsAdmin, async (req, res, next) => {
   try {
     const limit = req.query.limit ? parseInt(req.query.limit, 10) : 250;
     const writingPage = await findOrCreateWritingPage();
+    const writingData = parseWritingData(writingPage.content);
     const submissions = await WritingSubmission.findRecent(limit);
     const uniqueEmailCount = new Set(
       submissions
@@ -586,6 +653,7 @@ router.get('/admin', requireWritingSubmissionsAdmin, async (req, res, next) => {
       saved: req.query.saved === '1',
       limit,
       writingPage,
+      writingData,
       total: submissions.length,
       uniqueEmailCount,
       last24HoursCount,
@@ -600,7 +668,19 @@ router.post('/admin/writing-content', requireWritingSubmissionsAdmin, async (req
   try {
     const writingPage = await findOrCreateWritingPage();
     const title = (req.body.title || '').trim() || 'Writing';
-    const content = (req.body.content || '').trim() || 'Private essays archive. New pieces coming soon.';
+    const writingData = {
+      orienting: {
+        heading: (req.body.orienting_heading || '').trim() || 'Orienting',
+        lede: (req.body.orienting_lede || '').trim(),
+        content: (req.body.orienting_content || '').trim()
+      },
+      thinking: {
+        heading: (req.body.thinking_heading || '').trim() || 'Thinking',
+        title: (req.body.thinking_title || '').trim(),
+        content: (req.body.thinking_content || '').trim() || 'Private essays archive. New pieces coming soon.'
+      }
+    };
+    const content = serializeWritingData(writingData);
 
     await BookPost.update(writingPage.id, {
       title,
