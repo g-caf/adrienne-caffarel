@@ -611,16 +611,32 @@ main {
     white-space: nowrap;
   }
 
+  .header-content {
+    flex-wrap: nowrap;
+    min-width: 0;
+    gap: 6px;
+  }
+
   .site-title {
-    font-size: 1rem;
-    white-space: normal;
-    flex-wrap: wrap;
-    row-gap: 0.2em;
+    font-size: 0.84rem;
+    white-space: nowrap;
+    flex-wrap: nowrap;
+    row-gap: 0;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: clip;
+  }
+
+  .header-intro-text,
+  .header-word-flip,
+  .header-hover-links {
+    font-size: 0.84rem;
   }
 
   .header-about-link {
-    width: 64px;
-    height: 64px;
+    width: 50px;
+    height: 50px;
+    flex: 0 0 auto;
   }
 
   .articles-grid {
