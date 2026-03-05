@@ -85,6 +85,35 @@ document.addEventListener('DOMContentLoaded', function() {
     }, WORD_DURATION_MS);
   }
 
+  function initMobileHeaderNavToggle() {
+    const siteHeader = document.querySelector('.site-header');
+    const siteTitle = document.querySelector('.site-title');
+    const navLinks = Array.from(document.querySelectorAll('.header-hover-links a'));
+    if (!siteHeader || !siteTitle) return;
+
+    const isMobile = () => window.matchMedia('(max-width: 768px)').matches;
+
+    siteTitle.addEventListener('click', (event) => {
+      if (!isMobile()) return;
+      if (event.target.closest('.header-home-link')) return;
+      siteHeader.classList.toggle('mobile-nav-open');
+    });
+
+    navLinks.forEach((link) => {
+      link.addEventListener('click', () => {
+        siteHeader.classList.remove('mobile-nav-open');
+      });
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!isMobile()) return;
+      if (siteHeader.contains(event.target)) return;
+      siteHeader.classList.remove('mobile-nav-open');
+    });
+  }
+
+  initMobileHeaderNavToggle();
+
   function collapseToHeader() {
     if (!landingPage || isCollapsing) return;
     isCollapsing = true;

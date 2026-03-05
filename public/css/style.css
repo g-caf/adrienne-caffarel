@@ -638,20 +638,22 @@ main {
   }
 
   .header-word-flip {
-    display: none;
-    min-width: 0;
-    width: 0;
-    flex: 0 0 0;
-    margin-left: 0;
+    display: inline-block;
+    min-width: 11ch;
+    width: 11ch;
+    flex: 0 0 11ch;
+    margin-left: -0.01em;
+    opacity: 1;
+    max-width: none;
+    overflow: visible;
   }
 
   .header-hover-links {
-    opacity: 1;
-    max-width: min(62vw, 360px);
-    pointer-events: auto;
-    transform: none;
-    overflow-x: auto;
-    overflow-y: hidden;
+    opacity: 0;
+    max-width: 0;
+    pointer-events: none;
+    transform: translateX(-8px);
+    overflow: hidden;
     white-space: nowrap;
     display: inline-flex;
     flex-wrap: nowrap;
@@ -667,6 +669,25 @@ main {
   .header-hover-links a,
   .header-link-sep {
     flex: 0 0 auto;
+  }
+
+  .site-header.mobile-nav-open .header-hover-links {
+    opacity: 1;
+    max-width: min(62vw, 360px);
+    pointer-events: auto;
+    transform: none;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .site-header.mobile-nav-open .header-word-flip {
+    opacity: 0;
+    max-width: 0;
+    min-width: 0;
+    width: 0;
+    flex-basis: 0;
+    margin-left: 0;
+    overflow: hidden;
   }
 
   .header-about-link {
