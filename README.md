@@ -110,6 +110,20 @@ See `render.yaml` for automated deployment configuration.
 - **Reading** (`/reading`) - Reading list section (future)
 - **Writing** (`/writing`) - Essays and writing section (future)
 
+### Topic Hubs
+
+Dedicated RSS hub pages:
+- `/topics/iran-news`
+- `/topics/global-news`
+- `/topics/us-news`
+- `/topics/us-midterms`
+- `/topics/us-economy`
+- `/topics/ai`
+- `/topics/tech-news`
+- `/topics/new-york-city-news`
+- `/topics/global-economy`
+- `/topics/infrastructure-news`
+
 ## Admin Dashboard
 
 Writing gate form submissions are stored in the `writing_submissions` database table, and writing-page

@@ -395,6 +395,19 @@ main {
   display: none;
 }
 
+.topic-hub-title {
+  display: block;
+  margin: 0;
+  padding: 12px 16px;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: clamp(0.88rem, 0.25vw + 0.78rem, 1.05rem);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-red);
+  background: rgba(245, 241, 237, 0.94);
+  border-bottom: 1px solid rgba(164, 25, 31, 0.3);
+}
+
 /* Articles Grid - Square tile layout */
 .articles-grid {
   display: grid;

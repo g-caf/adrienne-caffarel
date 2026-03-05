@@ -47,6 +47,162 @@ const rssFeeds = [
   }
 ];
 
+const TOPIC_DEFINITIONS = [
+  {
+    slug: 'iran-news',
+    title: 'Iran News',
+    description: 'Iran-focused coverage from the live feed mix.',
+    keywords: ['iran', 'tehran', 'isfahan', 'ayatollah', 'persian gulf', 'islamic republic', 'irgc']
+  },
+  {
+    slug: 'global-news',
+    title: 'Global News',
+    description: 'International headlines and geopolitics from the live feed mix.',
+    keywords: [
+      'global', 'world', 'international', 'geopolit', 'foreign ministry', 'united nations',
+      'eu ', 'european union', 'ceasefire', 'sanctions', 'diplomacy', 'refugee'
+    ]
+  },
+  {
+    slug: 'us-news',
+    title: 'US News',
+    description: 'US national news from the live feed mix.',
+    keywords: [
+      'united states', 'u.s.', 'us ', 'white house', 'congress', 'senate',
+      'supreme court', 'governor', 'federal', 'washington'
+    ]
+  },
+  {
+    slug: 'us-midterms',
+    title: 'US Midterms',
+    description: 'US midterm election coverage from the live feed mix.',
+    keywords: [
+      'midterm', 'midterms', 'house race', 'senate race', 'swing state',
+      'campaign trail', 'ballot', 'polling', 'election day', 'primary'
+    ]
+  },
+  {
+    slug: 'us-economy',
+    title: 'US Economy',
+    description: 'US economic coverage from the live feed mix.',
+    keywords: [
+      'u.s. economy', 'us economy', 'federal reserve', 'fed ', 'inflation', 'jobs report',
+      'nonfarm payrolls', 'consumer spending', 'treasury', 'wall street'
+    ]
+  },
+  {
+    slug: 'ai',
+    title: 'AI',
+    description: 'Artificial intelligence coverage from the live feed mix.',
+    keywords: [
+      'artificial intelligence', 'ai ', 'machine learning', 'llm', 'foundation model',
+      'generative ai', 'chatgpt', 'openai', 'anthropic', 'gemini', 'copilot'
+    ]
+  },
+  {
+    slug: 'tech-news',
+    title: 'Tech News',
+    description: 'Technology coverage from the live feed mix.',
+    keywords: [
+      'startup', 'software', 'hardware', 'chip', 'semiconductor', 'cloud',
+      'cybersecurity', 'app', 'developer', 'platform', 'silicon valley', 'tech'
+    ]
+  },
+  {
+    slug: 'new-york-city-news',
+    title: 'New York City News',
+    description: 'New York City coverage from the live feed mix.',
+    keywords: [
+      'new york city', 'nyc', 'manhattan', 'brooklyn', 'queens', 'bronx', 'staten island',
+      'new york mayor', 'mta', 'subway', 'ny pd', 'new york state'
+    ]
+  },
+  {
+    slug: 'global-economy',
+    title: 'Global Economy',
+    description: 'Global economy coverage from the live feed mix.',
+    keywords: [
+      'global economy', 'g20', 'imf', 'world bank', 'oecd', 'trade deficit',
+      'supply chain', 'commodity', 'emerging market', 'central bank', 'currency'
+    ]
+  },
+  {
+    slug: 'infrastructure-news',
+    title: 'Infrastructure News',
+    description: 'Infrastructure coverage from the live feed mix.',
+    keywords: [
+      'infrastructure', 'bridge', 'highway', 'rail', 'transit', 'airport',
+      'seaport', 'power grid', 'water system', 'construction', 'public works'
+    ]
+  }
+];
+
+const TOPICS_BY_SLUG = new Map(TOPIC_DEFINITIONS.map((topic) => [topic.slug, topic]));
+
+function normalizePublicationName(feedConfig, feed) {
+  let publicationName = (feedConfig && feedConfig.label) || feed.title || feed.link || 'Unknown';
+  if (!(feedConfig && feedConfig.label)) {
+    if (publicationName.includes('>')) {
+      publicationName = publicationName.split('>')[0].trim();
+    }
+    if (publicationName.includes('-')) {
+      publicationName = publicationName.split('-')[0].trim();
+    }
+  }
+  return publicationName;
+}
+
+function buildTopicSearchText(item, publicationName) {
+  return [
+    publicationName,
+    item.title || '',
+    item.contentSnippet || '',
+    item.content || '',
+    item.description || '',
+    item.link || ''
+  ].join(' ').toLowerCase();
+}
+
+function transformFeedItem(item) {
+  const publicationName = item.feedTitle || 'Unknown';
+  const classificationText = buildTopicSearchText(item, publicationName);
+  return {
+    title: item.title,
+    author: item.creator || item.author,
+    publication_name: publicationName,
+    published_date: item.pubDate,
+    url: item.link,
+    image_url: extractImage(item),
+    _classificationText: classificationText
+  };
+}
+
+function matchesTopic(article, topic) {
+  const text = article._classificationText || '';
+  return topic.keywords.some((keyword) => text.includes(keyword));
+}
+
+async function fetchAggregatedArticles() {
+  const articles = [];
+
+  for (const feedConfig of rssFeeds) {
+    const url = typeof feedConfig === 'string' ? feedConfig : feedConfig.url;
+    try {
+      const feed = await parser.parseURL(url);
+      const publicationName = normalizePublicationName(feedConfig, feed);
+      articles.push(...feed.items.map((item) => ({
+        ...item,
+        feedTitle: publicationName
+      })));
+    } catch (error) {
+      console.error(`Failed to fetch RSS feed: ${url}`, error.message);
+    }
+  }
+
+  articles.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+  return articles.map(transformFeedItem);
+}
+
 // Helper function to extract image from RSS item
 function extractImage(item) {
   let imageUrl = null;
@@ -365,7 +521,15 @@ router.get('/robots.txt', (req, res) => {
 router.get('/sitemap.xml', (req, res) => {
   const siteUrl = getSiteUrl(req);
   const now = new Date().toISOString();
-  const urls = ['/', '/about', '/library', '/designing', '/developing', '/writing'];
+  const urls = [
+    '/',
+    '/about',
+    '/library',
+    '/designing',
+    '/developing',
+    '/writing',
+    ...TOPIC_DEFINITIONS.map((topic) => `/topics/${topic.slug}`)
+  ];
 
   const xml = [
     '<?xml version="1.0" encoding="UTF-8"?>',
@@ -390,45 +554,7 @@ router.get('/sitemap.xml', (req, res) => {
 // Home page - main RSS feed aggregator
 router.get('/', async (req, res, next) => {
   try {
-    const articles = [];
-
-    for (const feedConfig of rssFeeds) {
-      const url = typeof feedConfig === 'string' ? feedConfig : feedConfig.url;
-      try {
-        const feed = await parser.parseURL(url);
-
-        // Extract publication name from feed
-        let publicationName = (feedConfig && feedConfig.label) || feed.title || feed.link || 'Unknown';
-        if (!(feedConfig && feedConfig.label)) {
-          if (publicationName.includes('>')) {
-            publicationName = publicationName.split('>')[0].trim();
-          }
-          if (publicationName.includes('-')) {
-            publicationName = publicationName.split('-')[0].trim();
-          }
-        }
-
-        articles.push(...feed.items.map(item => ({
-          ...item,
-          feedTitle: publicationName
-        })));
-      } catch (error) {
-        console.error(`Failed to fetch RSS feed: ${url}`, error.message);
-      }
-    }
-
-    // Sort by publication date
-    articles.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
-
-    // Transform articles
-    const transformedArticles = articles.map(item => ({
-      title: item.title,
-      author: item.creator || item.author,
-      publication_name: item.feedTitle || 'Unknown',
-      published_date: item.pubDate,
-      url: item.link,
-      image_url: extractImage(item)
-    }));
+    const transformedArticles = await fetchAggregatedArticles();
 
     const seo = getPageSeo(req, {
       title: 'Home',
@@ -459,6 +585,34 @@ router.get('/', async (req, res, next) => {
     });
   } catch (error) {
     next(error);
+  }
+});
+
+router.get('/topics/:slug', async (req, res, next) => {
+  try {
+    const topic = TOPICS_BY_SLUG.get(req.params.slug);
+    if (!topic) {
+      return res.status(404).send('Topic not found');
+    }
+
+    const aggregatedArticles = await fetchAggregatedArticles();
+    const topicArticles = aggregatedArticles.filter((article) => matchesTopic(article, topic));
+    const visibleArticles = topicArticles.map(({ _classificationText, ...article }) => article);
+    const topicPath = `/topics/${topic.slug}`;
+
+    const seo = getPageSeo(req, {
+      title: topic.title,
+      path: topicPath,
+      description: topic.description
+    });
+
+    return res.render('topic-hub', {
+      ...seo,
+      topicTitle: topic.title,
+      articles: visibleArticles
+    });
+  } catch (error) {
+    return next(error);
   }
 });
 
