@@ -6,6 +6,7 @@ const path = require('path');
 
 const pagesRouter = require('./routes/pages');
 const { runMigrations } = require('./config/migrations');
+const analyticsPageviews = require('./middleware/analyticsPageviews');
 const logger = require('./utils/logger');
 
 const app = express();
@@ -38,6 +39,9 @@ app.use((req, res, next) => {
   res.locals.siteUrl = configuredSiteUrl || `${protocol}://${req.get('host')}`;
   next();
 });
+
+// Automatic server-side analytics for HTML navigations
+app.use(analyticsPageviews);
 
 // Routes - public only
 app.use('/', pagesRouter);

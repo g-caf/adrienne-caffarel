@@ -151,6 +151,59 @@ const createWritingEntriesTable = async () => {
   }
 };
 
+// SQL for creating analytics_events table (works for both SQLite and PostgreSQL)
+const createAnalyticsEventsTable = async () => {
+  const createTableSQL = db.usePostgres
+    ? `
+      CREATE TABLE IF NOT EXISTS analytics_events (
+        id SERIAL PRIMARY KEY,
+        event_type VARCHAR(32) NOT NULL,
+        event_name VARCHAR(100),
+        path VARCHAR(500) NOT NULL,
+        referrer_host VARCHAR(255),
+        source VARCHAR(255),
+        utm_source VARCHAR(255),
+        utm_medium VARCHAR(255),
+        utm_campaign VARCHAR(255),
+        visitor_id VARCHAR(128),
+        session_id VARCHAR(128),
+        device_type VARCHAR(32),
+        user_agent TEXT,
+        metadata TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `
+    : `
+      CREATE TABLE IF NOT EXISTS analytics_events (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        event_type TEXT NOT NULL,
+        event_name TEXT,
+        path TEXT NOT NULL,
+        referrer_host TEXT,
+        source TEXT,
+        utm_source TEXT,
+        utm_medium TEXT,
+        utm_campaign TEXT,
+        visitor_id TEXT,
+        session_id TEXT,
+        device_type TEXT,
+        user_agent TEXT,
+        metadata TEXT,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+      );
+    `;
+
+  try {
+    await db.query(createTableSQL);
+    await db.query('CREATE INDEX IF NOT EXISTS idx_analytics_events_created_at ON analytics_events(created_at)');
+    await db.query('CREATE INDEX IF NOT EXISTS idx_analytics_events_type_path ON analytics_events(event_type, path)');
+    logger.info('analytics_events table created or already exists');
+  } catch (error) {
+    logger.error('Error creating analytics_events table:', error);
+    throw error;
+  }
+};
+
 // Add sort_order column to library_items table
 const addLibrarySortOrderColumn = async () => {
   try {
@@ -271,6 +324,7 @@ const runMigrations = async () => {
     await createLibraryItemsTable();
     await createWritingSubmissionsTable();
     await createWritingEntriesTable();
+    await createAnalyticsEventsTable();
     await addLibrarySortOrderColumn();
     await addTypeColumn();
     await seedPages();

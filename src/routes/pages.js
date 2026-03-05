@@ -6,7 +6,9 @@ const MarkdownIt = require('markdown-it');
 const LibraryItem = require('../models/LibraryItem');
 const WritingEntry = require('../models/WritingEntry');
 const WritingSubmission = require('../models/WritingSubmission');
+const AnalyticsEvent = require('../models/AnalyticsEvent');
 const { ensureLibrarySynced, getLibrarySyncStatus } = require('../services/librarySync');
+const { buildRequestContext } = require('../services/analyticsContext');
 
 const parser = new Parser({
   customFields: {
@@ -505,6 +507,12 @@ function summarizeBody(body) {
   return plain.length > 120 ? `${plain.slice(0, 120)}...` : plain;
 }
 
+function normalizeAnalyticsDays(raw) {
+  const parsed = Number.parseInt(raw, 10);
+  if (!Number.isFinite(parsed)) return 30;
+  return Math.min(Math.max(parsed, 1), 365);
+}
+
 router.get('/robots.txt', (req, res) => {
   const siteUrl = getSiteUrl(req);
   const body = [
@@ -749,6 +757,33 @@ router.get('/reading', (req, res) => {
   res.redirect('/library');
 });
 
+router.post('/analytics/event', async (req, res, next) => {
+  try {
+    const eventName = (req.body.eventName || '').trim().toLowerCase();
+    const allowedEvents = new Set(['outbound_click']);
+    if (!allowedEvents.has(eventName)) {
+      return res.status(400).json({ error: 'Unsupported event.' });
+    }
+
+    const requestedPath = (req.body.path || '').trim();
+    const context = buildRequestContext(req, requestedPath || req.originalUrl || '/');
+    const metadata = {
+      targetUrl: (req.body.targetUrl || '').trim().slice(0, 1200),
+      targetHost: (req.body.targetHost || '').trim().slice(0, 255)
+    };
+
+    await AnalyticsEvent.createEvent({
+      ...context,
+      eventName,
+      metadata
+    });
+
+    return res.status(204).send();
+  } catch (error) {
+    return next(error);
+  }
+});
+
 router.get('/writing', async (req, res, next) => {
   try {
     const seo = getPageSeo(req, {
@@ -764,6 +799,11 @@ router.get('/writing', async (req, res, next) => {
         setWritingPreviewCookie(res, previewState.startedAtMs);
       }
       if (!previewState.active) {
+        await AnalyticsEvent.createEvent({
+          ...buildRequestContext(req, '/writing'),
+          eventName: 'writing_gate_view',
+          metadata: { reason: 'preview_expired' }
+        });
         return res.render('writing-gate', {
           ...seo,
           errorMessage: null,
@@ -850,6 +890,27 @@ router.get('/admin', requireWritingSubmissionsAdmin, async (req, res, next) => {
   }
 });
 
+router.get('/admin/analytics', requireWritingSubmissionsAdmin, async (req, res, next) => {
+  try {
+    const days = normalizeAnalyticsDays(req.query.days);
+    const analytics = await AnalyticsEvent.getDashboard(days);
+    const sparklineMax = analytics.daily.reduce((max, row) => Math.max(max, row.views), 0);
+
+    return res.render('admin-analytics', {
+      ...getPageSeo(req, {
+        title: 'Admin Analytics',
+        path: '/admin/analytics',
+        description: 'Traffic and conversion analytics dashboard.'
+      }),
+      analytics,
+      dayOptions: [7, 30, 90, 365],
+      sparklineMax: sparklineMax || 1
+    });
+  } catch (error) {
+    return next(error);
+  }
+});
+
 router.post('/admin/writing-content', requireWritingSubmissionsAdmin, async (req, res, next) => {
   try {
     const section = getSectionOrNull(req.body.section);
@@ -909,6 +970,12 @@ router.post('/writing/unlock', async (req, res, next) => {
       email,
       source_ip: req.ip,
       user_agent: req.headers['user-agent'] || null
+    });
+
+    await AnalyticsEvent.createEvent({
+      ...buildRequestContext(req, '/writing'),
+      eventName: 'writing_unlock_success',
+      metadata: { email_domain: email.split('@')[1] || '' }
     });
 
     const maxAgeSeconds = 60 * 60 * 24 * 365; // 365 days

@@ -1,0 +1,219 @@
+<%- include('partials/head', { title, pageDescription, canonicalPath, canonicalUrl, seoJsonLd, siteUrl }) %>
+<body>
+  <div class="page-container writing-page admin-writing-page admin-analytics-page">
+    <%- include('partials/header') %>
+
+    <main>
+      <section class="writing-content-section writing-editorial admin-writing-shell admin-analytics-shell" data-admin-analytics>
+        <header class="admin-writing-header admin-analytics-header">
+          <h2 class="writing-column-heading">Traffic Analytics</h2>
+          <p>
+            <a href="/admin">Writing Admin</a>
+          </p>
+        </header>
+
+        <form method="get" action="/admin/analytics" class="admin-analytics-range-form">
+          <label for="analytics-days">Range</label>
+          <select id="analytics-days" name="days" onchange="this.form.submit()">
+            <% dayOptions.forEach((value) => { %>
+              <option value="<%= value %>" <%= analytics.days === value ? 'selected' : '' %>>Last <%= value %> days</option>
+            <% }) %>
+          </select>
+        </form>
+
+        <div class="writing-mobile-tabs admin-analytics-mobile-tabs" role="tablist" aria-label="Analytics sections">
+          <button type="button" class="writing-mobile-tab is-active" data-analytics-tab="overview" role="tab" aria-selected="true">Overview</button>
+          <button type="button" class="writing-mobile-tab" data-analytics-tab="content" role="tab" aria-selected="false">Content</button>
+          <button type="button" class="writing-mobile-tab" data-analytics-tab="sources" role="tab" aria-selected="false">Sources</button>
+          <button type="button" class="writing-mobile-tab" data-analytics-tab="conversion" role="tab" aria-selected="false">Conversion</button>
+        </div>
+
+        <section class="admin-analytics-pane is-active" data-analytics-pane="overview" role="tabpanel">
+          <div class="admin-analytics-stats">
+            <article class="admin-analytics-stat">
+              <h3>Pageviews</h3>
+              <p><%= analytics.summary.totalPageviews.toLocaleString() %></p>
+            </article>
+            <article class="admin-analytics-stat">
+              <h3>Unique Visitors</h3>
+              <p><%= analytics.summary.uniqueVisitors.toLocaleString() %></p>
+            </article>
+            <article class="admin-analytics-stat">
+              <h3>Sessions</h3>
+              <p><%= analytics.summary.totalSessions.toLocaleString() %></p>
+            </article>
+            <article class="admin-analytics-stat">
+              <h3>Pages / Session</h3>
+              <p><%= analytics.summary.avgPagesPerSession %></p>
+            </article>
+          </div>
+
+          <div class="admin-analytics-card">
+            <h3 class="writing-column-heading">Daily Trend</h3>
+            <div class="admin-analytics-sparkline" aria-hidden="true">
+              <% if (!analytics.daily.length) { %>
+                <p class="admin-submissions-meta">No traffic yet.</p>
+              <% } %>
+              <% analytics.daily.forEach((row) => { %>
+                <% const height = Math.max(5, Math.round((row.views / sparklineMax) * 100)); %>
+                <div class="admin-analytics-bar" style="height:<%= height %>%" title="<%= row.day %>: <%= row.views %>"></div>
+              <% }) %>
+            </div>
+          </div>
+        </section>
+
+        <section class="admin-analytics-pane" data-analytics-pane="content" role="tabpanel" hidden>
+          <div class="admin-analytics-card">
+            <h3 class="writing-column-heading">Top Pages</h3>
+            <div class="admin-submissions-table-wrap">
+              <table class="admin-submissions-table">
+                <thead>
+                  <tr>
+                    <th>Path</th>
+                    <th>Views</th>
+                    <th>Unique Visitors</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% if (!analytics.topPages.length) { %>
+                    <tr><td colspan="3" class="admin-submissions-empty">No page data yet.</td></tr>
+                  <% } %>
+                  <% analytics.topPages.forEach((row) => { %>
+                    <tr>
+                      <td><%= row.path %></td>
+                      <td><%= row.views.toLocaleString() %></td>
+                      <td><%= row.uniqueVisitors.toLocaleString() %></td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="admin-analytics-card">
+            <h3 class="writing-column-heading">Topic Hubs</h3>
+            <div class="admin-submissions-table-wrap">
+              <table class="admin-submissions-table">
+                <thead>
+                  <tr>
+                    <th>Hub Path</th>
+                    <th>Views</th>
+                    <th>Outbound Clicks</th>
+                    <th>CTR</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% if (!analytics.hubs.length) { %>
+                    <tr><td colspan="4" class="admin-submissions-empty">No hub traffic yet.</td></tr>
+                  <% } %>
+                  <% analytics.hubs.forEach((row) => { %>
+                    <tr>
+                      <td><%= row.path %></td>
+                      <td><%= row.views.toLocaleString() %></td>
+                      <td><%= row.outbound_clicks.toLocaleString() %></td>
+                      <td><%= row.ctr %>%</td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="admin-analytics-pane" data-analytics-pane="sources" role="tabpanel" hidden>
+          <div class="admin-analytics-two-col">
+            <div class="admin-analytics-card">
+              <h3 class="writing-column-heading">Traffic Sources</h3>
+              <div class="admin-submissions-table-wrap">
+                <table class="admin-submissions-table">
+                  <thead>
+                    <tr>
+                      <th>Source</th>
+                      <th>Visits</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% if (!analytics.sources.length) { %>
+                      <tr><td colspan="2" class="admin-submissions-empty">No source data yet.</td></tr>
+                    <% } %>
+                    <% analytics.sources.forEach((row) => { %>
+                      <tr>
+                        <td><%= row.source %></td>
+                        <td><%= row.visits.toLocaleString() %></td>
+                      </tr>
+                    <% }) %>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="admin-analytics-card">
+              <h3 class="writing-column-heading">Top Referrers</h3>
+              <div class="admin-submissions-table-wrap">
+                <table class="admin-submissions-table">
+                  <thead>
+                    <tr>
+                      <th>Referrer</th>
+                      <th>Visits</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% if (!analytics.referrers.length) { %>
+                      <tr><td colspan="2" class="admin-submissions-empty">No referrer data yet.</td></tr>
+                    <% } %>
+                    <% analytics.referrers.forEach((row) => { %>
+                      <tr>
+                        <td><%= row.referrer_host %></td>
+                        <td><%= row.visits.toLocaleString() %></td>
+                      </tr>
+                    <% }) %>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="admin-analytics-card">
+            <h3 class="writing-column-heading">Devices</h3>
+            <div class="admin-analytics-devices">
+              <% analytics.devices.forEach((row) => { %>
+                <article class="admin-analytics-device">
+                  <h4><%= row.device %></h4>
+                  <p><%= row.visits.toLocaleString() %></p>
+                </article>
+              <% }) %>
+            </div>
+          </div>
+        </section>
+
+        <section class="admin-analytics-pane" data-analytics-pane="conversion" role="tabpanel" hidden>
+          <div class="admin-analytics-card">
+            <h3 class="writing-column-heading">Writing Funnel</h3>
+            <div class="admin-analytics-funnel">
+              <article>
+                <h4>Writing Page Views</h4>
+                <p><%= analytics.writingFunnel.writingViews.toLocaleString() %></p>
+              </article>
+              <article>
+                <h4>Gate Shown</h4>
+                <p><%= analytics.writingFunnel.gateViews.toLocaleString() %> (<%= analytics.writingFunnel.gateRate %>%)</p>
+              </article>
+              <article>
+                <h4>Unlocks</h4>
+                <p><%= analytics.writingFunnel.unlocks.toLocaleString() %> (<%= analytics.writingFunnel.unlockRate %>%)</p>
+              </article>
+              <article>
+                <h4>Submissions</h4>
+                <p><%= analytics.writingFunnel.submissions.toLocaleString() %> (<%= analytics.writingFunnel.submitRate %>%)</p>
+              </article>
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <script src="/js/animations.js"></script>
+  <script src="/js/admin-analytics-tabs.js"></script>
+</body>
+</html>
