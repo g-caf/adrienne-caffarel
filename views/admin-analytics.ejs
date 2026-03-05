@@ -9,6 +9,12 @@
           <h2 class="writing-column-heading">Traffic Analytics</h2>
           <p>
             <a href="/admin">Writing Admin</a>
+            <span aria-hidden="true"> / </span>
+            <% if (analyticsOptedOut) { %>
+              <a href="/analytics/opt-in?next=/admin/analytics?days=<%= analytics.days %>">Include this browser</a>
+            <% } else { %>
+              <a href="/analytics/opt-out?next=/admin/analytics?days=<%= analytics.days %>">Exclude this browser</a>
+            <% } %>
           </p>
         </header>
 

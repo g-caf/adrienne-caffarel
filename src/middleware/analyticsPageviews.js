@@ -1,5 +1,5 @@
 const AnalyticsEvent = require('../models/AnalyticsEvent');
-const { buildRequestContext, getPathname } = require('../services/analyticsContext');
+const { buildRequestContext, getPathname, isAnalyticsOptedOut } = require('../services/analyticsContext');
 
 function looksLikeHtmlNavigation(req) {
   const accept = (req.get('accept') || '').toLowerCase();
@@ -27,8 +27,9 @@ function analyticsPageviews(req, res, next) {
     if (res.statusCode < 200 || res.statusCode >= 400) return;
     if (!looksLikeHtmlNavigation(req)) return;
     if (!shouldTrackPath(pathname)) return;
+    if (isAnalyticsOptedOut(req)) return;
 
-    const context = buildRequestContext(req, pathname);
+    const context = buildRequestContext(req, res, pathname);
     AnalyticsEvent.createPageview(context);
   });
 

@@ -8,7 +8,7 @@ const WritingEntry = require('../models/WritingEntry');
 const WritingSubmission = require('../models/WritingSubmission');
 const AnalyticsEvent = require('../models/AnalyticsEvent');
 const { ensureLibrarySynced, getLibrarySyncStatus } = require('../services/librarySync');
-const { buildRequestContext } = require('../services/analyticsContext');
+const { buildRequestContext, isAnalyticsOptedOut, setCookie, OPTOUT_COOKIE } = require('../services/analyticsContext');
 
 const parser = new Parser({
   customFields: {
@@ -757,8 +757,24 @@ router.get('/reading', (req, res) => {
   res.redirect('/library');
 });
 
+router.get('/analytics/opt-out', (req, res) => {
+  setCookie(res, OPTOUT_COOKIE, '1', 60 * 60 * 24 * 365);
+  const destination = (req.query.next || '/admin/analytics').toString();
+  return res.redirect(destination.startsWith('/') ? destination : '/admin/analytics');
+});
+
+router.get('/analytics/opt-in', (req, res) => {
+  setCookie(res, OPTOUT_COOKIE, '0', 60 * 60 * 24 * 365);
+  const destination = (req.query.next || '/admin/analytics').toString();
+  return res.redirect(destination.startsWith('/') ? destination : '/admin/analytics');
+});
+
 router.post('/analytics/event', async (req, res, next) => {
   try {
+    if (isAnalyticsOptedOut(req)) {
+      return res.status(204).send();
+    }
+
     const eventName = (req.body.eventName || '').trim().toLowerCase();
     const allowedEvents = new Set(['outbound_click']);
     if (!allowedEvents.has(eventName)) {
@@ -766,7 +782,7 @@ router.post('/analytics/event', async (req, res, next) => {
     }
 
     const requestedPath = (req.body.path || '').trim();
-    const context = buildRequestContext(req, requestedPath || req.originalUrl || '/');
+    const context = buildRequestContext(req, res, requestedPath || req.originalUrl || '/');
     const metadata = {
       targetUrl: (req.body.targetUrl || '').trim().slice(0, 1200),
       targetHost: (req.body.targetHost || '').trim().slice(0, 255)
@@ -800,7 +816,7 @@ router.get('/writing', async (req, res, next) => {
       }
       if (!previewState.active) {
         await AnalyticsEvent.createEvent({
-          ...buildRequestContext(req, '/writing'),
+          ...buildRequestContext(req, res, '/writing'),
           eventName: 'writing_gate_view',
           metadata: { reason: 'preview_expired' }
         });
@@ -903,6 +919,7 @@ router.get('/admin/analytics', requireWritingSubmissionsAdmin, async (req, res, 
         description: 'Traffic and conversion analytics dashboard.'
       }),
       analytics,
+      analyticsOptedOut: isAnalyticsOptedOut(req),
       dayOptions: [7, 30, 90, 365],
       sparklineMax: sparklineMax || 1
     });
@@ -973,7 +990,7 @@ router.post('/writing/unlock', async (req, res, next) => {
     });
 
     await AnalyticsEvent.createEvent({
-      ...buildRequestContext(req, '/writing'),
+      ...buildRequestContext(req, res, '/writing'),
       eventName: 'writing_unlock_success',
       metadata: { email_domain: email.split('@')[1] || '' }
     });
