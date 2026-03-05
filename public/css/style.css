@@ -667,7 +667,9 @@ main {
   }
 
   .header-word-flip {
-    min-width: 6.8ch;
+    min-width: 11ch;
+    width: 11ch;
+    flex: 0 0 11ch;
   }
 
 }
