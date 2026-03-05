@@ -65,6 +65,9 @@ LOG_LEVEL=info
 GOOGLE_DRIVE_FOLDER_ID=1ppZKpX2eM0_yTVB1ebM3O1V7VTDrp_Ni
 GOOGLE_DRIVE_API_KEY=your_google_api_key_here
 LIBRARY_SYNC_INTERVAL_MINUTES=60
+
+# Writing preview gate timing (seconds; default 120)
+WRITING_PREVIEW_SECONDS=120
 ```
 
 ## Project Structure

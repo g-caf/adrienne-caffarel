@@ -27,6 +27,7 @@ const markdown = new MarkdownIt({
 const ADMIN_AUTH_WINDOW_MS = 15 * 60 * 1000;
 const ADMIN_AUTH_MAX_ATTEMPTS = 10;
 const adminAuthAttempts = new Map();
+const WRITING_PREVIEW_COOKIE = 'writing_preview_started_at';
 
 // Curated RSS feeds for the personal site
 const rssFeeds = [
@@ -136,6 +137,75 @@ function parseCookies(req) {
 function hasWritingAccess(req) {
   const cookies = parseCookies(req);
   return cookies.writing_access === 'granted';
+}
+
+function getWritingPreviewDurationMs() {
+  const seconds = Number.parseInt(process.env.WRITING_PREVIEW_SECONDS || '120', 10);
+  const safeSeconds = Number.isFinite(seconds)
+    ? Math.min(Math.max(seconds, 5), 60 * 60 * 24)
+    : 120;
+  return safeSeconds * 1000;
+}
+
+function getWritingPreviewState(req) {
+  const cookies = parseCookies(req);
+  const raw = cookies[WRITING_PREVIEW_COOKIE];
+  const now = Date.now();
+  const previewDurationMs = getWritingPreviewDurationMs();
+
+  if (!raw) {
+    return { active: true, shouldSetCookie: true, startedAtMs: now };
+  }
+
+  const startedAtMs = Number.parseInt(raw, 10);
+  if (!Number.isFinite(startedAtMs) || startedAtMs <= 0) {
+    return { active: true, shouldSetCookie: true, startedAtMs: now };
+  }
+
+  const active = now - startedAtMs < previewDurationMs;
+  return { active, shouldSetCookie: false, startedAtMs };
+}
+
+function appendSetCookieHeader(res, cookieValue) {
+  const existing = res.getHeader('Set-Cookie');
+  if (!existing) {
+    res.setHeader('Set-Cookie', [cookieValue]);
+    return;
+  }
+  if (Array.isArray(existing)) {
+    res.setHeader('Set-Cookie', [...existing, cookieValue]);
+    return;
+  }
+  res.setHeader('Set-Cookie', [existing, cookieValue]);
+}
+
+function setWritingPreviewCookie(res, startedAtMs) {
+  const maxAgeSeconds = 60 * 60 * 24 * 30; // Keep preview-start timestamp for 30 days.
+  const cookieParts = [
+    `${WRITING_PREVIEW_COOKIE}=${startedAtMs}`,
+    `Max-Age=${maxAgeSeconds}`,
+    'Path=/',
+    'HttpOnly',
+    'SameSite=Lax'
+  ];
+  if (process.env.NODE_ENV === 'production') {
+    cookieParts.push('Secure');
+  }
+  appendSetCookieHeader(res, cookieParts.join('; '));
+}
+
+function clearWritingPreviewCookie(res) {
+  const cookieParts = [
+    `${WRITING_PREVIEW_COOKIE}=`,
+    'Max-Age=0',
+    'Path=/',
+    'HttpOnly',
+    'SameSite=Lax'
+  ];
+  if (process.env.NODE_ENV === 'production') {
+    cookieParts.push('Secure');
+  }
+  appendSetCookieHeader(res, cookieParts.join('; '));
 }
 
 function getSiteUrl(req) {
@@ -533,12 +603,19 @@ router.get('/writing', async (req, res, next) => {
       description: 'Adrienne Caffarel: writing and essays.'
     });
 
-    if (!hasWritingAccess(req)) {
-      return res.render('writing-gate', {
-        ...seo,
-        errorMessage: null,
-        formData: { first_name: '', last_name: '', email: '' }
-      });
+    const hasAccess = hasWritingAccess(req);
+    if (!hasAccess) {
+      const previewState = getWritingPreviewState(req);
+      if (previewState.shouldSetCookie) {
+        setWritingPreviewCookie(res, previewState.startedAtMs);
+      }
+      if (!previewState.active) {
+        return res.render('writing-gate', {
+          ...seo,
+          errorMessage: null,
+          formData: { first_name: '', last_name: '', email: '' }
+        });
+      }
     }
 
     const orientingEntry = await WritingEntry.findLatestBySection('orienting');
@@ -700,7 +777,7 @@ router.post('/writing/unlock', async (req, res, next) => {
 });
 
 router.get('/writing/reset', (req, res) => {
-  const cookieParts = [
+  const accessCookieParts = [
     'writing_access=',
     'Max-Age=0',
     'Path=/',
@@ -708,9 +785,10 @@ router.get('/writing/reset', (req, res) => {
     'SameSite=Lax'
   ];
   if (process.env.NODE_ENV === 'production') {
-    cookieParts.push('Secure');
+    accessCookieParts.push('Secure');
   }
-  res.setHeader('Set-Cookie', cookieParts.join('; '));
+  res.setHeader('Set-Cookie', [accessCookieParts.join('; ')]);
+  clearWritingPreviewCookie(res);
   return res.redirect('/writing');
 });
 
