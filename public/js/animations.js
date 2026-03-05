@@ -96,6 +96,7 @@ document.addEventListener('DOMContentLoaded', function() {
     siteTitle.addEventListener('click', (event) => {
       if (!isMobile()) return;
       if (event.target.closest('.header-home-link')) return;
+      if (event.target.closest('.header-hover-links')) return;
       siteHeader.classList.toggle('mobile-nav-open');
     });
 
