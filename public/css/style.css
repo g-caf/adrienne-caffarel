@@ -690,6 +690,46 @@ main {
     overflow: hidden;
   }
 
+  /* Disable hover/focus-driven desktop swap on touch sizes. */
+  .site-header:hover .header-hover-links,
+  .site-header:focus-within .header-hover-links {
+    opacity: 0;
+    max-width: 0;
+    pointer-events: none;
+    transform: translateX(-8px);
+  }
+
+  .site-header:hover .header-word-flip,
+  .site-header:focus-within .header-word-flip {
+    opacity: 1;
+    max-width: none;
+    min-width: 11ch;
+    width: 11ch;
+    flex-basis: 11ch;
+    margin-left: -0.01em;
+    overflow: visible;
+  }
+
+  /* Ensure explicit mobile-open state always overrides touch/focus quirks. */
+  .site-header.mobile-nav-open .header-hover-links {
+    opacity: 1 !important;
+    max-width: min(62vw, 360px) !important;
+    pointer-events: auto !important;
+    transform: none !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+  }
+
+  .site-header.mobile-nav-open .header-word-flip {
+    opacity: 0 !important;
+    max-width: 0 !important;
+    min-width: 0 !important;
+    width: 0 !important;
+    flex-basis: 0 !important;
+    margin-left: 0 !important;
+    overflow: hidden !important;
+  }
+
   .header-about-link {
     width: 50px;
     height: 50px;
