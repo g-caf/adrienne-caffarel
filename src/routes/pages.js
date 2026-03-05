@@ -757,7 +757,7 @@ router.post('/writing/unlock', async (req, res, next) => {
       user_agent: req.headers['user-agent'] || null
     });
 
-    const maxAgeSeconds = 60 * 60 * 24 * 30; // 30 days
+    const maxAgeSeconds = 60 * 60 * 24 * 365; // 365 days
     const cookieParts = [
       `writing_access=granted`,
       `Max-Age=${maxAgeSeconds}`,
