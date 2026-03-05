@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const pageContainer = document.querySelector('.page-container');
   const landingDownArrow = document.querySelector('.landing-down-arrow');
   const WORD_DURATION_MS = 2500;
-  const AUTO_COLLAPSE_CYCLES = 2;
+  const AUTO_COLLAPSE_CYCLES = 1;
 
   let currentWordIndex = 0;
   let hasShownDownArrow = false;
@@ -167,10 +167,6 @@ document.addEventListener('DOMContentLoaded', function() {
     renderWord(headerFlipElement, currentWord);
     currentWordIndex++;
 
-    if (currentWordIndex === words.length) {
-      showDownArrow();
-    }
-
     if (currentWordIndex < words.length * AUTO_COLLAPSE_CYCLES) {
       setTimeout(cycleWords, WORD_DURATION_MS);
       return;
@@ -179,6 +175,7 @@ document.addEventListener('DOMContentLoaded', function() {
     collapseToHeader();
   }
 
+  showDownArrow();
   cycleWords();
 });
 
