@@ -869,22 +869,31 @@ footer a:hover {
 }
 
 .about-loading-indicator {
-  width: 14px;
-  aspect-ratio: 1;
+  width: 16px;
+  height: 16px;
   display: inline-block;
-  border-radius: 50%;
+  position: relative;
+  animation: aboutSpinner 1.95s steps(12, end) infinite;
+}
+
+.about-loading-indicator::before {
+  content: "";
+  position: absolute;
+  inset: 0;
   background:
-    repeating-conic-gradient(
-      from 0deg,
-      rgba(164, 25, 31, 0.18) 0deg 14deg,
-      rgba(164, 25, 31, 0.45) 14deg 28deg,
-      var(--color-red) 28deg 30deg
-    );
-  -webkit-mask:
-    radial-gradient(farthest-side, transparent calc(100% - 4.4px), #000 calc(100% - 4.4px));
-  mask:
-    radial-gradient(farthest-side, transparent calc(100% - 4.4px), #000 calc(100% - 4.4px));
-  animation: aboutSpinner 0.95s linear infinite;
+    linear-gradient(var(--color-red), var(--color-red)) 50% 0% / 2px 6px no-repeat,
+    linear-gradient(rgba(164, 25, 31, 0.9), rgba(164, 25, 31, 0.9)) 73% 7% / 2px 6px no-repeat,
+    linear-gradient(rgba(164, 25, 31, 0.75), rgba(164, 25, 31, 0.75)) 90% 24% / 2px 7px no-repeat,
+    linear-gradient(rgba(164, 25, 31, 0.58), rgba(164, 25, 31, 0.58)) 100% 50% / 2px 6px no-repeat,
+    linear-gradient(rgba(164, 25, 31, 0.45), rgba(164, 25, 31, 0.45)) 90% 76% / 2px 5px no-repeat,
+    linear-gradient(rgba(164, 25, 31, 0.34), rgba(164, 25, 31, 0.34)) 73% 93% / 2px 5px no-repeat,
+    linear-gradient(rgba(164, 25, 31, 0.25), rgba(164, 25, 31, 0.25)) 50% 100% / 2px 4px no-repeat,
+    linear-gradient(rgba(164, 25, 31, 0.19), rgba(164, 25, 31, 0.19)) 27% 93% / 2px 4px no-repeat,
+    linear-gradient(rgba(164, 25, 31, 0.14), rgba(164, 25, 31, 0.14)) 10% 76% / 2px 5px no-repeat,
+    linear-gradient(rgba(164, 25, 31, 0.11), rgba(164, 25, 31, 0.11)) 0% 50% / 2px 6px no-repeat,
+    linear-gradient(rgba(164, 25, 31, 0.09), rgba(164, 25, 31, 0.09)) 10% 24% / 2px 6px no-repeat,
+    linear-gradient(rgba(164, 25, 31, 0.07), rgba(164, 25, 31, 0.07)) 27% 7% / 2px 5px no-repeat;
+  border-radius: 50%;
 }
 
 @keyframes aboutSpinner {
