@@ -852,11 +852,29 @@ footer a:hover {
   gap: 8px;
 }
 
-.about-loading-gif {
-  width: 12px;
-  height: 12px;
+.about-loading-indicator {
+  width: 14px;
+  aspect-ratio: 1;
   display: inline-block;
-  object-fit: contain;
+  border-radius: 50%;
+  background:
+    repeating-conic-gradient(
+      from 0deg,
+      #f5b2b6 0deg 14deg,
+      #cf545c 14deg 28deg,
+      #a4191f 28deg 30deg
+    );
+  -webkit-mask:
+    radial-gradient(farthest-side, transparent calc(100% - 4.4px), #000 calc(100% - 4.4px));
+  mask:
+    radial-gradient(farthest-side, transparent calc(100% - 4.4px), #000 calc(100% - 4.4px));
+  animation: aboutSpinner 0.95s linear infinite;
+}
+
+@keyframes aboutSpinner {
+  to {
+    transform: rotate(1turn);
+  }
 }
 
 .about-outro {
