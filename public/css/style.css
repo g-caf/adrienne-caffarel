@@ -623,14 +623,50 @@ main {
     flex-wrap: nowrap;
     row-gap: 0;
     min-width: 0;
-    overflow: hidden;
-    text-overflow: clip;
+    overflow: visible;
+    text-overflow: unset;
   }
 
   .header-intro-text,
   .header-word-flip,
   .header-hover-links {
     font-size: 0.84rem;
+  }
+
+  .header-home-link {
+    flex: 0 0 auto;
+  }
+
+  .header-word-flip {
+    display: none;
+    min-width: 0;
+    width: 0;
+    flex: 0 0 0;
+    margin-left: 0;
+  }
+
+  .header-hover-links {
+    opacity: 1;
+    max-width: min(62vw, 360px);
+    pointer-events: auto;
+    transform: none;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    display: inline-flex;
+    flex-wrap: nowrap;
+    gap: 0.28em;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .header-hover-links::-webkit-scrollbar {
+    display: none;
+  }
+
+  .header-hover-links a,
+  .header-link-sep {
+    flex: 0 0 auto;
   }
 
   .header-about-link {
