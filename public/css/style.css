@@ -860,9 +860,9 @@ footer a:hover {
   background:
     repeating-conic-gradient(
       from 0deg,
-      #f5b2b6 0deg 14deg,
-      #cf545c 14deg 28deg,
-      #a4191f 28deg 30deg
+      rgba(164, 25, 31, 0.18) 0deg 14deg,
+      rgba(164, 25, 31, 0.45) 14deg 28deg,
+      var(--color-red) 28deg 30deg
     );
   -webkit-mask:
     radial-gradient(farthest-side, transparent calc(100% - 4.4px), #000 calc(100% - 4.4px));
