@@ -95,6 +95,7 @@ function randomToken() {
 }
 
 function setCookie(res, name, value, maxAgeSeconds) {
+  if (!res || res.headersSent) return;
   const cookieParts = [
     `${name}=${encodeURIComponent(value)}`,
     `Max-Age=${maxAgeSeconds}`,

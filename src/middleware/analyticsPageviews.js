@@ -21,15 +21,21 @@ function shouldTrackPath(pathname) {
 
 function analyticsPageviews(req, res, next) {
   const pathname = getPathname(req.originalUrl || req.url || '/');
+  let context = null;
+
+  if (
+    req.method === 'GET' &&
+    looksLikeHtmlNavigation(req) &&
+    shouldTrackPath(pathname) &&
+    !isAnalyticsOptedOut(req)
+  ) {
+    // Build identity and set tracking cookies while headers are still mutable.
+    context = buildRequestContext(req, res, pathname);
+  }
 
   res.on('finish', () => {
-    if (req.method !== 'GET') return;
+    if (!context) return;
     if (res.statusCode < 200 || res.statusCode >= 400) return;
-    if (!looksLikeHtmlNavigation(req)) return;
-    if (!shouldTrackPath(pathname)) return;
-    if (isAnalyticsOptedOut(req)) return;
-
-    const context = buildRequestContext(req, res, pathname);
     AnalyticsEvent.createPageview(context);
   });
 
