@@ -4,8 +4,10 @@
     <%- include('partials/header') %>
 
     <main>
+      <section class="topic-hub-bar" aria-label="Hub">
+        <h1 class="topic-hub-bar-title"><%= topicTitle %></h1>
+      </section>
       <section class="feeds-section">
-        <h1 class="topic-hub-title"><%= topicTitle %></h1>
         <ul class="articles-grid">
           <%- include('partials/articles-grid', { articles }) %>
         </ul>
