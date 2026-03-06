@@ -23,6 +23,13 @@
           Aggregated RSS feeds from:
           <span><%= (feedSourceNames || []).join(', ') %></span>
         </p>
+        <nav class="sr-only" aria-label="Topic hubs">
+          <ul>
+            <% (topicHubs || []).forEach((hub) => { %>
+              <li><a href="<%= hub.path %>"><%= hub.title %></a></li>
+            <% }) %>
+          </ul>
+        </nav>
         <ul class="articles-grid">
           <%- include('partials/articles-grid', { articles }) %>
         </ul>

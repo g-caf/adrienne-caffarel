@@ -582,6 +582,10 @@ router.get('/sitemap.xml', (req, res) => {
 router.get('/', async (req, res, next) => {
   try {
     const transformedArticles = await fetchAggregatedArticles();
+    const topicHubs = TOPIC_DEFINITIONS.map((topic) => ({
+      title: topic.title,
+      path: `/topics/${topic.slug}`
+    }));
 
     const seo = getPageSeo(req, {
       title: 'Home',
@@ -603,13 +607,20 @@ router.get('/', async (req, res, next) => {
         name: 'Adrienne Caffarel',
         url: siteUrl
       },
+      {
+        '@context': 'https://schema.org',
+        '@type': 'SiteNavigationElement',
+        name: topicHubs.map((hub) => hub.title),
+        url: topicHubs.map((hub) => `${siteUrl}${hub.path}`)
+      },
       seo.seoJsonLd
     ];
 
     res.render('home', {
       ...seo,
       articles: transformedArticles,
-      feedSourceNames: FEED_SOURCE_NAMES
+      feedSourceNames: FEED_SOURCE_NAMES,
+      topicHubs
     });
   } catch (error) {
     next(error);
