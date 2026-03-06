@@ -8,6 +8,10 @@
         <h1 class="topic-hub-bar-title"><%= topicTitle %></h1>
       </section>
       <section class="feeds-section">
+        <p class="feed-sources-subtitle">
+          Aggregated RSS feeds from:
+          <span><%= (feedSourceNames || []).join(', ') %></span>
+        </p>
         <ul class="articles-grid">
           <%- include('partials/articles-grid', { articles }) %>
         </ul>

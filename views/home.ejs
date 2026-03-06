@@ -19,6 +19,10 @@
     <main>
       <section class="feeds-section">
         <h2 class="section-title">What's happening</h2>
+        <p class="feed-sources-subtitle">
+          Aggregated RSS feeds from:
+          <span><%= (feedSourceNames || []).join(', ') %></span>
+        </p>
         <ul class="articles-grid">
           <%- include('partials/articles-grid', { articles }) %>
         </ul>

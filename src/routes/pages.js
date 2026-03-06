@@ -49,6 +49,20 @@ const rssFeeds = [
   }
 ];
 
+const FEED_SOURCE_NAMES = [
+  'TechCrunch',
+  'Hacker News',
+  'The Verge',
+  'Ars Technica',
+  'WIRED',
+  'Al Jazeera',
+  'BBC News',
+  'The New York Times',
+  'The Atlantic',
+  'The New Yorker',
+  'Reuters'
+];
+
 const TOPIC_DEFINITIONS = [
   {
     slug: 'global-news',
@@ -574,7 +588,8 @@ router.get('/', async (req, res, next) => {
 
     res.render('home', {
       ...seo,
-      articles: transformedArticles
+      articles: transformedArticles,
+      feedSourceNames: FEED_SOURCE_NAMES
     });
   } catch (error) {
     next(error);
@@ -602,7 +617,8 @@ router.get('/topics/:slug', async (req, res, next) => {
     return res.render('topic-hub', {
       ...seo,
       topicTitle: topic.title,
-      articles: visibleArticles
+      articles: visibleArticles,
+      feedSourceNames: FEED_SOURCE_NAMES
     });
   } catch (error) {
     return next(error);
