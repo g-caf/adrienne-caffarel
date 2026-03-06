@@ -51,12 +51,6 @@ const rssFeeds = [
 
 const TOPIC_DEFINITIONS = [
   {
-    slug: 'iran-news',
-    title: 'Iran News',
-    description: 'Iran-focused coverage from the live feed mix.',
-    keywords: ['iran', 'tehran', 'isfahan', 'ayatollah', 'persian gulf', 'islamic republic', 'irgc']
-  },
-  {
     slug: 'global-news',
     title: 'Global News',
     description: 'International headlines and geopolitics from the live feed mix.',
@@ -90,15 +84,6 @@ const TOPIC_DEFINITIONS = [
     keywords: [
       'u.s. economy', 'us economy', 'federal reserve', 'fed ', 'inflation', 'jobs report',
       'nonfarm payrolls', 'consumer spending', 'treasury', 'wall street'
-    ]
-  },
-  {
-    slug: 'ai',
-    title: 'AI',
-    description: 'Artificial intelligence coverage from the live feed mix.',
-    keywords: [
-      'artificial intelligence', 'ai ', 'machine learning', 'llm', 'foundation model',
-      'generative ai', 'chatgpt', 'openai', 'anthropic', 'gemini', 'copilot'
     ]
   },
   {
