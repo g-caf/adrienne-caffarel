@@ -33,35 +33,39 @@ const WRITING_PREVIEW_COOKIE = 'writing_preview_started_at';
 
 // Curated RSS feeds for the personal site
 const rssFeeds = [
-  { url: 'https://techcrunch.com/feed/' },
-  { url: 'https://hnrss.org/frontpage' },
-  { url: 'https://www.theverge.com/rss/index.xml' },
-  { url: 'https://feeds.arstechnica.com/arstechnica/index' },
-  { url: 'https://www.wired.com/feed/rss' },
-  { url: 'https://www.aljazeera.com/xml/rss/all.xml' },
-  { url: 'https://feeds.bbci.co.uk/news/rss.xml' },
-  { url: 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml' },
-  { url: 'https://www.theatlantic.com/feed/all/' },
-  { url: 'https://www.newyorker.com/feed/everything' },
   {
     url: 'https://news.google.com/rss/search?q=site%3Areuters.com&hl=en-US&gl=US&ceid=US%3Aen',
     label: 'Reuters'
-  }
+  },
+  { url: 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml', label: 'The New York Times' },
+  { url: 'https://www.aljazeera.com/xml/rss/all.xml', label: 'Al Jazeera' },
+  { url: 'https://feeds.bbci.co.uk/news/rss.xml', label: 'BBC News' },
+  { url: 'https://hnrss.org/frontpage', label: 'Hacker News' },
+  { url: 'https://www.theatlantic.com/feed/all/', label: 'The Atlantic' },
+  { url: 'https://www.newyorker.com/feed/everything', label: 'The New Yorker' },
+  { url: 'https://www.wired.com/feed/rss', label: 'WIRED' },
+  { url: 'https://www.theverge.com/rss/index.xml', label: 'The Verge' },
+  { url: 'https://feeds.arstechnica.com/arstechnica/index', label: 'Ars Technica' },
+  { url: 'https://techcrunch.com/feed/', label: 'TechCrunch' }
 ];
 
 const FEED_SOURCE_NAMES = [
-  'TechCrunch',
-  'Hacker News',
-  'The Verge',
-  'Ars Technica',
-  'WIRED',
+  'Reuters',
+  'The New York Times',
   'Al Jazeera',
   'BBC News',
-  'The New York Times',
+  'Hacker News',
   'The Atlantic',
   'The New Yorker',
-  'Reuters'
+  'WIRED',
+  'The Verge',
+  'Ars Technica',
+  'TechCrunch'
 ];
+
+const SOURCE_PRIORITY = new Map(
+  FEED_SOURCE_NAMES.map((sourceName, index) => [sourceName.toLowerCase(), index])
+);
 
 const TOPIC_DEFINITIONS = [
   {
@@ -167,6 +171,9 @@ function buildTopicSearchText(item, publicationName) {
 function transformFeedItem(item) {
   const publicationName = item.feedTitle || 'Unknown';
   const classificationText = buildTopicSearchText(item, publicationName);
+  const sourcePriority = SOURCE_PRIORITY.has(publicationName.toLowerCase())
+    ? SOURCE_PRIORITY.get(publicationName.toLowerCase())
+    : Number.MAX_SAFE_INTEGER;
   return {
     title: item.title,
     author: item.creator || item.author,
@@ -174,7 +181,8 @@ function transformFeedItem(item) {
     published_date: item.pubDate,
     url: item.link,
     image_url: extractImage(item),
-    _classificationText: classificationText
+    _classificationText: classificationText,
+    _sourcePriority: sourcePriority
   };
 }
 
@@ -200,7 +208,19 @@ async function fetchAggregatedArticles() {
     }
   }
 
-  articles.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+  articles.sort((a, b) => {
+    const dateDiff = new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime();
+    if (dateDiff !== 0) return dateDiff;
+
+    const aPriority = SOURCE_PRIORITY.has((a.feedTitle || '').toLowerCase())
+      ? SOURCE_PRIORITY.get((a.feedTitle || '').toLowerCase())
+      : Number.MAX_SAFE_INTEGER;
+    const bPriority = SOURCE_PRIORITY.has((b.feedTitle || '').toLowerCase())
+      ? SOURCE_PRIORITY.get((b.feedTitle || '').toLowerCase())
+      : Number.MAX_SAFE_INTEGER;
+
+    return aPriority - bPriority;
+  });
   return articles.map(transformFeedItem);
 }
 
