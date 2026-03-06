@@ -19,16 +19,31 @@
     <main>
       <section class="feeds-section">
         <h2 class="section-title">What's happening</h2>
-        <p class="feed-sources-subtitle">
-          Aggregated RSS feeds from:
-          <span><%= (feedSourceNames || []).join(', ') %></span>
-        </p>
-        <nav class="sr-only" aria-label="Topic hubs">
-          <ul>
+        <div class="feed-map-control" data-feed-map>
+          <button
+            type="button"
+            class="feed-map-toggle"
+            data-feed-map-toggle
+            aria-expanded="false"
+            aria-controls="feed-map-sources feed-map-hubs"
+            aria-label="Open feed and hub map"
+          >
+            +
+          </button>
+          <p id="feed-map-sources" class="feed-map-ribbon feed-map-ribbon-horizontal">
+            Aggregated RSS feeds from:
+            <span><%= (feedSourceNames || []).join(', ') %></span>
+          </p>
+          <nav id="feed-map-hubs" class="feed-map-ribbon feed-map-ribbon-vertical" aria-label="Topic hubs">
             <% (topicHubs || []).forEach((hub) => { %>
-              <li><a href="<%= hub.path %>"><%= hub.title %></a></li>
+              <a href="<%= hub.path %>"><%= hub.title %></a>
             <% }) %>
-          </ul>
+          </nav>
+        </div>
+        <nav class="sr-only" aria-label="Topic hubs fallback">
+          <% (topicHubs || []).forEach((hub) => { %>
+            <a href="<%= hub.path %>"><%= hub.title %></a>
+          <% }) %>
         </nav>
         <ul class="articles-grid">
           <%- include('partials/articles-grid', { articles }) %>
@@ -40,6 +55,7 @@
   </div>
 
   <script src="/js/animations.js"></script>
+  <script src="/js/feed-map-toggle.js"></script>
   <script src="/js/analytics-client.js"></script>
 </body>
 </html>

@@ -399,7 +399,7 @@ main {
   max-width: 100%;
   margin: 0;
   width: 100%;
-  position: static;
+  position: relative;
   display: block;
 }
 
@@ -421,6 +421,88 @@ main {
 
 .feed-sources-subtitle span {
   font-weight: 600;
+}
+
+.feed-map-control {
+  position: absolute;
+  top: 8px;
+  left: 10px;
+  z-index: 8;
+  display: grid;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.feed-map-toggle {
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--color-red);
+  background: rgba(245, 241, 237, 0.95);
+  color: var(--color-red);
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.feed-map-ribbon {
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid rgba(164, 25, 31, 0.35);
+  background: rgba(245, 241, 237, 0.96);
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 0.67rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-red);
+  pointer-events: auto;
+}
+
+.feed-map-ribbon-horizontal {
+  width: min(860px, calc(100vw - 64px));
+  max-width: 0;
+  white-space: nowrap;
+  padding: 0;
+  transition: max-width 0.28s ease, padding 0.2s ease;
+}
+
+.feed-map-ribbon-horizontal span {
+  font-weight: 600;
+}
+
+.feed-map-ribbon-vertical {
+  display: grid;
+  max-height: 0;
+  width: min(280px, calc(100vw - 64px));
+  padding: 0;
+  transition: max-height 0.28s ease, padding 0.2s ease;
+}
+
+.feed-map-ribbon-vertical a {
+  color: var(--color-red);
+  text-decoration: none;
+  padding: 5px 0;
+  border-top: 1px solid rgba(164, 25, 31, 0.15);
+}
+
+.feed-map-ribbon-vertical a:first-child {
+  border-top: 0;
+}
+
+.feed-map-control.is-open .feed-map-ribbon-horizontal {
+  max-width: min(860px, calc(100vw - 64px));
+  padding: 8px 10px;
+}
+
+.feed-map-control.is-open .feed-map-ribbon-vertical {
+  max-height: 320px;
+  padding: 6px 10px;
+}
+
+.feed-map-control.is-open .feed-map-toggle {
+  background: var(--color-red);
+  color: var(--color-off-white);
 }
 
 .topic-hub-bar {
