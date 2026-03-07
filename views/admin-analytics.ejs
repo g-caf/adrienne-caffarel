@@ -68,8 +68,12 @@
                 <% const height = Math.max(5, Math.round((row.views / sparklineMax) * 100)); %>
                 <% const uniqueHeight = Math.max(4, Math.round((row.uniqueVisitors / sparklineUniqueMax) * 100)); %>
                 <div class="admin-analytics-day" title="<%= row.day %>: <%= row.views %> views, <%= row.uniqueVisitors %> uniques">
-                  <div class="admin-analytics-bar admin-analytics-bar-views" style="height:<%= height %>%"></div>
-                  <div class="admin-analytics-bar admin-analytics-bar-unique" style="height:<%= uniqueHeight %>%"></div>
+                  <div class="admin-analytics-bar admin-analytics-bar-views" style="height:<%= height %>%">
+                    <span><%= row.views %></span>
+                  </div>
+                  <div class="admin-analytics-bar admin-analytics-bar-unique" style="height:<%= uniqueHeight %>%">
+                    <span><%= row.uniqueVisitors %></span>
+                  </div>
                 </div>
               <% }) %>
             </div>
