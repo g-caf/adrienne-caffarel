@@ -72,73 +72,129 @@ const TOPIC_DEFINITIONS = [
     slug: 'global-news',
     title: 'Global News',
     description: 'International headlines and geopolitics from the live feed mix.',
-    keywords: [
-      'global', 'world', 'international', 'geopolit', 'foreign ministry', 'united nations',
-      'eu ', 'european union', 'ceasefire', 'sanctions', 'diplomacy', 'refugee'
-    ]
+    criteria: {
+      requiredAny: [
+        'international', 'global', 'world', 'geopolit', 'diplomacy', 'foreign ministry',
+        'united nations', 'un', 'embassy', 'ceasefire', 'peace talks', 'sanctions',
+        'war', 'missile', 'troops', 'military'
+      ],
+      strong: [
+        'nato', 'european union', 'eu', 'g7', 'g20', 'human rights', 'refugee', 'asylum'
+      ],
+      minScore: 2,
+      requiredAnyIn: 'titleSummaryUrl'
+    }
   },
   {
     slug: 'us-news',
     title: 'US News',
     description: 'US national news from the live feed mix.',
-    keywords: [
-      'united states', 'u.s.', 'us ', 'white house', 'congress', 'senate',
-      'supreme court', 'governor', 'federal', 'washington'
-    ]
+    criteria: {
+      requiredAny: [
+        'white house', 'congress', 'senate', 'house of representatives', 'supreme court',
+        'federal', 'washington', 'department of justice', 'justice department', 'pentagon',
+        'homeland security', 'state department', 'governor'
+      ],
+      strong: ['us', 'united states', 'capitol hill'],
+      minScore: 2,
+      requiredAnyIn: 'titleSummaryUrl'
+    }
   },
   {
     slug: 'us-midterms',
     title: 'US Midterms',
     description: 'US midterm election coverage from the live feed mix.',
-    keywords: [
-      'midterm', 'midterms', 'house race', 'senate race', 'swing state',
-      'campaign trail', 'ballot', 'polling', 'election day', 'primary'
-    ]
+    criteria: {
+      requiredAny: [
+        'midterm', 'midterms', 'house race', 'senate race', 'swing state',
+        'campaign trail', 'ballot', 'polling', 'election day', 'primary'
+      ],
+      strong: ['voter turnout', 'election results', 'runoff'],
+      minScore: 2,
+      requiredAnyIn: 'titleSummaryUrl'
+    }
   },
   {
     slug: 'us-economy',
     title: 'US Economy',
     description: 'US economic coverage from the live feed mix.',
-    keywords: [
-      'u.s. economy', 'us economy', 'federal reserve', 'fed ', 'inflation', 'jobs report',
-      'nonfarm payrolls', 'consumer spending', 'treasury', 'wall street'
-    ]
+    criteria: {
+      requiredAllGroups: [
+        [
+          'economy', 'inflation', 'jobs report', 'payrolls', 'unemployment', 'gdp',
+          'consumer spending', 'retail sales', 'housing starts', 'cpi', 'pce', 'recession',
+          'interest rate', 'rate hike', 'rate cut', 'treasury', 'wall street', 'bond market'
+        ],
+        ['us', 'united states', 'federal reserve', 'fed', 'treasury']
+      ],
+      strong: ['nonfarm payrolls', 'federal reserve', 'jobs report'],
+      minScore: 2
+    }
   },
   {
     slug: 'tech-news',
     title: 'Tech News',
     description: 'Technology coverage from the live feed mix.',
-    keywords: [
-      'startup', 'software', 'hardware', 'chip', 'semiconductor', 'cloud',
-      'cybersecurity', 'app', 'developer', 'platform', 'silicon valley', 'tech'
-    ]
+    criteria: {
+      requiredAny: [
+        'startup', 'software', 'hardware', 'chip', 'semiconductor', 'cloud',
+        'cybersecurity', 'app', 'developer', 'platform', 'ai', 'artificial intelligence',
+        'machine learning', 'robotics', 'silicon valley', 'tech'
+      ],
+      strong: ['data center', 'open source', 'operating system', 'security breach'],
+      minScore: 2,
+      requiredAnyIn: 'titleSummaryUrl'
+    }
   },
   {
     slug: 'new-york-city-news',
     title: 'New York City News',
     description: 'New York City coverage from the live feed mix.',
-    keywords: [
-      'new york city', 'nyc', 'manhattan', 'brooklyn', 'queens', 'bronx', 'staten island',
-      'new york mayor', 'mta', 'subway', 'ny pd', 'new york state'
-    ]
+    criteria: {
+      requiredAny: [
+        'new york city', 'nyc', 'manhattan', 'brooklyn', 'queens', 'bronx', 'staten island',
+        'nyc mayor', 'mayor adams', 'eric adams', 'mta', 'subway', 'nypd', 'nycha',
+        'city hall', 'nyc council', 'new york'
+      ],
+      exclude: [
+        'new york times', 'new yorker', 'new york magazine'
+      ],
+      minScore: 2,
+      requiredAnyIn: 'titleSummaryUrl',
+      minTitleScore: 1
+    }
   },
   {
     slug: 'global-economy',
     title: 'Global Economy',
     description: 'Global economy coverage from the live feed mix.',
-    keywords: [
-      'global economy', 'g20', 'imf', 'world bank', 'oecd', 'trade deficit',
-      'supply chain', 'commodity', 'emerging market', 'central bank', 'currency'
-    ]
+    criteria: {
+      requiredAllGroups: [
+        [
+          'economy', 'inflation', 'gdp', 'trade deficit', 'supply chain', 'commodity',
+          'emerging market', 'currency', 'central bank', 'interest rate', 'recession'
+        ],
+        ['global', 'international', 'world', 'cross-border', 'multilateral']
+      ],
+      strong: ['imf', 'world bank', 'oecd', 'g20', 'wto'],
+      minScore: 2,
+      strongBypassGroups: true
+    }
   },
   {
     slug: 'infrastructure-news',
     title: 'Infrastructure News',
     description: 'Infrastructure coverage from the live feed mix.',
-    keywords: [
-      'infrastructure', 'bridge', 'highway', 'rail', 'transit', 'airport',
-      'seaport', 'power grid', 'water system', 'construction', 'public works'
-    ]
+    criteria: {
+      requiredAny: [
+        'infrastructure', 'bridge', 'highway', 'rail', 'transit', 'airport',
+        'seaport', 'power grid', 'water system', 'construction', 'public works',
+        'roadway', 'tunnel', 'port authority'
+      ],
+      strong: ['bridge repair', 'infrastructure bill', 'transit authority'],
+      minScore: 2,
+      requiredAnyIn: 'titleSummaryUrl'
+    }
   }
 ];
 
@@ -157,20 +213,43 @@ function normalizePublicationName(feedConfig, feed) {
   return publicationName;
 }
 
-function buildTopicSearchText(item, publicationName) {
-  return [
-    publicationName,
-    item.title || '',
-    item.contentSnippet || '',
-    item.content || '',
-    item.description || '',
-    item.link || ''
-  ].join(' ').toLowerCase();
+function normalizeText(raw) {
+  const text = (raw || '')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&[a-z]+;/gi, ' ')
+    .toLowerCase()
+    .replace(/\bu\.s\.a?\b/g, 'usa')
+    .replace(/\bu\.s\.\b/g, 'us')
+    .replace(/\bu\.s\b/g, 'us')
+    .replace(/\bu\.k\.\b/g, 'uk')
+    .replace(/\bu\.k\b/g, 'uk')
+    .replace(/\bn\.y\.c\.\b/g, 'nyc')
+    .replace(/\bn\.y\.c\b/g, 'nyc')
+    .replace(/\bn\.y\.\b/g, 'ny')
+    .replace(/[^\w\s]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return text;
+}
+
+function buildTopicSearchFields(item) {
+  const titleText = normalizeText(item.title || '');
+  const summaryText = normalizeText(item.contentSnippet || item.description || '');
+  const contentText = normalizeText(item.content || item['content:encoded'] || '');
+  const urlText = normalizeText(item.link || '');
+  return {
+    titleText,
+    summaryText,
+    contentText,
+    urlText,
+    combinedText: [titleText, summaryText, contentText].join(' ').trim(),
+    titleSummaryText: [titleText, summaryText].join(' ').trim()
+  };
 }
 
 function transformFeedItem(item) {
   const publicationName = item.feedTitle || 'Unknown';
-  const classificationText = buildTopicSearchText(item, publicationName);
+  const searchFields = buildTopicSearchFields(item);
   const sourcePriority = SOURCE_PRIORITY.has(publicationName.toLowerCase())
     ? SOURCE_PRIORITY.get(publicationName.toLowerCase())
     : Number.MAX_SAFE_INTEGER;
@@ -181,14 +260,87 @@ function transformFeedItem(item) {
     published_date: item.pubDate,
     url: item.link,
     image_url: extractImage(item),
-    _classificationText: classificationText,
+    _classificationText: searchFields.combinedText,
+    _titleSummaryText: searchFields.titleSummaryText,
+    _urlText: searchFields.urlText,
     _sourcePriority: sourcePriority
   };
 }
 
+function matchesTerm(text, term) {
+  if (!text || !term) return false;
+  const normalizedTerm = normalizeText(term);
+  if (!normalizedTerm) return false;
+  if (normalizedTerm.includes(' ')) {
+    return text.includes(normalizedTerm);
+  }
+  const pattern = new RegExp(`(^|\\s)${normalizedTerm}(\\s|$)`, 'i');
+  return pattern.test(text);
+}
+
+function matchesAny(text, keywords = []) {
+  if (!text || !keywords || keywords.length === 0) return false;
+  return keywords.some((keyword) => matchesTerm(text, keyword));
+}
+
+function countMatches(text, keywords = []) {
+  if (!text || !keywords || keywords.length === 0) return 0;
+  return keywords.reduce((count, keyword) => (matchesTerm(text, keyword) ? count + 1 : count), 0);
+}
+
 function matchesTopic(article, topic) {
+  const criteria = topic.criteria || {};
   const text = article._classificationText || '';
-  return topic.keywords.some((keyword) => text.includes(keyword));
+  const titleSummaryText = article._titleSummaryText || '';
+  const urlText = article._urlText || '';
+
+  if (matchesAny(text, criteria.exclude)) {
+    return false;
+  }
+
+  if (criteria.requiredAny) {
+    const requiredTarget =
+      criteria.requiredAnyIn === 'all'
+        ? text
+        : `${titleSummaryText} ${urlText}`.trim();
+    if (!matchesAny(requiredTarget, criteria.requiredAny)) {
+      return false;
+    }
+  }
+
+  if (criteria.requiredAllGroups) {
+    const allowBypass = criteria.strongBypassGroups && matchesAny(text, criteria.strong);
+    if (!allowBypass) {
+      for (const group of criteria.requiredAllGroups) {
+        if (!matchesAny(text, group)) {
+          return false;
+        }
+      }
+    }
+  }
+
+  const strongMatches =
+    countMatches(titleSummaryText, criteria.strong) * 3 +
+    countMatches(urlText, criteria.strong) * 2 +
+    countMatches(text, criteria.strong) * 2;
+  const anyMatches =
+    countMatches(titleSummaryText, criteria.any) * 2 +
+    countMatches(urlText, criteria.any) +
+    countMatches(text, criteria.any);
+  const score = strongMatches + anyMatches;
+
+  if (criteria.minTitleScore) {
+    const titleScore = countMatches(titleSummaryText, [
+      ...(criteria.any || []),
+      ...(criteria.strong || [])
+    ]);
+    if (titleScore < criteria.minTitleScore) {
+      return false;
+    }
+  }
+
+  const minScore = criteria.minScore || 1;
+  return score >= minScore;
 }
 
 async function fetchAggregatedArticles() {
