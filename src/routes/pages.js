@@ -684,6 +684,19 @@ function normalizeAnalyticsDays(raw) {
   return Math.min(Math.max(parsed, 1), 365);
 }
 
+function formatTimestamp(value) {
+  if (!value) return '';
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit'
+  });
+}
+
 router.get('/robots.txt', (req, res) => {
   const siteUrl = getSiteUrl(req);
   const body = [
@@ -1037,6 +1050,22 @@ router.get('/admin', requireWritingSubmissionsAdmin, async (req, res, next) => {
     const entryLimit = req.query.entry_limit ? parseInt(req.query.entry_limit, 10) : 50;
     const orientingEntries = await WritingEntry.findRecentBySection('orienting', entryLimit);
     const thinkingEntries = await WritingEntry.findRecentBySection('thinking', entryLimit);
+    const librarySyncStatus = getLibrarySyncStatus();
+    const librarySyncResult = (req.query.library_sync || '').toString();
+    const librarySyncCount = req.query.library_count ? parseInt(req.query.library_count, 10) : null;
+    const librarySyncMessage = (() => {
+      if (!librarySyncResult) return '';
+      if (librarySyncResult === 'success') {
+        return `Library sync complete${Number.isFinite(librarySyncCount) ? ` (${librarySyncCount} items).` : '.'}`;
+      }
+      if (librarySyncResult === 'missing') {
+        return 'Library sync is not configured yet (missing Google Drive settings).';
+      }
+      if (librarySyncResult === 'skipped') {
+        return 'Library sync already running. Try again in a minute.';
+      }
+      return 'Library sync failed. Check server logs for details.';
+    })();
 
     const orientingEditId = req.query.orienting_edit ? parseInt(req.query.orienting_edit, 10) : null;
     const thinkingEditId = req.query.thinking_edit ? parseInt(req.query.thinking_edit, 10) : null;
@@ -1083,7 +1112,12 @@ router.get('/admin', requireWritingSubmissionsAdmin, async (req, res, next) => {
       thinkingEditingId:
         thinkingEditingEntry && thinkingEditingEntry.section === 'thinking'
           ? thinkingEditingEntry.id
-          : null
+          : null,
+      librarySyncMessage,
+      librarySyncStatus: {
+        lastSyncCompletedAt: formatTimestamp(librarySyncStatus.lastSyncCompletedAt),
+        lastSyncError: librarySyncStatus.lastSyncError || ''
+      }
     });
   } catch (error) {
     return next(error);
@@ -1094,7 +1128,8 @@ router.get('/admin/analytics', requireWritingSubmissionsAdmin, async (req, res, 
   try {
     const days = normalizeAnalyticsDays(req.query.days);
     const analytics = await AnalyticsEvent.getDashboard(days);
-    const sparklineMax = analytics.daily.reduce((max, row) => Math.max(max, row.views), 0);
+    const sparklineMaxViews = analytics.daily.reduce((max, row) => Math.max(max, row.views), 0);
+    const sparklineMaxUniques = analytics.daily.reduce((max, row) => Math.max(max, row.uniqueVisitors || 0), 0);
 
     return res.render('admin-analytics', {
       ...getPageSeo(req, {
@@ -1105,8 +1140,27 @@ router.get('/admin/analytics', requireWritingSubmissionsAdmin, async (req, res, 
       analytics,
       analyticsOptedOut: isAnalyticsOptedOut(req),
       dayOptions: [7, 30, 90, 365],
-      sparklineMax: sparklineMax || 1
+      sparklineMax: sparklineMaxViews || 1,
+      sparklineUniqueMax: sparklineMaxUniques || 1
     });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.post('/admin/library-sync', requireWritingSubmissionsAdmin, async (req, res, next) => {
+  try {
+    const result = await ensureLibrarySynced({ force: true });
+    if (result && result.synced) {
+      return res.redirect(`/admin?library_sync=success&library_count=${encodeURIComponent(result.count || 0)}`);
+    }
+    if (result && result.reason === 'missing_drive_config') {
+      return res.redirect('/admin?library_sync=missing');
+    }
+    if (result && result.skipped) {
+      return res.redirect('/admin?library_sync=skipped');
+    }
+    return res.redirect('/admin?library_sync=error');
   } catch (error) {
     return next(error);
   }

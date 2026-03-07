@@ -31,8 +31,16 @@
             +
           </button>
           <p id="feed-map-sources" class="feed-map-ribbon feed-map-ribbon-horizontal">
-            Aggregated RSS feeds from:
-            <span><%= (feedSourceNames || []).join(', ') %></span>
+            <span class="feed-map-ribbon-track">
+              <span class="feed-map-ribbon-text">
+                Aggregated RSS feeds from:
+                <span><%= (feedSourceNames || []).join(', ') %></span>
+              </span>
+              <span class="feed-map-ribbon-text feed-map-ribbon-text-copy" aria-hidden="true">
+                Aggregated RSS feeds from:
+                <span><%= (feedSourceNames || []).join(', ') %></span>
+              </span>
+            </span>
           </p>
           <nav id="feed-map-hubs" class="feed-map-ribbon feed-map-ribbon-vertical" aria-label="Topic hubs">
             <% (topicHubs || []).forEach((hub) => { %>

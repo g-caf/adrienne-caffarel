@@ -17,6 +17,25 @@
         <% if (saved) { %>
           <p class="admin-editor-flash">Saved <%= savedSection || 'entry' %>.</p>
         <% } %>
+        <% if (librarySyncMessage) { %>
+          <p class="admin-editor-flash"><%= librarySyncMessage %></p>
+        <% } %>
+
+        <div class="admin-library-sync">
+          <form method="post" action="/admin/library-sync">
+            <button type="submit">Sync Library</button>
+          </form>
+          <div class="admin-library-sync-meta">
+            <% if (librarySyncStatus && librarySyncStatus.lastSyncCompletedAt) { %>
+              <p>Last sync: <%= librarySyncStatus.lastSyncCompletedAt %></p>
+            <% } else { %>
+              <p>No library sync recorded yet.</p>
+            <% } %>
+            <% if (librarySyncStatus && librarySyncStatus.lastSyncError) { %>
+              <p class="admin-library-sync-error">Last error: <%= librarySyncStatus.lastSyncError %></p>
+            <% } %>
+          </div>
+        </div>
 
         <div class="admin-writing-grid">
           <section class="admin-writing-feed">

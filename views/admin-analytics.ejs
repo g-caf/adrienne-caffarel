@@ -56,13 +56,21 @@
 
           <div class="admin-analytics-card">
             <h3 class="writing-column-heading">Daily Trend</h3>
+            <div class="admin-analytics-legend">
+              <span><span class="admin-analytics-swatch admin-analytics-swatch-views"></span>Pageviews</span>
+              <span><span class="admin-analytics-swatch admin-analytics-swatch-unique"></span>Unique Visitors</span>
+            </div>
             <div class="admin-analytics-sparkline" aria-hidden="true">
               <% if (!analytics.daily.length) { %>
                 <p class="admin-submissions-meta">No traffic yet.</p>
               <% } %>
               <% analytics.daily.forEach((row) => { %>
                 <% const height = Math.max(5, Math.round((row.views / sparklineMax) * 100)); %>
-                <div class="admin-analytics-bar" style="height:<%= height %>%" title="<%= row.day %>: <%= row.views %>"></div>
+                <% const uniqueHeight = Math.max(4, Math.round((row.uniqueVisitors / sparklineUniqueMax) * 100)); %>
+                <div class="admin-analytics-day" title="<%= row.day %>: <%= row.views %> views, <%= row.uniqueVisitors %> uniques">
+                  <div class="admin-analytics-bar admin-analytics-bar-views" style="height:<%= height %>%"></div>
+                  <div class="admin-analytics-bar admin-analytics-bar-unique" style="height:<%= uniqueHeight %>%"></div>
+                </div>
               <% }) %>
             </div>
           </div>

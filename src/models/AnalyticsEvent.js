@@ -205,7 +205,8 @@ class AnalyticsEvent {
     const dailyResult = await db.query(
       `SELECT
          ${getDayExpr()} AS day,
-         COUNT(*) AS views
+         COUNT(*) AS views,
+         COUNT(DISTINCT visitor_id) AS unique_visitors
        FROM analytics_events
        WHERE event_type = 'pageview'
          AND ${sinceClause}
@@ -296,7 +297,8 @@ class AnalyticsEvent {
       },
       daily: (dailyResult.rows || []).map((row) => ({
         day: row.day,
-        views: toNumber(row.views)
+        views: toNumber(row.views),
+        uniqueVisitors: toNumber(row.unique_visitors)
       })),
       topPages: (topPagesResult.rows || []).map((row) => ({
         path: row.path,
