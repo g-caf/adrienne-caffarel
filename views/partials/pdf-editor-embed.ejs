@@ -1,0 +1,22 @@
+<section class="pdf-tool-embed" aria-labelledby="pdf-tool-title">
+  <div class="pdf-tool-embed__copy">
+    <p class="pdf-tool-embed__eyebrow">PDF Tool</p>
+    <h2 id="pdf-tool-title" class="pdf-tool-embed__title">PDF Editor & Signing Tool</h2>
+    <p class="pdf-tool-embed__description">
+      Upload a PDF, reorder or delete pages, add text, signatures, and form fields, then export the finished file directly from the browser.
+    </p>
+    <% if (showFullPageLink) { %>
+      <a class="pdf-tool-embed__link" href="/pdf-editor">Open the standalone PDF editor page</a>
+    <% } %>
+  </div>
+
+  <div class="pdf-tool-embed__frame" role="region" aria-label="Embedded PDF editor">
+    <iframe
+      src="/pdf-tool/"
+      title="PDF editor"
+      loading="lazy"
+      allow="clipboard-read; clipboard-write"
+      referrerpolicy="no-referrer-when-downgrade"
+    ></iframe>
+  </div>
+</section>

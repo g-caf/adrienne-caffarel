@@ -31,9 +31,17 @@
                   <li><%= feature %></li>
                 <% }) %>
               </ul>
+
+              <% if (app.href) { %>
+                <a class="dev-app-link" href="<%= app.href %>"><%= app.linkLabel || 'Open project' %></a>
+              <% } %>
             </article>
           <% }) %>
         </div>
+
+        <section class="dev-tool-block" aria-label="PDF editor and signing tool">
+          <%- include('partials/pdf-editor-embed', { showFullPageLink: true }) %>
+        </section>
 
         <section class="dev-site-block" aria-labelledby="moon-tide-title">
           <div class="dev-site-layout">

@@ -1812,6 +1812,23 @@ footer a:hover {
   gap: 1px;
 }
 
+.dev-app-link {
+  margin-top: 10px;
+  color: var(--color-red);
+  text-decoration: none;
+  font-weight: 700;
+  width: fit-content;
+  border-bottom: 1px solid currentColor;
+}
+
+.dev-app-link:hover {
+  opacity: 0.72;
+}
+
+.dev-tool-block {
+  margin-top: clamp(14px, 2vw, 30px);
+}
+
 .dev-site-block {
   margin-top: clamp(24px, 3vw, 50px);
 }
@@ -1855,6 +1872,94 @@ footer a:hover {
   max-width: 720px;
 }
 
+.pdf-tool-embed {
+  display: grid;
+  gap: 18px;
+  color: var(--color-red);
+}
+
+.pdf-tool-embed__copy {
+  max-width: 760px;
+  display: grid;
+  gap: 8px;
+}
+
+.pdf-tool-embed__eyebrow,
+.pdf-editor-hero__eyebrow {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.82em;
+  font-weight: 700;
+}
+
+.pdf-tool-embed__title,
+.pdf-editor-hero__title {
+  margin: 0;
+  font-size: clamp(1.1rem, 0.9vw + 0.9rem, 2rem);
+  line-height: 1.08;
+}
+
+.pdf-tool-embed__description,
+.pdf-editor-hero__copy p {
+  margin: 0;
+}
+
+.pdf-tool-embed__link {
+  margin-top: 4px;
+  color: var(--color-red);
+  text-decoration: none;
+  width: fit-content;
+  border-bottom: 1px solid currentColor;
+  font-weight: 700;
+}
+
+.pdf-tool-embed__link:hover {
+  opacity: 0.72;
+}
+
+.pdf-tool-embed__frame {
+  border: 1.2px solid rgba(164, 25, 31, 0.42);
+  background: rgba(255, 255, 255, 0.78);
+  min-height: 720px;
+  overflow: hidden;
+}
+
+.pdf-tool-embed__frame iframe {
+  display: block;
+  width: 100%;
+  min-height: 720px;
+  height: 80vh;
+  border: 0;
+  background: #fff;
+}
+
+.pdf-editor-page .site-header {
+  position: sticky;
+}
+
+.pdf-editor-hero,
+.pdf-editor-page__tool {
+  max-width: 1380px;
+  margin: 0 auto;
+  padding: clamp(24px, 2.8vw, 42px) clamp(16px, 2.8vw, 34px) 0;
+  color: var(--color-red);
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: clamp(0.66rem, 0.22vw + 0.58rem, 0.82rem);
+  line-height: 1.35;
+}
+
+.pdf-editor-hero {
+  display: grid;
+  gap: 12px;
+}
+
+.pdf-editor-hero__copy {
+  max-width: 760px;
+  display: grid;
+  gap: 10px;
+}
+
 @media (max-width: 1100px) {
   .dev-intro-grid {
     grid-template-columns: minmax(140px, 0.5fr) minmax(0, 1fr);
@@ -1867,6 +1972,11 @@ footer a:hover {
 
   .dev-site-layout {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pdf-tool-embed__frame,
+  .pdf-tool-embed__frame iframe {
+    min-height: 640px;
   }
 }
 
@@ -1905,6 +2015,19 @@ footer a:hover {
   .dev-snake-ribbon {
     height: 78px;
     margin-top: 22px;
+  }
+
+  .pdf-editor-hero,
+  .pdf-editor-page__tool {
+    padding: 22px 12px 0;
+    font-size: 0.8rem;
+    line-height: 1.45;
+  }
+
+  .pdf-tool-embed__frame,
+  .pdf-tool-embed__frame iframe {
+    min-height: 520px;
+    height: 76vh;
   }
 }
 

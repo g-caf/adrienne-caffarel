@@ -719,6 +719,7 @@ router.get('/sitemap.xml', (req, res) => {
     '/library',
     '/designing',
     '/developing',
+    '/pdf-editor',
     '/writing',
     ...TOPIC_DEFINITIONS.map((topic) => `/topics/${topic.slug}`)
   ];
@@ -924,6 +925,8 @@ router.get('/developing', (req, res) => {
     {
       title: 'PDF Editor & Signing Tool',
       replaced: 'Adobe Acrobat',
+      href: '/pdf-editor',
+      linkLabel: 'Open PDF editor',
       features: [
         'Signature panel',
         'PDF merging and splitting',
@@ -947,6 +950,34 @@ router.get('/developing', (req, res) => {
     ...seo,
     pageTitle: 'Developing',
     developingApps
+  });
+});
+
+router.get('/pdf-editor', (req, res) => {
+  const seo = getPageSeo(req, {
+    title: 'PDF Editor',
+    path: '/pdf-editor',
+    description: 'Free online PDF editor and signing tool for merging files, reordering pages, filling forms, and exporting updated PDFs.'
+  });
+
+  seo.seoJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: 'Adrienne Caffarel PDF Editor & Signing Tool',
+    applicationCategory: 'BusinessApplication',
+    operatingSystem: 'Web',
+    description: 'Browser-based PDF editing tool for merging, reordering, annotating, signing, and exporting PDF files.',
+    url: seo.canonicalUrl,
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD'
+    }
+  };
+
+  res.render('pdf-editor', {
+    ...seo,
+    pageTitle: 'PDF Editor'
   });
 });
 
