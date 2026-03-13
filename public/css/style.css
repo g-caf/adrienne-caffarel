@@ -1057,6 +1057,32 @@ footer a:hover {
   color: var(--color-gray);
 }
 
+.wip-page .site-header {
+  position: sticky;
+}
+
+.wip-section {
+  min-height: calc(100vh - 220px);
+  display: grid;
+  place-items: center;
+  text-align: center;
+  gap: 14px;
+}
+
+.wip-section .simple-title {
+  margin-bottom: 0;
+  color: var(--color-red);
+}
+
+.wip-copy {
+  margin: 0;
+  color: var(--color-red);
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: clamp(1rem, 0.5vw + 0.9rem, 1.3rem);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
 /* About page */
 .about-page .site-header {
   position: sticky;

@@ -850,43 +850,16 @@ router.get('/library', async (req, res, next) => {
 });
 
 router.get('/designing', (req, res) => {
-  const eventProductionMedia = [
-    {
-      type: 'video',
-      src: '/videos/event-production-01.mp4'
-    },
-    {
-      type: 'image',
-      src: '/images/developing/event-photo-01.jpg'
-    },
-    {
-      type: 'image',
-      src: '/images/developing/event-photo-02.jpg'
-    },
-    {
-      type: 'image',
-      src: '/images/developing/event-photo-03.jpg'
-    },
-    {
-      type: 'image',
-      src: '/images/developing/event-photo-04.jpg'
-    },
-    {
-      type: 'video',
-      src: '/videos/event-production-02.mp4'
-    }
-  ];
-
   const seo = getPageSeo(req, {
     title: 'Designing',
     path: '/designing',
     description: 'Adrienne Caffarel: design work and event production portfolio.'
   });
 
-  res.render('developing', {
+  res.render('placeholder-page', {
     ...seo,
     pageTitle: 'Designing',
-    eventProductionMedia
+    pageMessage: 'Work in progress...be back soon...'
   });
 });
 
@@ -910,46 +883,10 @@ router.get('/developing', (req, res) => {
     description: 'Adrienne Caffarel: software development projects and experiments.'
   });
 
-  const developingApps = [
-    {
-      title: 'Event & Guest Management Platform',
-      replaced: 'Tripleseat',
-      features: [
-        'Custom landing page builder',
-        'Custom RSVP form',
-        'Event admin dashboard',
-        'Invite builder & mailer',
-        '.ics calendar attachments'
-      ]
-    },
-    {
-      title: 'PDF Editor & Signing Tool',
-      replaced: 'Adobe Acrobat',
-      href: '/pdf-editor',
-      linkLabel: 'Open PDF editor',
-      features: [
-        'Signature panel',
-        'PDF merging and splitting',
-        'Form field detection'
-      ]
-    },
-    {
-      title: 'Reception Check-in App',
-      replaced: 'Envoy',
-      features: [
-        'Tablet based UI for guest check-in',
-        'Admin dashboard',
-        'Customizable contacts list',
-        'Custom notification settings',
-        'Slack integration'
-      ]
-    }
-  ];
-
-  res.render('developing-page', {
+  res.render('placeholder-page', {
     ...seo,
     pageTitle: 'Developing',
-    developingApps
+    pageMessage: 'Work in progress...be back soon...'
   });
 });
 
