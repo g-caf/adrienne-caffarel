@@ -30,6 +30,8 @@ const ADMIN_AUTH_WINDOW_MS = 15 * 60 * 1000;
 const ADMIN_AUTH_MAX_ATTEMPTS = 10;
 const adminAuthAttempts = new Map();
 const WRITING_PREVIEW_COOKIE = 'writing_preview_started_at';
+const SPOTIFY_TOKEN_URL = 'https://accounts.spotify.com/api/token';
+const SPOTIFY_API_URL = 'https://api.spotify.com/v1';
 
 // Curated RSS feeds for the personal site
 const rssFeeds = [
@@ -199,6 +201,87 @@ const TOPIC_DEFINITIONS = [
 ];
 
 const TOPICS_BY_SLUG = new Map(TOPIC_DEFINITIONS.map((topic) => [topic.slug, topic]));
+
+async function getSpotifyAccessToken() {
+  const clientId = process.env.SPOTIFY_CLIENT_ID;
+  const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
+  const refreshToken = process.env.SPOTIFY_REFRESH_TOKEN;
+
+  if (!clientId || !clientSecret || !refreshToken) {
+    return null;
+  }
+
+  const authHeader = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+  const response = await fetch(SPOTIFY_TOKEN_URL, {
+    method: 'POST',
+    headers: {
+      Authorization: `Basic ${authHeader}`,
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body: new URLSearchParams({
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken
+    })
+  });
+
+  if (!response.ok) {
+    return null;
+  }
+
+  const data = await response.json();
+  return data.access_token || null;
+}
+
+function formatSpotifyTrack(item, isPlaying = false) {
+  if (!item) return null;
+  const artists = (item.artists || []).map((artist) => artist.name).filter(Boolean);
+  const albumImages = item.album && Array.isArray(item.album.images) ? item.album.images : [];
+  const albumImage = albumImages[0] ? albumImages[0].url : '';
+
+  return {
+    id: item.id,
+    name: item.name,
+    artists,
+    album: item.album ? item.album.name : '',
+    albumImage,
+    trackUrl: item.external_urls ? item.external_urls.spotify : '',
+    isPlaying,
+    durationMs: item.duration_ms || 0,
+    previewUrl: item.preview_url || null
+  };
+}
+
+async function fetchSpotifyNowPlaying() {
+  const accessToken = await getSpotifyAccessToken();
+  if (!accessToken) return { status: 'unauthorized' };
+
+  const headers = { Authorization: `Bearer ${accessToken}` };
+  const nowPlayingRes = await fetch(`${SPOTIFY_API_URL}/me/player/currently-playing`, { headers });
+
+  if (nowPlayingRes.status === 204) {
+    const recentRes = await fetch(`${SPOTIFY_API_URL}/me/player/recently-played?limit=1`, { headers });
+    if (!recentRes.ok) return { status: 'offline' };
+    const recentData = await recentRes.json();
+    const recentItem = recentData.items && recentData.items[0] ? recentData.items[0] : null;
+    return {
+      status: recentItem ? 'recent' : 'offline',
+      track: recentItem ? formatSpotifyTrack(recentItem.track, false) : null,
+      playedAt: recentItem ? recentItem.played_at : null
+    };
+  }
+
+  if (!nowPlayingRes.ok) {
+    return { status: 'error' };
+  }
+
+  const nowPlayingData = await nowPlayingRes.json();
+  const track = formatSpotifyTrack(nowPlayingData.item, !!nowPlayingData.is_playing);
+  return {
+    status: track ? 'playing' : 'offline',
+    track,
+    progressMs: nowPlayingData.progress_ms || 0
+  };
+}
 
 function normalizePublicationName(feedConfig, feed) {
   let publicationName = (feedConfig && feedConfig.label) || feed.title || feed.link || 'Unknown';
@@ -717,8 +800,7 @@ router.get('/sitemap.xml', (req, res) => {
     '/',
     '/about',
     '/library',
-    '/designing',
-    '/developing',
+    '/building',
     '/pdf-editor',
     '/writing',
     ...TOPIC_DEFINITIONS.map((topic) => `/topics/${topic.slug}`)
@@ -756,7 +838,7 @@ router.get('/', async (req, res, next) => {
     const seo = getPageSeo(req, {
       title: 'Home',
       path: '/',
-      description: 'Adrienne Caffarel is designing, developing, reading, and writing.'
+      description: 'Adrienne Caffarel is building, reading, and writing.'
     });
     const siteUrl = getSiteUrl(req);
 
@@ -849,18 +931,29 @@ router.get('/library', async (req, res, next) => {
   }
 });
 
-router.get('/designing', (req, res) => {
-  const seo = getPageSeo(req, {
-    title: 'Designing',
-    path: '/designing',
-    description: 'Adrienne Caffarel: design work and event production portfolio.'
-  });
+router.get('/building', async (req, res, next) => {
+  try {
+    const seo = getPageSeo(req, {
+      title: 'Building',
+      path: '/building',
+      description: 'Adrienne Caffarel: building software, tools, and experiments.'
+    });
 
-  res.render('placeholder-page', {
-    ...seo,
-    pageTitle: 'Designing',
-    pageMessage: 'Work in progress...be back soon...'
-  });
+    const uniqueVisitors = await AnalyticsEvent.getUniqueVisitorCount();
+
+    res.render('building', {
+      ...seo,
+      pageTitle: 'Building',
+      uniqueVisitors,
+      trackingStartDate: 'March 6, 2026'
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/designing', (req, res) => {
+  res.redirect(301, '/building');
 });
 
 router.get('/about', (req, res) => {
@@ -877,17 +970,7 @@ router.get('/about', (req, res) => {
 });
 
 router.get('/developing', (req, res) => {
-  const seo = getPageSeo(req, {
-    title: 'Developing',
-    path: '/developing',
-    description: 'Adrienne Caffarel: software development projects and experiments.'
-  });
-
-  res.render('placeholder-page', {
-    ...seo,
-    pageTitle: 'Developing',
-    pageMessage: 'Work in progress...be back soon...'
-  });
+  res.redirect(301, '/building');
 });
 
 router.get('/pdf-editor', (req, res) => {
@@ -920,6 +1003,60 @@ router.get('/pdf-editor', (req, res) => {
 
 router.get('/reading', (req, res) => {
   res.redirect('/library');
+});
+
+router.get('/api/spotify/now-playing', async (req, res) => {
+  try {
+    const payload = await fetchSpotifyNowPlaying();
+    res.setHeader('Cache-Control', 'no-store');
+    if (payload.status === 'unauthorized') {
+      return res.status(503).json({ status: 'unauthorized' });
+    }
+    return res.json(payload);
+  } catch (error) {
+    return res.status(502).json({ status: 'error' });
+  }
+});
+
+router.get('/api/unique-visitors', async (req, res) => {
+  try {
+    const uniqueVisitors = await AnalyticsEvent.getUniqueVisitorCount();
+    return res.json({ uniqueVisitors });
+  } catch (error) {
+    return res.status(500).json({ uniqueVisitors: 0 });
+  }
+});
+
+router.get('/api/unique-visitors/stream', async (req, res) => {
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no');
+  if (res.flushHeaders) res.flushHeaders();
+
+  let isClosed = false;
+
+  const sendCount = async () => {
+    try {
+      const uniqueVisitors = await AnalyticsEvent.getUniqueVisitorCount();
+      if (!isClosed) {
+        res.write(`data: ${JSON.stringify({ uniqueVisitors })}\n\n`);
+      }
+    } catch (error) {
+      if (!isClosed) {
+        res.write(`data: ${JSON.stringify({ uniqueVisitors: 0 })}\n\n`);
+      }
+    }
+  };
+
+  await sendCount();
+  const interval = setInterval(sendCount, 15000);
+
+  req.on('close', () => {
+    isClosed = true;
+    clearInterval(interval);
+    res.end();
+  });
 });
 
 router.get('/analytics/opt-out', (req, res) => {

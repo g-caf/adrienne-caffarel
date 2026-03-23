@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   initDevelopingSnakeRibbon();
 
-  const words = ['designing', 'developing', 'reading', 'writing'];
+  const words = ['building', 'reading', 'writing'];
   const flipElement = document.querySelector('.word-flip');
   const headerFlipElement = document.querySelector('.header-word-flip');
   const landingPage = document.querySelector('.landing-page');

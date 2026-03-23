@@ -329,6 +329,21 @@ class AnalyticsEvent {
       }
     };
   }
+
+  static async getUniqueVisitorCount() {
+    try {
+      const result = await db.query(
+        `SELECT COUNT(DISTINCT visitor_id) AS unique_visitors
+         FROM analytics_events
+         WHERE event_type = 'pageview'`
+      );
+      const row = result.rows && result.rows[0] ? result.rows[0] : {};
+      return toNumber(row.unique_visitors);
+    } catch (error) {
+      logger.error('Error fetching unique visitor count:', error);
+      return 0;
+    }
+  }
 }
 
 module.exports = AnalyticsEvent;
