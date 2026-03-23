@@ -215,6 +215,17 @@ class AnalyticsEvent {
       [safeDays]
     );
 
+    const buildingResult = await db.query(
+      `SELECT
+         COUNT(*) AS views,
+         COUNT(DISTINCT visitor_id) AS unique_visitors
+       FROM analytics_events
+       WHERE event_type = 'pageview'
+         AND path = '/building'
+         AND ${sinceClause}`,
+      [safeDays]
+    );
+
     const hubViewsResult = await db.query(
       `SELECT
          path,
@@ -317,6 +328,10 @@ class AnalyticsEvent {
         device: row.device,
         visits: toNumber(row.visits)
       })),
+      buildingPage: {
+        views: toNumber((buildingResult.rows[0] || {}).views),
+        uniqueVisitors: toNumber((buildingResult.rows[0] || {}).unique_visitors)
+      },
       hubs,
       writingFunnel: {
         writingViews,

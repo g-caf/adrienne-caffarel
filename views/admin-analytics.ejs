@@ -52,6 +52,14 @@
               <h3>Pages / Session</h3>
               <p><%= analytics.summary.avgPagesPerSession %></p>
             </article>
+            <article class="admin-analytics-stat">
+              <h3>/building Views</h3>
+              <p><%= analytics.buildingPage.views.toLocaleString() %></p>
+            </article>
+            <article class="admin-analytics-stat">
+              <h3>/building Uniques</h3>
+              <p><%= analytics.buildingPage.uniqueVisitors.toLocaleString() %></p>
+            </article>
           </div>
 
           <div class="admin-analytics-card">
