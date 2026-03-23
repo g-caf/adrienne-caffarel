@@ -7,20 +7,21 @@
   --color-black: #1a1a1a;     /* Black accents */
   --color-gray: #6B6B6B;      /* Gray text */
   --color-light-gray: #D4D4D4; /* Light gray borders */
+  --font-body: 'Bodoni Moda', serif;
+  --font-display: 'Crimson Text', serif;
   --font-sans: 'Source Sans 3', 'Helvetica Neue', Arial, sans-serif;
-  --font-display: var(--font-sans);
   --landing-inline-pad: clamp(24px, 6vw, 72px);
 }
 
 /* Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Crimson+Text:ital,wght@0,400;0,500;1,400&family=Source+Sans+3:wght@400;500;600&display=swap');
 
 html, body {
   margin: 0;
   padding: 0;
   background: var(--color-off-white);
   color: var(--color-black);
-  font-family: var(--font-sans);
+  font-family: var(--font-body);
   font-size: 16px;
   line-height: 1.6;
   font-weight: 400;
@@ -2652,6 +2653,7 @@ footer a:hover {
 .building-page main {
   padding: clamp(100px, 12vw, 180px) clamp(48px, 14vw, 200px) clamp(140px, 20vw, 220px);
   color: var(--color-red);
+  font-family: var(--font-sans);
 }
 
 .building-intro__line {
