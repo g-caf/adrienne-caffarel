@@ -2680,7 +2680,7 @@ footer a:hover {
   max-width: min(820px, 90%);
   text-align: justify;
   text-justify: inter-word;
-  text-align-last: center;
+  text-align-last: left;
   line-height: 1.6;
   font-size: clamp(0.9rem, 0.5vw + 0.7rem, 0.98rem);
   letter-spacing: 0.01em;
@@ -2785,7 +2785,7 @@ footer a:hover {
   max-width: min(820px, 90%);
   text-align: justify;
   text-justify: inter-word;
-  text-align-last: center;
+  text-align-last: left;
   line-height: 1.6;
   font-size: clamp(0.9rem, 0.5vw + 0.7rem, 0.98rem);
   letter-spacing: 0.01em;
@@ -2841,7 +2841,7 @@ footer a:hover {
   max-width: min(820px, 90%);
   text-align: justify;
   text-justify: inter-word;
-  text-align-last: center;
+  text-align-last: left;
   line-height: 1.6;
   font-size: clamp(0.9rem, 0.5vw + 0.7rem, 0.98rem);
   letter-spacing: 0.01em;
