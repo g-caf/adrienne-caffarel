@@ -7,18 +7,20 @@
   --color-black: #1a1a1a;     /* Black accents */
   --color-gray: #6B6B6B;      /* Gray text */
   --color-light-gray: #D4D4D4; /* Light gray borders */
+  --font-sans: 'Source Sans 3', 'Helvetica Neue', Arial, sans-serif;
+  --font-display: var(--font-sans);
   --landing-inline-pad: clamp(24px, 6vw, 72px);
 }
 
 /* Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Crimson+Text:ital,wght@0,400;0,500;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600&display=swap');
 
 html, body {
   margin: 0;
   padding: 0;
   background: var(--color-off-white);
   color: var(--color-black);
-  font-family: 'Bodoni Moda', serif;
+  font-family: var(--font-sans);
   font-size: 16px;
   line-height: 1.6;
   font-weight: 400;
@@ -73,7 +75,7 @@ html, body {
 }
 
 .intro-text {
-  font-family: 'Crimson Text', serif;
+  font-family: var(--font-display);
   font-size: clamp(0.9rem, 6.4vmin, 5rem);
   line-height: 1.1;
   color: var(--color-red);
@@ -251,7 +253,7 @@ html, body {
 
 .site-title {
   margin: 0 0 0 4px;
-  font-family: 'Crimson Text', serif;
+  font-family: var(--font-display);
   font-size: 1.2rem;
   color: var(--color-red);
   font-weight: 400;
@@ -682,7 +684,7 @@ main {
 }
 
 .article-title {
-  font-family: 'Crimson Text', serif;
+  font-family: var(--font-display);
   font-size: 1.6rem;
   font-weight: 400;
   color: white;
@@ -778,7 +780,7 @@ main {
 
 .library-title {
   margin: 0;
-  font-family: 'Crimson Text', serif;
+  font-family: var(--font-display);
   font-weight: 400;
   font-size: 1.18rem;
   line-height: 1.25;
@@ -1047,7 +1049,7 @@ footer a:hover {
 
 .simple-title {
   margin: 0 0 12px;
-  font-family: 'Crimson Text', serif;
+  font-family: var(--font-display);
   font-size: 2rem;
   font-weight: 400;
 }
@@ -1312,7 +1314,7 @@ footer a:hover {
 
 .portfolio-block-title {
   margin: 0;
-  font-family: var(--font-display, 'Crimson Text', serif);
+  font-family: var(--font-display);
   font-size: 1.4rem;
   font-weight: 400;
 }
@@ -1697,7 +1699,7 @@ footer a:hover {
     background: rgba(245, 241, 237, 0.88);
     color: rgba(164, 25, 31, 0.78);
     padding: 8px 14px 9px;
-    font-family: 'Bodoni Moda', serif;
+    font-family: var(--font-display);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     font-size: 0.74rem;
@@ -2648,7 +2650,7 @@ footer a:hover {
 
 /* Building Page */
 .building-page main {
-  padding: clamp(80px, 10vw, 140px) clamp(24px, 6vw, 96px) clamp(120px, 16vw, 180px);
+  padding: clamp(100px, 12vw, 180px) clamp(48px, 14vw, 200px) clamp(140px, 20vw, 220px);
   color: var(--color-red);
 }
 
@@ -2664,15 +2666,29 @@ footer a:hover {
 .building-columns {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: clamp(40px, 10vw, 160px);
-  max-width: 1200px;
+  gap: clamp(80px, 18vw, 240px);
+  max-width: 1400px;
   margin: 0 auto clamp(90px, 12vw, 150px);
-  font-size: 1rem;
-  line-height: 1.7;
 }
 
 .building-columns p {
   margin: 0;
+  max-width: 34ch;
+  text-align: justify;
+  text-justify: inter-word;
+  text-align-last: left;
+  line-height: 1.75;
+  font-size: clamp(0.98rem, 0.65vw + 0.75rem, 1.08rem);
+  letter-spacing: 0.01em;
+  hyphens: auto;
+}
+
+.building-columns p:first-child {
+  justify-self: start;
+}
+
+.building-columns p:last-child {
+  justify-self: end;
 }
 
 .building-spotify {
@@ -2761,16 +2777,30 @@ footer a:hover {
 .building-visitors {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  gap: clamp(24px, 6vw, 80px);
+  gap: clamp(40px, 10vw, 140px);
   align-items: start;
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto clamp(90px, 12vw, 150px);
 }
 
 .building-visitors__copy {
   margin: 0;
-  font-size: 1rem;
-  line-height: 1.7;
+  max-width: 34ch;
+  text-align: justify;
+  text-justify: inter-word;
+  text-align-last: left;
+  line-height: 1.75;
+  font-size: clamp(0.98rem, 0.65vw + 0.75rem, 1.08rem);
+  letter-spacing: 0.01em;
+  hyphens: auto;
+}
+
+.building-visitors__copy:first-of-type {
+  justify-self: start;
+}
+
+.building-visitors__copy:nth-of-type(2) {
+  justify-self: end;
 }
 
 .building-visitors__count {
@@ -2791,38 +2821,43 @@ footer a:hover {
   color: inherit;
 }
 
-.building-pdf-tease {
-  margin: 0 auto clamp(70px, 10vw, 130px);
-  max-width: 1200px;
-}
-
-.building-pdf-tease__title {
-  text-align: center;
-  margin: 0 0 clamp(40px, 6vw, 80px);
-  letter-spacing: 0.08em;
-  font-size: 0.9rem;
-}
-
-.building-pdf-tease__columns {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: clamp(40px, 10vw, 160px);
-}
-
-.building-pdf-tease__columns p {
-  margin: 0;
-  line-height: 1.7;
-}
-
 .building-pdf {
+  margin: 0 auto clamp(60px, 10vw, 120px);
+  max-width: 1400px;
+}
+
+.pdf-tool-shell {
+  border-radius: 28px;
+  border: 1px solid rgba(26, 26, 26, 0.2);
+  background: #fff;
+  padding: clamp(18px, 4vw, 32px);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.06);
+}
+
+.building-postscript {
+  max-width: 720px;
   margin: 0 auto;
-  max-width: 1200px;
+}
+
+.building-postscript p {
+  margin: 0;
+  text-align: justify;
+  text-justify: inter-word;
+  text-align-last: left;
+  line-height: 1.75;
+  font-size: clamp(0.98rem, 0.65vw + 0.75rem, 1.08rem);
+  letter-spacing: 0.01em;
+  hyphens: auto;
 }
 
 @media (max-width: 900px) {
-  .building-columns,
-  .building-pdf-tease__columns {
+  .building-columns {
     grid-template-columns: 1fr;
+  }
+
+  .building-columns p {
+    max-width: 100%;
+    justify-self: stretch;
   }
 
   .building-visitors {
@@ -2832,6 +2867,7 @@ footer a:hover {
 
   .building-visitors__copy {
     text-align: center;
+    max-width: 100%;
   }
 
   .spotify-card {
