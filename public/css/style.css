@@ -2661,6 +2661,7 @@ footer a:hover {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-size: 0.85rem;
+  font-weight: 600;
   margin: 0 auto clamp(80px, 12vw, 140px);
   max-width: 900px;
 }
@@ -2823,6 +2824,44 @@ footer a:hover {
   color: inherit;
 }
 
+.building-pdf-intro {
+  margin: 0 auto clamp(70px, 10vw, 130px);
+  max-width: 1400px;
+}
+
+.building-pdf-intro__title {
+  text-align: center;
+  margin: 0 0 clamp(40px, 6vw, 80px);
+  letter-spacing: 0.08em;
+  font-size: 0.9rem;
+}
+
+.building-pdf-intro__columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(80px, 18vw, 240px);
+}
+
+.building-pdf-intro__columns p {
+  margin: 0;
+  max-width: 34ch;
+  text-align: justify;
+  text-justify: inter-word;
+  text-align-last: left;
+  line-height: 1.75;
+  font-size: clamp(0.98rem, 0.65vw + 0.75rem, 1.08rem);
+  letter-spacing: 0.01em;
+  hyphens: auto;
+}
+
+.building-pdf-intro__columns p:first-child {
+  justify-self: start;
+}
+
+.building-pdf-intro__columns p:last-child {
+  justify-self: end;
+}
+
 .building-pdf {
   margin: 0 auto clamp(60px, 10vw, 120px);
   max-width: 1400px;
@@ -2834,6 +2873,10 @@ footer a:hover {
   background: #fff;
   padding: clamp(18px, 4vw, 32px);
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.06);
+}
+
+.pdf-tool-shell #pdf-tool-app {
+  min-height: 640px;
 }
 
 .building-postscript {
@@ -2858,6 +2901,15 @@ footer a:hover {
   }
 
   .building-columns p {
+    max-width: 100%;
+    justify-self: stretch;
+  }
+
+  .building-pdf-intro__columns {
+    grid-template-columns: 1fr;
+  }
+
+  .building-pdf-intro__columns p {
     max-width: 100%;
     justify-self: stretch;
   }
