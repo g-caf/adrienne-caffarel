@@ -61,6 +61,20 @@
           <strong>THIS IS</strong> what I’m up to when I’m not working: walking, running, reading, writing, crocheting,
           cooking, going to the movies, and spending time with my two cats.
         </p>
+
+        <section class="about-spotify" aria-live="polite">
+          <div class="spotify-card" data-spotify-card>
+            <div class="spotify-card__art">
+              <img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="" data-spotify-art loading="lazy">
+            </div>
+            <div class="spotify-card__meta">
+              <p class="spotify-card__status" data-spotify-status>Loading Spotify…</p>
+              <h3 class="spotify-card__track" data-spotify-track></h3>
+              <p class="spotify-card__artist" data-spotify-artist></p>
+              <a class="spotify-card__link" data-spotify-link href="" target="_blank" rel="noreferrer">Open in Spotify</a>
+            </div>
+          </div>
+        </section>
       </section>
     </main>
 
@@ -78,5 +92,6 @@
     <%- include('partials/footer') %>
   </div>
   <script src="/js/animations.js"></script>
+  <script src="/js/building.js"></script>
 </body>
 </html>

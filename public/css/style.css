@@ -2826,6 +2826,17 @@ footer a:hover {
   color: #29e46c;
 }
 
+.about-spotify {
+  display: flex;
+  justify-content: center;
+  margin: 24px auto 36px;
+}
+
+.about-spotify .spotify-card {
+  min-width: 0;
+  width: min(520px, 92vw);
+}
+
 .building-visitors {
   display: flex;
   flex-direction: column;
