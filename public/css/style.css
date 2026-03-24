@@ -2343,23 +2343,36 @@ footer a:hover {
 }
 
 .admin-building-order__item {
-  display: flex;
-  align-items: center;
+  display: grid;
   gap: 10px;
   padding: 8px 10px;
   border: 1px solid rgba(164, 25, 31, 0.2);
   background: #fff;
-  cursor: grab;
 }
 
 .admin-building-order__item.is-dragging {
   opacity: 0.6;
-  cursor: grabbing;
+}
+
+.admin-building-order__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .admin-building-order__handle {
   font-size: 1rem;
   color: var(--color-red);
+  cursor: grab;
+  user-select: none;
+}
+
+.admin-building-order__item.is-dragging .admin-building-order__handle {
+  cursor: grabbing;
+}
+
+.admin-building-order__title {
+  font-weight: 600;
 }
 
 .admin-building-block {

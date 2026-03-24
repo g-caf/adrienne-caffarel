@@ -13,8 +13,12 @@
   };
 
   list.addEventListener('dragstart', (event) => {
+    const handle = event.target.closest('[data-building-handle]');
     const item = event.target.closest('[data-building-slug]');
-    if (!item) return;
+    if (!item || !handle) {
+      event.preventDefault();
+      return;
+    }
     dragging = item;
     item.classList.add('is-dragging');
     event.dataTransfer.effectAllowed = 'move';

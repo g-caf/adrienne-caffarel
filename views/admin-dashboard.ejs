@@ -39,51 +39,47 @@
 
         <section class="admin-building">
           <h3 class="writing-column-heading">Building Page</h3>
-          <p class="admin-submissions-meta">Drag to reorder. Text supports Markdown.</p>
-          <form method="post" action="/admin/building-order" class="admin-editor-form" data-building-order-form>
+          <p class="admin-submissions-meta">Drag to reorder. Markdown supported.</p>
+          <ol class="admin-building-order" data-building-order-list>
+            <% (buildingBlocks || []).forEach((block) => { %>
+              <li class="admin-building-order__item" draggable="true" data-building-slug="<%= block.slug %>">
+                <div class="admin-building-order__header">
+                  <span class="admin-building-order__handle" data-building-handle aria-hidden="true">drag</span>
+                  <span class="admin-building-order__title"><%= block.label %></span>
+                </div>
+                <% if (block.editable) { %>
+                  <form method="post" action="/admin/building-content" class="admin-editor-form">
+                    <input type="hidden" name="slug" value="<%= block.slug %>">
+                    <% (block.fields || []).forEach((field) => { %>
+                      <label for="admin-building-<%= block.slug %>-<%= field.name %>"><%= field.label %></label>
+                      <textarea
+                        id="admin-building-<%= block.slug %>-<%= field.name %>"
+                        name="<%= field.name %>"
+                        rows="<%= field.rows || 3 %>"
+                        required
+                      ><%= field.value || '' %></textarea>
+                    <% }) %>
+                    <div class="admin-editor-actions">
+                      <button type="submit">Save</button>
+                    </div>
+                  </form>
+                <% } else { %>
+                  <p class="admin-submissions-meta">This block is reorder-only.</p>
+                <% } %>
+              </li>
+            <% }) %>
+          </ol>
+          <form method="post" action="/admin/building-order" class="admin-editor-form admin-building-order-form">
             <input
               type="hidden"
               name="order"
               value="<%= (buildingBlocks || []).map((block) => block.slug).join(',') %>"
               data-building-order-input
             >
-            <ol class="admin-building-order" data-building-order-list>
-              <% (buildingBlocks || []).forEach((block) => { %>
-                <li class="admin-building-order__item" draggable="true" data-building-slug="<%= block.slug %>">
-                  <span class="admin-building-order__handle" aria-hidden="true">drag</span>
-                  <span><%= block.label %></span>
-                </li>
-              <% }) %>
-            </ol>
             <div class="admin-editor-actions">
               <button type="submit">Save order</button>
             </div>
           </form>
-
-          <% (buildingBlocks || []).forEach((block) => { %>
-            <section class="admin-building-block">
-              <h4 class="writing-column-heading"><%= block.label %></h4>
-              <% if (block.editable) { %>
-                <form method="post" action="/admin/building-content" class="admin-editor-form">
-                  <input type="hidden" name="slug" value="<%= block.slug %>">
-                  <% (block.fields || []).forEach((field) => { %>
-                    <label for="admin-building-<%= block.slug %>-<%= field.name %>"><%= field.label %></label>
-                    <textarea
-                      id="admin-building-<%= block.slug %>-<%= field.name %>"
-                      name="<%= field.name %>"
-                      rows="<%= field.rows || 3 %>"
-                      required
-                    ><%= field.value || '' %></textarea>
-                  <% }) %>
-                  <div class="admin-editor-actions">
-                    <button type="submit">Save</button>
-                  </div>
-                </form>
-              <% } else { %>
-                <p class="admin-submissions-meta">This block is reorder-only.</p>
-              <% } %>
-            </section>
-          <% }) %>
         </section>
 
         <div class="admin-writing-grid">
