@@ -226,7 +226,7 @@ const seedBuildingBlocks = async () => {
         type: 'spotify',
         sort_order: 3,
         content: {
-          title: \"This is what I'm listening to right now!\"
+          title: "This is what I'm listening to right now!"
         }
       },
       {
@@ -235,9 +235,9 @@ const seedBuildingBlocks = async () => {
         sort_order: 4,
         content: {
           left:
-            \"I hate Adobe. I hate anything that forces me to make an account. I've never wanted to receive an email in my life, why the fuck would I want emails from my fucking PDF editing software? We've accepted a bizarrely cruel world.\",
+            "I hate Adobe. I hate anything that forces me to make an account. I've never wanted to receive an email in my life, why the fuck would I want emails from my fucking PDF editing software? We've accepted a bizarrely cruel world.",
           right:
-            \"I've built a few custom solutions after being fed up with the options at hand. My idea is that in time, this site will be the one-stop-shop solution for the operations professional I was four-five years ago. Or not! Who cares? Who's reading this?\"
+            "I've built a few custom solutions after being fed up with the options at hand. My idea is that in time, this site will be the one-stop-shop solution for the operations professional I was four-five years ago. Or not! Who cares? Who's reading this?"
         }
       },
       {
@@ -263,7 +263,7 @@ const seedBuildingBlocks = async () => {
           left:
             'Ok, it does what Adobe Acrobat does but it is free and it uses local storage only so everything gets processed in the browser and I never touch your data and the app can be set as system default so you can open a pdf from your desktop and it will literally show up here! In my stupid little site!',
           right:
-            \"This will get unsustainable for me to run for free eventually, but it's a really lightweight app, and i really fucking hate Adobe, and I'm going to grad school to do something completely unrelated so I'd rather not worry about it too much right now. It'll be free as long as I can keep it free.\"
+            "This will get unsustainable for me to run for free eventually, but it's a really lightweight app, and i really fucking hate Adobe, and I'm going to grad school to do something completely unrelated so I'd rather not worry about it too much right now. It'll be free as long as I can keep it free."
         }
       },
       {
