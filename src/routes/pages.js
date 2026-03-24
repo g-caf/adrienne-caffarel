@@ -5,6 +5,7 @@ const Parser = require('rss-parser');
 const MarkdownIt = require('markdown-it');
 const LibraryItem = require('../models/LibraryItem');
 const WritingEntry = require('../models/WritingEntry');
+const BuildingBlock = require('../models/BuildingBlock');
 const WritingSubmission = require('../models/WritingSubmission');
 const AnalyticsEvent = require('../models/AnalyticsEvent');
 const { ensureLibrarySynced, getLibrarySyncStatus } = require('../services/librarySync');
@@ -32,6 +33,52 @@ const adminAuthAttempts = new Map();
 const WRITING_PREVIEW_COOKIE = 'writing_preview_started_at';
 const SPOTIFY_TOKEN_URL = 'https://accounts.spotify.com/api/token';
 const SPOTIFY_API_URL = 'https://api.spotify.com/v1';
+const BUILDING_TRACKING_START_DATE = 'March 6, 2026';
+const BUILDING_BLOCK_CONFIG = {
+  intro: {
+    label: 'Intro line',
+    fields: [{ name: 'line', label: 'Intro line', rows: 2 }]
+  },
+  columns_primary: {
+    label: 'Primary columns',
+    fields: [
+      { name: 'left', label: 'Left column', rows: 6 },
+      { name: 'right', label: 'Right column', rows: 6 }
+    ]
+  },
+  spotify: {
+    label: 'Spotify viewer',
+    fields: [{ name: 'title', label: 'Section title', rows: 2 }]
+  },
+  columns_secondary: {
+    label: 'Secondary columns',
+    fields: [
+      { name: 'left', label: 'Left column', rows: 6 },
+      { name: 'right', label: 'Right column', rows: 6 }
+    ]
+  },
+  visitors: {
+    label: 'Visitor counter',
+    fields: [
+      { name: 'copy', label: 'Copy (use {{trackingStartDate}})', rows: 4 },
+      { name: 'contact', label: 'Contact line', rows: 3 }
+    ]
+  },
+  pdf_intro: {
+    label: 'PDF intro',
+    fields: [
+      { name: 'title', label: 'Title', rows: 2 },
+      { name: 'cta_label', label: 'Download button label', rows: 2 },
+      { name: 'cta_href', label: 'Download URL', rows: 2 },
+      { name: 'note', label: 'Note', rows: 2 },
+      { name: 'left', label: 'Left column', rows: 6 },
+      { name: 'right', label: 'Right column', rows: 6 }
+    ]
+  },
+  pdf_app: {
+    label: 'PDF app'
+  }
+};
 
 // Curated RSS feeds for the personal site
 const rssFeeds = [
@@ -761,6 +808,82 @@ function summarizeBody(body) {
   return plain.length > 120 ? `${plain.slice(0, 120)}...` : plain;
 }
 
+function parseBuildingBlockContent(rawContent) {
+  if (!rawContent) return {};
+  try {
+    return JSON.parse(rawContent);
+  } catch (error) {
+    return {};
+  }
+}
+
+function buildBuildingAdminBlocks(blocks) {
+  return (blocks || []).map((block) => {
+    const config = BUILDING_BLOCK_CONFIG[block.type] || { label: block.slug };
+    const content = parseBuildingBlockContent(block.content);
+    const fields = (config.fields || []).map((field) => ({
+      ...field,
+      value: content[field.name] || ''
+    }));
+    return {
+      id: block.id,
+      slug: block.slug,
+      type: block.type,
+      label: config.label || block.slug,
+      fields,
+      editable: fields.length > 0
+    };
+  });
+}
+
+function renderInlineMarkdown(value) {
+  return markdown.renderInline(String(value || ''));
+}
+
+function buildBuildingBlocksView(blocks) {
+  return (blocks || [])
+    .filter((block) => block.is_visible !== false && block.is_visible !== 0)
+    .map((block) => {
+      const content = parseBuildingBlockContent(block.content);
+      if (block.type === 'intro') {
+        return { type: 'intro', lineHtml: renderInlineMarkdown(content.line) };
+      }
+      if (block.type === 'columns_primary' || block.type === 'columns_secondary') {
+        return {
+          type: block.type,
+          leftHtml: renderInlineMarkdown(content.left),
+          rightHtml: renderInlineMarkdown(content.right)
+        };
+      }
+      if (block.type === 'spotify') {
+        return { type: 'spotify', titleHtml: renderInlineMarkdown(content.title) };
+      }
+      if (block.type === 'visitors') {
+        const copy = String(content.copy || '').replace(
+          /\{\{\s*trackingStartDate\s*\}\}/g,
+          BUILDING_TRACKING_START_DATE
+        );
+        return {
+          type: 'visitors',
+          copyHtml: renderInlineMarkdown(copy),
+          contactHtml: renderInlineMarkdown(content.contact)
+        };
+      }
+      if (block.type === 'pdf_intro') {
+        return {
+          type: 'pdf_intro',
+          titleHtml: renderInlineMarkdown(content.title),
+          ctaLabelHtml: renderInlineMarkdown(content.cta_label),
+          ctaHref: content.cta_href || '',
+          noteHtml: renderInlineMarkdown(content.note),
+          leftHtml: renderInlineMarkdown(content.left),
+          rightHtml: renderInlineMarkdown(content.right)
+        };
+      }
+      return { type: block.type };
+    });
+}
+
 function normalizeAnalyticsDays(raw) {
   const parsed = Number.parseInt(raw, 10);
   if (!Number.isFinite(parsed)) return 30;
@@ -940,12 +1063,15 @@ router.get('/building', async (req, res, next) => {
     });
 
     const uniqueVisitors = await AnalyticsEvent.getUniqueVisitorCount();
+    const buildingBlocks = await BuildingBlock.findAllOrdered();
+    const buildingBlocksView = buildBuildingBlocksView(buildingBlocks);
 
     res.render('building', {
       ...seo,
       pageTitle: 'Building',
       uniqueVisitors,
-      trackingStartDate: 'March 6, 2026'
+      trackingStartDate: BUILDING_TRACKING_START_DATE,
+      buildingBlocks: buildingBlocksView
     });
   } catch (error) {
     next(error);
@@ -1155,6 +1281,8 @@ router.get('/admin', requireWritingSubmissionsAdmin, async (req, res, next) => {
     const entryLimit = req.query.entry_limit ? parseInt(req.query.entry_limit, 10) : 50;
     const orientingEntries = await WritingEntry.findRecentBySection('orienting', entryLimit);
     const thinkingEntries = await WritingEntry.findRecentBySection('thinking', entryLimit);
+    const buildingBlocks = await BuildingBlock.findAllOrdered();
+    const buildingAdminBlocks = buildBuildingAdminBlocks(buildingBlocks);
     const librarySyncStatus = getLibrarySyncStatus();
     const librarySyncResult = (req.query.library_sync || '').toString();
     const librarySyncCount = req.query.library_count ? parseInt(req.query.library_count, 10) : null;
@@ -1196,7 +1324,7 @@ router.get('/admin', requireWritingSubmissionsAdmin, async (req, res, next) => {
         description: 'Manage writing page content and writing gate submissions.'
       }),
       saved: req.query.saved === '1',
-      savedSection: getSectionOrNull(req.query.section),
+      savedSection: req.query.section === 'building' ? 'building' : getSectionOrNull(req.query.section),
       limit,
       total: submissions.length,
       submissions,
@@ -1222,7 +1350,8 @@ router.get('/admin', requireWritingSubmissionsAdmin, async (req, res, next) => {
       librarySyncStatus: {
         lastSyncCompletedAt: formatTimestamp(librarySyncStatus.lastSyncCompletedAt),
         lastSyncError: librarySyncStatus.lastSyncError || ''
-      }
+      },
+      buildingBlocks: buildingAdminBlocks
     });
   } catch (error) {
     return next(error);
@@ -1295,6 +1424,71 @@ router.post('/admin/writing-content', requireWritingSubmissionsAdmin, async (req
     }
 
     return res.redirect(`/admin?saved=1&section=${encodeURIComponent(section)}`);
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.post('/admin/building-content', requireWritingSubmissionsAdmin, async (req, res, next) => {
+  try {
+    const slug = (req.body.slug || '').trim();
+    if (!slug) {
+      return res.status(400).json({ error: 'Missing block slug.' });
+    }
+
+    const block = await BuildingBlock.findBySlug(slug);
+    if (!block) {
+      return res.status(404).json({ error: 'Block not found.' });
+    }
+
+    const config = BUILDING_BLOCK_CONFIG[block.type];
+    if (!config || !config.fields || config.fields.length === 0) {
+      return res.status(400).json({ error: 'Block is not editable.' });
+    }
+
+    const content = {};
+    for (const field of config.fields) {
+      content[field.name] = (req.body[field.name] || '').trim();
+    }
+
+    await BuildingBlock.updateContent(slug, JSON.stringify(content));
+    return res.redirect('/admin?saved=1&section=building');
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.post('/admin/building-order', requireWritingSubmissionsAdmin, async (req, res, next) => {
+  try {
+    const rawOrder = (req.body.order || '')
+      .split(',')
+      .map((slug) => slug.trim())
+      .filter(Boolean);
+    const blocks = await BuildingBlock.findAllOrdered();
+    const existingSlugs = blocks.map((block) => block.slug);
+    const existingSet = new Set(existingSlugs);
+
+    const normalized = [];
+    const seen = new Set();
+    for (const slug of rawOrder) {
+      if (existingSet.has(slug) && !seen.has(slug)) {
+        normalized.push(slug);
+        seen.add(slug);
+      }
+    }
+    for (const slug of existingSlugs) {
+      if (!seen.has(slug)) {
+        normalized.push(slug);
+        seen.add(slug);
+      }
+    }
+
+    if (normalized.length === 0) {
+      return res.status(400).json({ error: 'Invalid order payload.' });
+    }
+
+    await BuildingBlock.updateOrder(normalized);
+    return res.redirect('/admin?saved=1&section=building');
   } catch (error) {
     return next(error);
   }

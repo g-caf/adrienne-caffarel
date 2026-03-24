@@ -4,89 +4,62 @@
     <%- include('partials/header') %>
 
     <main>
-      <section class="building-intro">
-        <p class="building-intro__line">IF YOU'RE HERE TO EDIT A PDF, SCROLL DOWN. LIKE, WAY DOWN.</p>
-      </section>
-
-      <section class="building-columns">
-        <p>
-          I've built mobile, desktop, and web applications. I'm experienced with APIs. I used the Spotify API to
-          show what I'm listening to at any given time right here in the page of this, an Express app with a Node
-          backend, deployed on Render.
-        </p>
-        <p>
-          I'm kind of a luddite and I really resent how much of my life depends on software. I don't like screens
-          or computers and I abhor gadgetry and wish we could just turn the internet off. But I build software for
-          fun, and out of frustration.
-        </p>
-      </section>
-
-      <section class="building-spotify" aria-live="polite">
-        <p class="building-spotify__title">This is what I'm listening to right now!</p>
-        <div class="spotify-card" data-spotify-card>
-          <div class="spotify-card__art">
-            <img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="" data-spotify-art loading="lazy">
-          </div>
-          <div class="spotify-card__meta">
-            <p class="spotify-card__status" data-spotify-status>Loading Spotify…</p>
-            <h3 class="spotify-card__track" data-spotify-track></h3>
-            <p class="spotify-card__artist" data-spotify-artist></p>
-            <a class="spotify-card__link" data-spotify-link href="" target="_blank" rel="noreferrer">Open in Spotify</a>
-          </div>
-        </div>
-      </section>
-
-      <section class="building-columns building-columns--secondary">
-        <p>
-          I hate Adobe. I hate anything that forces me to make an account. I've never wanted to receive an email
-          in my life, why the fuck would I want emails from my fucking PDF editing software? We've accepted a
-          bizarrely cruel world.
-        </p>
-        <p>
-          I've built a few custom solutions after being fed up with the options at hand. My idea is that in time,
-          this site will be the one-stop-shop solution for the operations professional I was four-five years ago.
-          Or not! Who cares? Who's reading this?
-        </p>
-      </section>
-
-      <section class="building-visitors">
-        <p class="building-visitors__copy">
-          Who is reading this? A lot of you, apparently! In case you're wondering, this is the number of visitors
-          who have been sitting where you are since I started tracking that on <%= trackingStartDate %>.
-        </p>
-        <div class="building-visitors__count" aria-live="polite" data-visitor-count>
-          <%= typeof uniqueVisitors !== 'undefined' ? uniqueVisitors : 0 %>
-        </div>
-        <p class="building-visitors__contact">
-          If you absolutely have to contact me about any of this, you can get in touch with me <a href="/about">here</a>.
-        </p>
-      </section>
-
-      <section class="building-pdf-intro">
-        <p class="building-pdf-intro__title"><strong>YOU READY TO EDIT A PDF?</strong></p>
-        <div class="building-pdf-download">
-          <a class="building-pdf-download__button" href="/downloads/pdf-launcher-macos.zip">
-            Download the macOS desktop launcher
-          </a>
-          <p class="building-pdf-download__note">Set it as your default PDF app and open files straight into the editor.</p>
-        </div>
-        <div class="building-pdf-intro__columns">
-          <p>
-            Ok, it does what Adobe Acrobat does but it's free and it uses local storage only so everything gets
-            processed in the browser and I never touch your data and the app can be set as system default so you
-            can open a pdf from your desktop and it will literally show up here! In my stupid little site!
-          </p>
-          <p>
-            This will get unsustainable for me to run for free eventually, but it's a really lightweight app, and i
-            really fucking hate Adobe, and I'm going to grad school to do something completely unrelated so I'd
-            rather not worry about it too much right now. It'll be free as long as I can keep it free.
-          </p>
-        </div>
-      </section>
-
-      <section class="building-pdf">
-        <div id="pdf-tool-app" class="pdf-tool-shell" aria-label="Embedded PDF editor"></div>
-      </section>
+      <% (buildingBlocks || []).forEach((block) => { %>
+        <% if (block.type === 'intro') { %>
+          <section class="building-intro">
+            <p class="building-intro__line"><%- block.lineHtml %></p>
+          </section>
+        <% } else if (block.type === 'columns_primary') { %>
+          <section class="building-columns">
+            <p><%- block.leftHtml %></p>
+            <p><%- block.rightHtml %></p>
+          </section>
+        <% } else if (block.type === 'spotify') { %>
+          <section class="building-spotify" aria-live="polite">
+            <p class="building-spotify__title"><%- block.titleHtml %></p>
+            <div class="spotify-card" data-spotify-card>
+              <div class="spotify-card__art">
+                <img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="" data-spotify-art loading="lazy">
+              </div>
+              <div class="spotify-card__meta">
+                <p class="spotify-card__status" data-spotify-status>Loading Spotify…</p>
+                <h3 class="spotify-card__track" data-spotify-track></h3>
+                <p class="spotify-card__artist" data-spotify-artist></p>
+                <a class="spotify-card__link" data-spotify-link href="" target="_blank" rel="noreferrer">Open in Spotify</a>
+              </div>
+            </div>
+          </section>
+        <% } else if (block.type === 'columns_secondary') { %>
+          <section class="building-columns building-columns--secondary">
+            <p><%- block.leftHtml %></p>
+            <p><%- block.rightHtml %></p>
+          </section>
+        <% } else if (block.type === 'visitors') { %>
+          <section class="building-visitors">
+            <p class="building-visitors__copy"><%- block.copyHtml %></p>
+            <div class="building-visitors__count" aria-live="polite" data-visitor-count>
+              <%= typeof uniqueVisitors !== 'undefined' ? uniqueVisitors : 0 %>
+            </div>
+            <p class="building-visitors__contact"><%- block.contactHtml %></p>
+          </section>
+        <% } else if (block.type === 'pdf_intro') { %>
+          <section class="building-pdf-intro">
+            <p class="building-pdf-intro__title"><%- block.titleHtml %></p>
+            <div class="building-pdf-download">
+              <a class="building-pdf-download__button" href="<%= block.ctaHref %>"><%- block.ctaLabelHtml %></a>
+              <p class="building-pdf-download__note"><%- block.noteHtml %></p>
+            </div>
+            <div class="building-pdf-intro__columns">
+              <p><%- block.leftHtml %></p>
+              <p><%- block.rightHtml %></p>
+            </div>
+          </section>
+        <% } else if (block.type === 'pdf_app') { %>
+          <section class="building-pdf">
+            <div id="pdf-tool-app" class="pdf-tool-shell" aria-label="Embedded PDF editor"></div>
+          </section>
+        <% } %>
+      <% }) %>
     </main>
   </div>
 

@@ -151,6 +151,146 @@ const createWritingEntriesTable = async () => {
   }
 };
 
+// SQL for creating building_blocks table (works for both SQLite and PostgreSQL)
+const createBuildingBlocksTable = async () => {
+  const createTableSQL = db.usePostgres
+    ? `
+      CREATE TABLE IF NOT EXISTS building_blocks (
+        id SERIAL PRIMARY KEY,
+        slug VARCHAR(64) UNIQUE NOT NULL,
+        type VARCHAR(64) NOT NULL,
+        content TEXT NOT NULL,
+        sort_order INTEGER NOT NULL DEFAULT 0,
+        is_visible BOOLEAN NOT NULL DEFAULT TRUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `
+    : `
+      CREATE TABLE IF NOT EXISTS building_blocks (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        slug TEXT UNIQUE NOT NULL,
+        type TEXT NOT NULL,
+        content TEXT NOT NULL,
+        sort_order INTEGER NOT NULL DEFAULT 0,
+        is_visible INTEGER NOT NULL DEFAULT 1,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+      );
+    `;
+
+  try {
+    await db.query(createTableSQL);
+    logger.info('building_blocks table created or already exists');
+  } catch (error) {
+    logger.error('Error creating building_blocks table:', error);
+    throw error;
+  }
+};
+
+const seedBuildingBlocks = async () => {
+  try {
+    const countResult = await db.query(
+      db.usePostgres
+        ? 'SELECT COUNT(*)::int AS count FROM building_blocks'
+        : 'SELECT COUNT(*) AS count FROM building_blocks'
+    );
+    const existingCount = countResult.rows[0] ? Number(countResult.rows[0].count) : 0;
+    if (existingCount > 0) {
+      logger.info('Building blocks already seeded.');
+      return;
+    }
+
+    const blocks = [
+      {
+        slug: 'intro',
+        type: 'intro',
+        sort_order: 1,
+        content: {
+          line: "IF YOU'RE HERE TO EDIT A PDF, SCROLL DOWN. LIKE, WAY DOWN."
+        }
+      },
+      {
+        slug: 'columns_primary',
+        type: 'columns_primary',
+        sort_order: 2,
+        content: {
+          left:
+            "I've built mobile, desktop, and web applications. I'm experienced with APIs. I used the Spotify API to show what I'm listening to at any given time right here in the page of this, an Express app with a Node backend, deployed on Render.",
+          right:
+            "I'm kind of a luddite and I really resent how much of my life depends on software. I don't like screens or computers and I abhor gadgetry and wish we could just turn the internet off. But I build software for fun, and out of frustration."
+        }
+      },
+      {
+        slug: 'spotify',
+        type: 'spotify',
+        sort_order: 3,
+        content: {
+          title: \"This is what I'm listening to right now!\"
+        }
+      },
+      {
+        slug: 'columns_secondary',
+        type: 'columns_secondary',
+        sort_order: 4,
+        content: {
+          left:
+            \"I hate Adobe. I hate anything that forces me to make an account. I've never wanted to receive an email in my life, why the fuck would I want emails from my fucking PDF editing software? We've accepted a bizarrely cruel world.\",
+          right:
+            \"I've built a few custom solutions after being fed up with the options at hand. My idea is that in time, this site will be the one-stop-shop solution for the operations professional I was four-five years ago. Or not! Who cares? Who's reading this?\"
+        }
+      },
+      {
+        slug: 'visitors',
+        type: 'visitors',
+        sort_order: 5,
+        content: {
+          copy:
+            'Who is reading this? A lot of you, apparently! In case you are wondering, this is the number of visitors who have been sitting where you are since I started tracking that on {{trackingStartDate}}.',
+          contact:
+            'If you absolutely have to contact me about any of this, you can get in touch with me [here](/about).'
+        }
+      },
+      {
+        slug: 'pdf_intro',
+        type: 'pdf_intro',
+        sort_order: 6,
+        content: {
+          title: '**YOU READY TO EDIT A PDF?**',
+          cta_label: 'Download the macOS desktop launcher',
+          cta_href: '/downloads/pdf-launcher-macos.zip',
+          note: 'Set it as your default PDF app and open files straight into the editor.',
+          left:
+            'Ok, it does what Adobe Acrobat does but it is free and it uses local storage only so everything gets processed in the browser and I never touch your data and the app can be set as system default so you can open a pdf from your desktop and it will literally show up here! In my stupid little site!',
+          right:
+            \"This will get unsustainable for me to run for free eventually, but it's a really lightweight app, and i really fucking hate Adobe, and I'm going to grad school to do something completely unrelated so I'd rather not worry about it too much right now. It'll be free as long as I can keep it free.\"
+        }
+      },
+      {
+        slug: 'pdf_app',
+        type: 'pdf_app',
+        sort_order: 7,
+        content: {}
+      }
+    ];
+
+    for (const block of blocks) {
+      const content = JSON.stringify(block.content || {});
+      const insertSQL = db.usePostgres
+        ? `INSERT INTO building_blocks (slug, type, content, sort_order, is_visible)
+           VALUES ($1, $2, $3, $4, $5)`
+        : `INSERT INTO building_blocks (slug, type, content, sort_order, is_visible)
+           VALUES (?, ?, ?, ?, ?)`;
+      await db.query(insertSQL, [block.slug, block.type, content, block.sort_order, true]);
+    }
+
+    logger.info('Seeded building blocks.');
+  } catch (error) {
+    logger.error('Error seeding building blocks:', error);
+    throw error;
+  }
+};
+
 // SQL for creating analytics_events table (works for both SQLite and PostgreSQL)
 const createAnalyticsEventsTable = async () => {
   const createTableSQL = db.usePostgres
@@ -324,10 +464,12 @@ const runMigrations = async () => {
     await createLibraryItemsTable();
     await createWritingSubmissionsTable();
     await createWritingEntriesTable();
+    await createBuildingBlocksTable();
     await createAnalyticsEventsTable();
     await addLibrarySortOrderColumn();
     await addTypeColumn();
     await seedPages();
+    await seedBuildingBlocks();
     logger.info('Migrations completed successfully');
   } catch (error) {
     logger.error('Migration failed:', error);
