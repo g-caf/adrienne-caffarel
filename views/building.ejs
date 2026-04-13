@@ -1,9 +1,9 @@
-<%- include('partials/head', { title: pageTitle, extraStyles: ['/pdf-tool/assets/index-Mjgm8SgZ.css'] }) %>
+<%- include('partials/head', { title: pageTitle, extraStyles: buildingPageSuspended ? [] : ['/pdf-tool/assets/index-Mjgm8SgZ.css'] }) %>
 <body>
-  <div class="page-container building-page">
+  <div class="page-container building-page <%= buildingPageSuspended ? 'building-page--suspended' : '' %>">
     <%- include('partials/header') %>
 
-    <main>
+    <main <%= buildingPageSuspended ? 'aria-hidden="true" inert' : '' %>>
       <% (buildingBlocks || []).forEach((block) => { %>
         <% if (block.type === 'intro') { %>
           <section class="building-intro">
@@ -56,15 +56,37 @@
           </section>
         <% } else if (block.type === 'pdf_app') { %>
           <section class="building-pdf">
-            <div id="pdf-tool-app" class="pdf-tool-shell" aria-label="Embedded PDF editor"></div>
+            <% if (!buildingPageSuspended) { %>
+              <div id="pdf-tool-app" class="pdf-tool-shell" aria-label="Embedded PDF editor"></div>
+            <% } else { %>
+              <div class="pdf-tool-shell pdf-tool-shell--suspended" aria-hidden="true"></div>
+            <% } %>
           </section>
         <% } %>
       <% }) %>
     </main>
+
+    <% if (buildingPageSuspended) { %>
+      <section class="building-suspend-wrap" aria-label="Building page suspended">
+        <div class="writing-gate-card building-suspend-card">
+          <div class="writing-lock-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" role="img" focusable="false">
+              <path class="lock-body" d="M7 10h10a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2Z"/>
+              <path class="lock-shackle" d="M9 10V7.75a3 3 0 1 1 6 0V10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <p class="building-suspend-card__eyebrow">Building</p>
+          <p class="building-suspend-card__copy">This page is locked while I rework it.</p>
+          <p class="building-suspend-card__copy">Check back soon.</p>
+        </div>
+      </section>
+    <% } %>
   </div>
 
   <script src="/js/animations.js"></script>
   <script src="/js/building.js"></script>
-  <script type="module" src="/pdf-tool/assets/index-T63kGvLd.js"></script>
+  <% if (!buildingPageSuspended) { %>
+    <script type="module" src="/pdf-tool/assets/index-T63kGvLd.js"></script>
+  <% } %>
 </body>
 </html>

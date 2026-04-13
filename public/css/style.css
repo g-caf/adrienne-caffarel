@@ -2706,10 +2706,60 @@ footer a:hover {
 }
 
 /* Building Page */
+.building-page--suspended {
+  position: relative;
+  overflow: hidden;
+}
+
 .building-page main {
   padding: clamp(100px, 12vw, 180px) clamp(48px, 14vw, 200px) clamp(140px, 20vw, 220px);
   color: var(--color-red);
   font-family: var(--font-sans);
+}
+
+.building-page--suspended main {
+  filter: blur(10px);
+  opacity: 0.2;
+  user-select: none;
+  pointer-events: none;
+}
+
+.building-suspend-wrap {
+  position: fixed;
+  inset: 90px 0 0;
+  display: grid;
+  place-items: center;
+  padding: 28px 16px 40px;
+  box-sizing: border-box;
+  z-index: 40;
+  pointer-events: none;
+}
+
+.building-suspend-card {
+  width: min(360px, calc(100vw - 32px));
+  text-align: center;
+  pointer-events: auto;
+}
+
+.building-suspend-card__eyebrow {
+  margin: 0 0 10px;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.11em;
+  position: relative;
+  z-index: 1;
+}
+
+.building-suspend-card__copy {
+  margin: 0;
+  position: relative;
+  z-index: 1;
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.building-suspend-card__copy + .building-suspend-card__copy {
+  margin-top: 4px;
 }
 
 .building-intro__line {
@@ -2967,8 +3017,16 @@ footer a:hover {
   min-height: 640px;
 }
 
+.pdf-tool-shell--suspended {
+  min-height: 640px;
+}
+
 
 @media (max-width: 900px) {
+  .building-page main {
+    padding: clamp(88px, 16vw, 120px) clamp(24px, 8vw, 48px) clamp(120px, 18vw, 170px);
+  }
+
   .building-visitors__copy {
     text-align: center;
     max-width: 100%;
@@ -2982,5 +3040,9 @@ footer a:hover {
   .spotify-card__art {
     width: 110px;
     height: 110px;
+  }
+
+  .building-suspend-wrap {
+    inset: 78px 0 0;
   }
 }

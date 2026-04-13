@@ -34,6 +34,7 @@ const WRITING_PREVIEW_COOKIE = 'writing_preview_started_at';
 const SPOTIFY_TOKEN_URL = 'https://accounts.spotify.com/api/token';
 const SPOTIFY_API_URL = 'https://api.spotify.com/v1';
 const BUILDING_TRACKING_START_DATE = 'March 6, 2026';
+const BUILDING_PAGE_SUSPENDED = true;
 const BUILDING_BLOCK_CONFIG = {
   intro: {
     label: 'Intro line',
@@ -1069,6 +1070,7 @@ router.get('/building', async (req, res, next) => {
     res.render('building', {
       ...seo,
       pageTitle: 'Building',
+      buildingPageSuspended: BUILDING_PAGE_SUSPENDED,
       uniqueVisitors,
       trackingStartDate: BUILDING_TRACKING_START_DATE,
       buildingBlocks: buildingBlocksView
