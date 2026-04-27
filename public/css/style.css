@@ -266,6 +266,8 @@ html, body {
 }
 
 .header-home-link {
+  display: inline-flex;
+  align-items: baseline;
   color: var(--color-red);
   text-decoration: none;
 }
@@ -278,8 +280,8 @@ html, body {
 }
 
 .header-word-flip {
-  display: inline-block;
-  height: 1em;
+  display: inline-flex;
+  align-items: baseline;
   position: relative;
   overflow: visible;
   white-space: nowrap;
