@@ -10,7 +10,7 @@
   --font-body: 'Bodoni Moda', serif;
   --font-display: 'Crimson Text', serif;
   --font-sans: 'Source Sans 3', 'Helvetica Neue', Arial, sans-serif;
-  --landing-inline-pad: clamp(24px, 6vw, 72px);
+  --landing-inline-pad: clamp(20px, 7vw, 96px);
 }
 
 /* Fonts */
@@ -67,6 +67,8 @@ html, body {
   text-align: center;
   z-index: 10;
   width: 100%;
+  max-width: min(100%, 1400px);
+  margin-inline: auto;
   transition: opacity 0.5s ease, transform 0.62s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -77,18 +79,21 @@ html, body {
 
 .intro-text {
   font-family: var(--font-display);
-  font-size: clamp(0.9rem, 6.4vmin, 5rem);
+  font-size: clamp(1.2rem, 0.7rem + 4.9vw, 5rem);
   line-height: 1.1;
   color: var(--color-red);
   margin: 0;
   font-weight: 500;
-  max-width: 100%;
+  max-width: min(100%, 18ch);
   display: flex;
   align-items: baseline;
   gap: 0.3em;
   justify-content: center;
-  flex-wrap: nowrap;
-  white-space: nowrap;
+  flex-wrap: wrap;
+  white-space: normal;
+  margin-inline: auto;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
 }
 
 .intro-text-part {
@@ -105,6 +110,7 @@ html, body {
   vertical-align: baseline;
   min-width: 9ch;
   text-align: left;
+  flex: 0 0 auto;
 }
 
 .word-flip span {
