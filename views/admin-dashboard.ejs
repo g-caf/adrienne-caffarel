@@ -34,6 +34,19 @@
             <% if (librarySyncStatus && librarySyncStatus.lastSyncError) { %>
               <p class="admin-library-sync-error">Last error: <%= librarySyncStatus.lastSyncError %></p>
             <% } %>
+            <% if (librarySyncStatus && librarySyncStatus.details) { %>
+              <p>
+                Drive config:
+                <%= librarySyncStatus.details.folderIdConfigured ? 'folder IDs set' : 'folder IDs missing' %>,
+                <%= librarySyncStatus.details.apiKeyConfigured ? 'API key set' : 'API key missing' %>
+                <% if (Number.isFinite(librarySyncStatus.details.rootFolderCount)) { %>
+                  (<%= librarySyncStatus.details.rootFolderCount %> root folders)
+                <% } %>
+              </p>
+              <% if (Number.isFinite(librarySyncStatus.details.driveFileCount)) { %>
+                <p>Last Drive result: <%= librarySyncStatus.details.driveFileCount %> supported files.</p>
+              <% } %>
+            <% } %>
           </div>
         </div>
 

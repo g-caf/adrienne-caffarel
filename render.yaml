@@ -24,4 +24,10 @@ services:
         fromDatabase:
           name: adrienne-personal-site-db
           property: connectionString
+      - key: GOOGLE_DRIVE_FOLDER_IDS
+        sync: false
+      - key: GOOGLE_DRIVE_API_KEY
+        sync: false
+      - key: LIBRARY_SYNC_INTERVAL_MINUTES
+        value: 60
     healthCheckPath: /

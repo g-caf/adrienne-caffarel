@@ -62,7 +62,7 @@ DATABASE_URL=postgresql://user:password@localhost:5432/adrienne_personal_site
 LOG_LEVEL=info
 
 # Google Drive library sync
-GOOGLE_DRIVE_FOLDER_ID=1ppZKpX2eM0_yTVB1ebM3O1V7VTDrp_Ni
+GOOGLE_DRIVE_FOLDER_IDS=folder_id_or_url,another_folder_id_or_url
 GOOGLE_DRIVE_API_KEY=your_google_api_key_here
 LIBRARY_SYNC_INTERVAL_MINUTES=60
 
@@ -104,7 +104,7 @@ See `render.yaml` for automated deployment configuration.
 ## Pages
 
 - **Home** (`/`) - Landing page with RSS feed aggregator
-- **Library** (`/library`) - Square-tile PDF library synced from Google Drive
+- **Library** (`/library`) - Square-tile document library synced from Google Drive
 - **Designing** (`/designing`) - Portfolio section (future)
 - **Developing** (`/developing`) - Development portfolio section (future)
 - **Reading** (`/reading`) - Reading list section (future)

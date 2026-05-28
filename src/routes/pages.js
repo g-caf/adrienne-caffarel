@@ -1028,7 +1028,7 @@ router.get('/topics/:slug', async (req, res, next) => {
   }
 });
 
-// Library page - Google Drive PDF library
+// Library page - Google Drive document library
 router.get('/library', async (req, res, next) => {
   try {
     const shouldForceSync = req.query.refresh === '1';
@@ -1351,7 +1351,13 @@ router.get('/admin', requireWritingSubmissionsAdmin, async (req, res, next) => {
       librarySyncMessage,
       librarySyncStatus: {
         lastSyncCompletedAt: formatTimestamp(librarySyncStatus.lastSyncCompletedAt),
-        lastSyncError: librarySyncStatus.lastSyncError || ''
+        lastSyncError: librarySyncStatus.lastSyncError || '',
+        details: librarySyncStatus.lastSyncDetails
+          ? {
+              ...librarySyncStatus.lastSyncDetails,
+              completedAt: formatTimestamp(librarySyncStatus.lastSyncDetails.completedAt)
+            }
+          : null
       },
       buildingBlocks: buildingAdminBlocks
     });
