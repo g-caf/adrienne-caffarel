@@ -418,6 +418,10 @@ function normalizeDriveFile(file, overrides) {
   };
 }
 
+function getTitleSortValue(title) {
+  return (title || '').replace(/^the\s+/i, '').trim();
+}
+
 function sortLibraryItems(items) {
   return items.sort((a, b) => {
     if (a.sort_order !== null && b.sort_order !== null) {
@@ -425,7 +429,7 @@ function sortLibraryItems(items) {
     }
     if (a.sort_order !== null) return -1;
     if (b.sort_order !== null) return 1;
-    return a.title.localeCompare(b.title);
+    return getTitleSortValue(a.title).localeCompare(getTitleSortValue(b.title)) || a.title.localeCompare(b.title);
   });
 }
 

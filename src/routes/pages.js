@@ -1033,7 +1033,11 @@ router.get('/library', async (req, res, next) => {
   try {
     const syncResult = await ensureLibrarySynced({ force: true });
     const items = await LibraryItem.findAll(
-      'CASE WHEN sort_order IS NULL THEN 1 ELSE 0 END ASC, sort_order ASC, COALESCE(author, \'\') ASC, title ASC'
+      `CASE WHEN sort_order IS NULL THEN 1 ELSE 0 END ASC,
+       sort_order ASC,
+       COALESCE(author, '') ASC,
+       CASE WHEN LOWER(title) LIKE 'the %' THEN SUBSTR(title, 5) ELSE title END ASC,
+       title ASC`
     );
     const syncStatus = getLibrarySyncStatus();
 
