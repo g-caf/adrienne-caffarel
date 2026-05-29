@@ -265,7 +265,6 @@ async function fetchFilesInFolder({ folderId, apiKey, serviceAccount }) {
       fields: `nextPageToken,files(${DRIVE_FILE_FIELDS})`,
       orderBy: 'name',
       pageSize: '1000',
-      corpora: 'allDrives',
       includeItemsFromAllDrives: 'true',
       supportsAllDrives: 'true'
     });
