@@ -62,7 +62,7 @@ DATABASE_URL=postgresql://user:password@localhost:5432/adrienne_personal_site
 LOG_LEVEL=info
 
 # Google Drive library sync
-GOOGLE_DRIVE_FOLDER_IDS=folder_id_or_url,another_folder_id_or_url
+GOOGLE_DRIVE_FOLDER_IDS=1ppZKpX2eM0_yTVB1ebM3O1V7VTDrp_Ni
 GOOGLE_DRIVE_SERVICE_ACCOUNT_JSON={"type":"service_account","project_id":"...","private_key":"-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----\\n","client_email":"...@....iam.gserviceaccount.com"}
 GOOGLE_DRIVE_API_KEY=your_google_api_key_here
 LIBRARY_SYNC_INTERVAL_MINUTES=60

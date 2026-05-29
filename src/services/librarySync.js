@@ -8,17 +8,12 @@ const DEFAULT_SYNC_MINUTES = 60;
 const GOOGLE_DRIVE_API_BASE = 'https://www.googleapis.com/drive/v3/files';
 const GOOGLE_OAUTH_TOKEN_URL = 'https://oauth2.googleapis.com/token';
 const GOOGLE_DRIVE_READONLY_SCOPE = 'https://www.googleapis.com/auth/drive.readonly';
+const DEFAULT_GOOGLE_DRIVE_FOLDER_ID = '1ppZKpX2eM0_yTVB1ebM3O1V7VTDrp_Ni';
 const FOLDER_MIME_TYPE = 'application/vnd.google-apps.folder';
 const SHORTCUT_MIME_TYPE = 'application/vnd.google-apps.shortcut';
 const PDF_MIME_TYPE = 'application/pdf';
 const DRIVE_FILE_FIELDS = 'id,name,webViewLink,thumbnailLink,iconLink,owners(displayName),mimeType,modifiedTime,size,resourceKey,shortcutDetails(targetId,targetMimeType,targetResourceKey)';
-const LIBRARY_MIME_TYPES = new Set([
-  PDF_MIME_TYPE,
-  'application/vnd.google-apps.document',
-  'application/vnd.google-apps.spreadsheet',
-  'application/vnd.google-apps.presentation',
-  'application/vnd.google-apps.drawing'
-]);
+const LIBRARY_MIME_TYPES = new Set([PDF_MIME_TYPE]);
 const metadataPath = path.join(__dirname, '../../data/library-metadata.json');
 
 let lastSyncStartedAt = 0;
@@ -112,7 +107,7 @@ function getConfiguredTargetInput() {
     process.env.GOOGLE_DRIVE_FOLDER_URL,
     process.env.GOOGLE_DRIVE_LIBRARY_URL,
     process.env.GOOGLE_DRIVE_URL
-  ].filter(Boolean).join(',');
+  ].filter(Boolean).join(',') || DEFAULT_GOOGLE_DRIVE_FOLDER_ID;
 }
 
 function getConfiguredTargets() {
@@ -442,7 +437,7 @@ async function syncLibraryFromDrive() {
     return {
       synced: false,
       reason: 'missing_drive_config',
-      message: 'Set GOOGLE_DRIVE_FOLDER_IDS or GOOGLE_DRIVE_LIBRARY_URL, plus GOOGLE_DRIVE_SERVICE_ACCOUNT_JSON or GOOGLE_DRIVE_API_KEY, to enable library sync.'
+      message: 'Set GOOGLE_DRIVE_API_KEY to enable library sync.'
     };
   }
 
