@@ -8,6 +8,7 @@ const GOOGLE_DRIVE_API_BASE = 'https://www.googleapis.com/drive/v3/files';
 const FOLDER_MIME_TYPE = 'application/vnd.google-apps.folder';
 const SHORTCUT_MIME_TYPE = 'application/vnd.google-apps.shortcut';
 const PDF_MIME_TYPE = 'application/pdf';
+const DRIVE_FILE_FIELDS = 'id,name,webViewLink,thumbnailLink,iconLink,owners(displayName),mimeType,modifiedTime,size,resourceKey,shortcutDetails(targetId,targetMimeType,targetResourceKey)';
 const LIBRARY_MIME_TYPES = new Set([
   PDF_MIME_TYPE,
   'application/vnd.google-apps.document',
@@ -27,26 +28,60 @@ function stripPdfExtension(name) {
   return name ? name.replace(/\.pdf$/i, '').trim() : name;
 }
 
-function extractDriveFolderId(value) {
+function extractDriveTarget(value) {
   const input = (value || '').trim();
-  if (!input) return '';
+  if (!input) return { id: '', resourceKey: '' };
+  const rawResourceKey = input.match(/[?&]resourcekey=([a-zA-Z0-9_-]+)/);
+  const rawResourceKeyValue = rawResourceKey ? rawResourceKey[1] : '';
+
+  let url = null;
+  try {
+    url = new URL(input);
+  } catch (error) {
+    url = null;
+  }
+
+  if (url) {
+    const resourceKey = url.searchParams.get('resourcekey') || '';
+    const pathMatch = url.pathname.match(/\/(?:folders|file\/d|document\/d|spreadsheets\/d|presentation\/d|drawings\/d)\/([a-zA-Z0-9_-]+)/);
+    if (pathMatch) {
+      return { id: pathMatch[1], resourceKey };
+    }
+
+    const id = url.searchParams.get('id');
+    if (id) {
+      return { id, resourceKey };
+    }
+  }
 
   const folderMatch = input.match(/\/folders\/([a-zA-Z0-9_-]+)/);
-  if (folderMatch) return folderMatch[1];
+  if (folderMatch) return { id: folderMatch[1], resourceKey: rawResourceKeyValue };
+
+  const fileMatch = input.match(/\/(?:file\/d|document\/d|spreadsheets\/d|presentation\/d|drawings\/d)\/([a-zA-Z0-9_-]+)/);
+  if (fileMatch) return { id: fileMatch[1], resourceKey: rawResourceKeyValue };
 
   const idMatch = input.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-  if (idMatch) return idMatch[1];
+  if (idMatch) return { id: idMatch[1], resourceKey: rawResourceKeyValue };
 
-  return input;
+  return { id: input.split(/[?&]resourcekey=/)[0], resourceKey: rawResourceKeyValue };
 }
 
-function parseFolderIds(value) {
-  return Array.from(new Set(
-    (value || '')
-      .split(',')
-      .map(extractDriveFolderId)
-      .filter(Boolean)
-  ));
+function parseDriveTargets(value) {
+  const targetsById = new Map();
+
+  (value || '')
+    .split(',')
+    .map(extractDriveTarget)
+    .filter((target) => target.id)
+    .forEach((target) => {
+      const existing = targetsById.get(target.id);
+      targetsById.set(target.id, {
+        id: target.id,
+        resourceKey: target.resourceKey || (existing ? existing.resourceKey : '')
+      });
+    });
+
+  return Array.from(targetsById.values());
 }
 
 function isLibraryFile(file) {
@@ -61,17 +96,31 @@ function normalizeShortcut(file) {
   return {
     ...file,
     id: file.shortcutDetails.targetId || file.id,
-    mimeType: file.shortcutDetails.targetMimeType || file.mimeType
+    mimeType: file.shortcutDetails.targetMimeType || file.mimeType,
+    resourceKey: file.shortcutDetails.targetResourceKey || file.resourceKey || null
   };
 }
 
+function getConfiguredTargetInput() {
+  return [
+    process.env.GOOGLE_DRIVE_FOLDER_IDS,
+    process.env.GOOGLE_DRIVE_FOLDER_ID,
+    process.env.GOOGLE_DRIVE_FOLDER_URL,
+    process.env.GOOGLE_DRIVE_LIBRARY_URL,
+    process.env.GOOGLE_DRIVE_URL
+  ].filter(Boolean).join(',');
+}
+
+function getConfiguredTargets() {
+  return parseDriveTargets(getConfiguredTargetInput());
+}
+
 function getConfig() {
-  const folderIds = parseFolderIds(
-    process.env.GOOGLE_DRIVE_FOLDER_IDS || process.env.GOOGLE_DRIVE_FOLDER_ID
-  );
+  const targets = getConfiguredTargets();
 
   return {
-    folderIds,
+    targets,
+    folderIds: targets.map((target) => target.id),
     apiKey: process.env.GOOGLE_DRIVE_API_KEY,
     intervalMs: (Number(process.env.LIBRARY_SYNC_INTERVAL_MINUTES) || DEFAULT_SYNC_MINUTES) * 60 * 1000
   };
@@ -98,7 +147,7 @@ async function fetchFilesInFolder({ folderId, apiKey }) {
     const params = new URLSearchParams({
       key: apiKey,
       q: `'${folderId}' in parents and trashed=false`,
-      fields: 'nextPageToken,files(id,name,webViewLink,thumbnailLink,iconLink,owners(displayName),mimeType,modifiedTime,size,shortcutDetails(targetId,targetMimeType))',
+      fields: `nextPageToken,files(${DRIVE_FILE_FIELDS})`,
       orderBy: 'name',
       pageSize: '1000',
       includeItemsFromAllDrives: 'true',
@@ -125,13 +174,34 @@ async function fetchFilesInFolder({ folderId, apiKey }) {
   return files;
 }
 
-async function fetchDriveLibraryFilesRecursive({ rootFolderId, apiKey }) {
-  const queue = [rootFolderId];
+async function fetchDriveFile({ fileId, apiKey, resourceKey = '' }) {
+  const params = new URLSearchParams({
+    key: apiKey,
+    fields: DRIVE_FILE_FIELDS,
+    supportsAllDrives: 'true'
+  });
+
+  if (resourceKey) {
+    params.set('resourceKey', resourceKey);
+  }
+
+  const response = await fetch(`${GOOGLE_DRIVE_API_BASE}/${encodeURIComponent(fileId)}?${params.toString()}`);
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`Google Drive API error (${response.status}) for file ${fileId}: ${body}`);
+  }
+
+  return response.json();
+}
+
+async function fetchDriveLibraryFilesRecursive({ rootTarget, apiKey }) {
+  const queue = [rootTarget];
   const visited = new Set();
   const libraryFiles = [];
 
   while (queue.length > 0) {
-    const currentFolderId = queue.shift();
+    const currentFolder = queue.shift();
+    const currentFolderId = currentFolder && currentFolder.id;
     if (!currentFolderId || visited.has(currentFolderId)) {
       continue;
     }
@@ -144,7 +214,7 @@ async function fetchDriveLibraryFilesRecursive({ rootFolderId, apiKey }) {
       if (!file || !file.mimeType) continue;
 
       if (file.mimeType === FOLDER_MIME_TYPE) {
-        queue.push(file.id);
+        queue.push({ id: file.id, resourceKey: file.resourceKey || '' });
         continue;
       }
 
@@ -155,6 +225,26 @@ async function fetchDriveLibraryFilesRecursive({ rootFolderId, apiKey }) {
   }
 
   return libraryFiles;
+}
+
+async function fetchDriveLibraryFilesForTarget({ target, apiKey }) {
+  let rootFile = null;
+
+  try {
+    rootFile = normalizeShortcut(await fetchDriveFile({
+      fileId: target.id,
+      apiKey,
+      resourceKey: target.resourceKey
+    }));
+  } catch (error) {
+    logger.warn(`Unable to read Google Drive target metadata for ${target.id}. Trying it as a folder.`, error.message);
+  }
+
+  if (rootFile && rootFile.mimeType && rootFile.mimeType !== FOLDER_MIME_TYPE) {
+    return isLibraryFile(rootFile) ? [rootFile] : [];
+  }
+
+  return fetchDriveLibraryFilesRecursive({ rootTarget: rootFile || target, apiKey });
 }
 
 function normalizeDriveFile(file, overrides) {
@@ -186,21 +276,21 @@ function sortLibraryItems(items) {
 }
 
 async function syncLibraryFromDrive() {
-  const { folderIds, apiKey } = getConfig();
+  const { targets, folderIds, apiKey } = getConfig();
 
-  if (folderIds.length === 0 || !apiKey) {
+  if (targets.length === 0 || !apiKey) {
     return {
       synced: false,
       reason: 'missing_drive_config',
-      message: 'Set GOOGLE_DRIVE_FOLDER_IDS and GOOGLE_DRIVE_API_KEY to enable library sync.'
+      message: 'Set GOOGLE_DRIVE_FOLDER_IDS or GOOGLE_DRIVE_LIBRARY_URL and GOOGLE_DRIVE_API_KEY to enable library sync.'
     };
   }
 
   const overrides = loadMetadataOverrides();
   const driveFilesById = new Map();
-  for (const folderId of folderIds) {
-    const folderFiles = await fetchDriveLibraryFilesRecursive({ rootFolderId: folderId, apiKey });
-    for (const file of folderFiles) {
+  for (const target of targets) {
+    const targetFiles = await fetchDriveLibraryFilesForTarget({ target, apiKey });
+    for (const file of targetFiles) {
       if (file && file.id) {
         driveFilesById.set(file.id, file);
       }
@@ -266,15 +356,12 @@ async function ensureLibrarySynced({ force = false } = {}) {
           logger.warn(result.warning);
         }
       } else if (result.reason === 'missing_drive_config') {
+        const configuredTargets = getConfiguredTargets();
         lastSyncDetails = {
           driveFileCount: null,
           normalizedItemCount: null,
-          rootFolderCount: parseFolderIds(
-            process.env.GOOGLE_DRIVE_FOLDER_IDS || process.env.GOOGLE_DRIVE_FOLDER_ID
-          ).length,
-          folderIdConfigured: parseFolderIds(
-            process.env.GOOGLE_DRIVE_FOLDER_IDS || process.env.GOOGLE_DRIVE_FOLDER_ID
-          ).length > 0,
+          rootFolderCount: configuredTargets.length,
+          folderIdConfigured: configuredTargets.length > 0,
           apiKeyConfigured: Boolean(process.env.GOOGLE_DRIVE_API_KEY),
           completedAt: new Date()
         };
@@ -284,15 +371,12 @@ async function ensureLibrarySynced({ force = false } = {}) {
     })
     .catch((error) => {
       lastSyncError = error.message;
+      const configuredTargets = getConfiguredTargets();
       lastSyncDetails = {
         driveFileCount: null,
         normalizedItemCount: null,
-        rootFolderCount: parseFolderIds(
-          process.env.GOOGLE_DRIVE_FOLDER_IDS || process.env.GOOGLE_DRIVE_FOLDER_ID
-        ).length,
-        folderIdConfigured: parseFolderIds(
-          process.env.GOOGLE_DRIVE_FOLDER_IDS || process.env.GOOGLE_DRIVE_FOLDER_ID
-        ).length > 0,
+        rootFolderCount: configuredTargets.length,
+        folderIdConfigured: configuredTargets.length > 0,
         apiKeyConfigured: Boolean(process.env.GOOGLE_DRIVE_API_KEY),
         completedAt: new Date()
       };
@@ -320,5 +404,9 @@ function getLibrarySyncStatus() {
 
 module.exports = {
   ensureLibrarySynced,
-  getLibrarySyncStatus
+  getLibrarySyncStatus,
+  __private: {
+    extractDriveTarget,
+    parseDriveTargets
+  }
 };
