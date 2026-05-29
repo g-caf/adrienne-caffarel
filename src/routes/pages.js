@@ -1031,8 +1031,7 @@ router.get('/topics/:slug', async (req, res, next) => {
 // Library page - Google Drive document library
 router.get('/library', async (req, res, next) => {
   try {
-    const shouldForceSync = req.query.refresh === '1';
-    const syncResult = await ensureLibrarySynced({ force: shouldForceSync });
+    const syncResult = await ensureLibrarySynced({ force: true });
     const items = await LibraryItem.findAll(
       'CASE WHEN sort_order IS NULL THEN 1 ELSE 0 END ASC, sort_order ASC, COALESCE(author, \'\') ASC, title ASC'
     );
