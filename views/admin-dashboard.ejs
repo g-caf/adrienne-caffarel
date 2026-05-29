@@ -38,13 +38,44 @@
               <p>
                 Drive config:
                 <%= librarySyncStatus.details.folderIdConfigured ? 'folder IDs set' : 'folder IDs missing' %>,
-                <%= librarySyncStatus.details.apiKeyConfigured ? 'API key set' : 'API key missing' %>
+                auth <%= librarySyncStatus.details.authMode || 'unknown' %>
                 <% if (Number.isFinite(librarySyncStatus.details.rootFolderCount)) { %>
                   (<%= librarySyncStatus.details.rootFolderCount %> root folders)
                 <% } %>
               </p>
+              <p>
+                Credentials:
+                <%= librarySyncStatus.details.serviceAccountConfigured ? 'service account set' : 'service account missing' %>,
+                <%= librarySyncStatus.details.apiKeyConfigured ? 'API key set' : 'API key missing' %>
+              </p>
               <% if (Number.isFinite(librarySyncStatus.details.driveFileCount)) { %>
                 <p>Last Drive result: <%= librarySyncStatus.details.driveFileCount %> supported files.</p>
+              <% } %>
+              <% if (Array.isArray(librarySyncStatus.details.targetDetails) && librarySyncStatus.details.targetDetails.length > 0) { %>
+                <ul>
+                  <% librarySyncStatus.details.targetDetails.forEach((target) => { %>
+                    <li>
+                      Target <%= target.id %>:
+                      <%= Number.isFinite(target.supportedFileCount) ? `${target.supportedFileCount} supported files` : 'not checked' %>
+                      <% if (Number.isFinite(target.scannedFileCount)) { %>
+                        from <%= target.scannedFileCount %> scanned items
+                      <% } %>
+                      <% if (Number.isFinite(target.folderCount)) { %>
+                        across <%= target.folderCount %> folders
+                      <% } %>
+                      <%= target.hasResourceKey ? '(resource key present)' : '' %>
+                      <% if (target.metadataMimeType) { %>
+                        metadata: <%= target.metadataMimeType %>
+                      <% } %>
+                      <% if (target.metadataError) { %>
+                        metadata error: <%= target.metadataError %>
+                      <% } %>
+                      <% if (target.mimeTypes && Object.keys(target.mimeTypes).length > 0) { %>
+                        seen: <%= Object.entries(target.mimeTypes).map(([mimeType, count]) => `${mimeType} (${count})`).join(', ') %>
+                      <% } %>
+                    </li>
+                  <% }) %>
+                </ul>
               <% } %>
             <% } %>
           </div>

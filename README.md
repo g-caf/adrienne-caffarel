@@ -63,12 +63,15 @@ LOG_LEVEL=info
 
 # Google Drive library sync
 GOOGLE_DRIVE_FOLDER_IDS=folder_id_or_url,another_folder_id_or_url
+GOOGLE_DRIVE_SERVICE_ACCOUNT_JSON={"type":"service_account","project_id":"...","private_key":"-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----\\n","client_email":"...@....iam.gserviceaccount.com"}
 GOOGLE_DRIVE_API_KEY=your_google_api_key_here
 LIBRARY_SYNC_INTERVAL_MINUTES=60
 
 # Writing preview gate timing (seconds; default 120)
 WRITING_PREVIEW_SECONDS=120
 ```
+
+Use `GOOGLE_DRIVE_SERVICE_ACCOUNT_JSON` for private or shared Google Drive folders, and share the library folder with the service account `client_email`. `GOOGLE_DRIVE_API_KEY` only works for Drive content that is public to the API.
 
 ## Project Structure
 

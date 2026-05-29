@@ -1,10 +1,13 @@
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const LibraryItem = require('../models/LibraryItem');
 const logger = require('../utils/logger');
 
 const DEFAULT_SYNC_MINUTES = 60;
 const GOOGLE_DRIVE_API_BASE = 'https://www.googleapis.com/drive/v3/files';
+const GOOGLE_OAUTH_TOKEN_URL = 'https://oauth2.googleapis.com/token';
+const GOOGLE_DRIVE_READONLY_SCOPE = 'https://www.googleapis.com/auth/drive.readonly';
 const FOLDER_MIME_TYPE = 'application/vnd.google-apps.folder';
 const SHORTCUT_MIME_TYPE = 'application/vnd.google-apps.shortcut';
 const PDF_MIME_TYPE = 'application/pdf';
@@ -23,6 +26,7 @@ let lastSyncCompletedAt = null;
 let lastSyncError = null;
 let lastSyncDetails = null;
 let syncInFlight = null;
+let serviceAccountToken = null;
 
 function stripPdfExtension(name) {
   return name ? name.replace(/\.pdf$/i, '').trim() : name;
@@ -115,14 +119,129 @@ function getConfiguredTargets() {
   return parseDriveTargets(getConfiguredTargetInput());
 }
 
+function normalizePrivateKey(value) {
+  return value ? value.replace(/\\n/g, '\n') : value;
+}
+
+function getServiceAccountConfig() {
+  if (process.env.GOOGLE_DRIVE_SERVICE_ACCOUNT_JSON) {
+    try {
+      const parsed = JSON.parse(process.env.GOOGLE_DRIVE_SERVICE_ACCOUNT_JSON);
+      return {
+        clientEmail: parsed.client_email,
+        privateKey: normalizePrivateKey(parsed.private_key)
+      };
+    } catch (error) {
+      logger.warn('Failed to parse GOOGLE_DRIVE_SERVICE_ACCOUNT_JSON.', error.message);
+      return null;
+    }
+  }
+
+  if (process.env.GOOGLE_DRIVE_CLIENT_EMAIL && process.env.GOOGLE_DRIVE_PRIVATE_KEY) {
+    return {
+      clientEmail: process.env.GOOGLE_DRIVE_CLIENT_EMAIL,
+      privateKey: normalizePrivateKey(process.env.GOOGLE_DRIVE_PRIVATE_KEY)
+    };
+  }
+
+  return null;
+}
+
+function getAuthMode({ apiKey, serviceAccount }) {
+  if (serviceAccount && serviceAccount.clientEmail && serviceAccount.privateKey) {
+    return 'service_account';
+  }
+  if (apiKey) {
+    return 'api_key';
+  }
+  return 'none';
+}
+
 function getConfig() {
   const targets = getConfiguredTargets();
+  const apiKey = process.env.GOOGLE_DRIVE_API_KEY;
+  const serviceAccount = getServiceAccountConfig();
+  const authMode = getAuthMode({ apiKey, serviceAccount });
 
   return {
     targets,
     folderIds: targets.map((target) => target.id),
-    apiKey: process.env.GOOGLE_DRIVE_API_KEY,
+    apiKey,
+    serviceAccount,
+    authMode,
     intervalMs: (Number(process.env.LIBRARY_SYNC_INTERVAL_MINUTES) || DEFAULT_SYNC_MINUTES) * 60 * 1000
+  };
+}
+
+function toBase64Url(value) {
+  return Buffer.from(JSON.stringify(value)).toString('base64url');
+}
+
+async function getServiceAccountToken(serviceAccount) {
+  const now = Math.floor(Date.now() / 1000);
+  if (
+    serviceAccountToken &&
+    serviceAccountToken.clientEmail === serviceAccount.clientEmail &&
+    serviceAccountToken.expiresAt > now + 60
+  ) {
+    return serviceAccountToken.accessToken;
+  }
+
+  const header = { alg: 'RS256', typ: 'JWT' };
+  const payload = {
+    iss: serviceAccount.clientEmail,
+    scope: GOOGLE_DRIVE_READONLY_SCOPE,
+    aud: GOOGLE_OAUTH_TOKEN_URL,
+    exp: now + 3600,
+    iat: now
+  };
+  const unsignedToken = `${toBase64Url(header)}.${toBase64Url(payload)}`;
+  const signature = crypto
+    .createSign('RSA-SHA256')
+    .update(unsignedToken)
+    .end()
+    .sign(serviceAccount.privateKey, 'base64url');
+  const assertion = `${unsignedToken}.${signature}`;
+
+  const response = await fetch(GOOGLE_OAUTH_TOKEN_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body: new URLSearchParams({
+      grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+      assertion
+    }).toString()
+  });
+
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`Google service account auth error (${response.status}): ${body}`);
+  }
+
+  const payloadResponse = await response.json();
+  serviceAccountToken = {
+    clientEmail: serviceAccount.clientEmail,
+    accessToken: payloadResponse.access_token,
+    expiresAt: now + Number(payloadResponse.expires_in || 3600)
+  };
+
+  return serviceAccountToken.accessToken;
+}
+
+async function buildDriveRequestOptions({ apiKey, serviceAccount }) {
+  if (serviceAccount && serviceAccount.clientEmail && serviceAccount.privateKey) {
+    return {
+      query: {},
+      headers: {
+        Authorization: `Bearer ${await getServiceAccountToken(serviceAccount)}`
+      }
+    };
+  }
+
+  return {
+    query: { key: apiKey },
+    headers: {}
   };
 }
 
@@ -139,17 +258,19 @@ function loadMetadataOverrides() {
   }
 }
 
-async function fetchFilesInFolder({ folderId, apiKey }) {
+async function fetchFilesInFolder({ folderId, apiKey, serviceAccount }) {
   const files = [];
   let pageToken = null;
 
   do {
+    const requestOptions = await buildDriveRequestOptions({ apiKey, serviceAccount });
     const params = new URLSearchParams({
-      key: apiKey,
+      ...requestOptions.query,
       q: `'${folderId}' in parents and trashed=false`,
       fields: `nextPageToken,files(${DRIVE_FILE_FIELDS})`,
       orderBy: 'name',
       pageSize: '1000',
+      corpora: 'allDrives',
       includeItemsFromAllDrives: 'true',
       supportsAllDrives: 'true'
     });
@@ -158,7 +279,9 @@ async function fetchFilesInFolder({ folderId, apiKey }) {
       params.set('pageToken', pageToken);
     }
 
-    const response = await fetch(`${GOOGLE_DRIVE_API_BASE}?${params.toString()}`);
+    const response = await fetch(`${GOOGLE_DRIVE_API_BASE}?${params.toString()}`, {
+      headers: requestOptions.headers
+    });
     if (!response.ok) {
       const body = await response.text();
       throw new Error(`Google Drive API error (${response.status}): ${body}`);
@@ -174,9 +297,10 @@ async function fetchFilesInFolder({ folderId, apiKey }) {
   return files;
 }
 
-async function fetchDriveFile({ fileId, apiKey, resourceKey = '' }) {
+async function fetchDriveFile({ fileId, apiKey, serviceAccount, resourceKey = '' }) {
+  const requestOptions = await buildDriveRequestOptions({ apiKey, serviceAccount });
   const params = new URLSearchParams({
-    key: apiKey,
+    ...requestOptions.query,
     fields: DRIVE_FILE_FIELDS,
     supportsAllDrives: 'true'
   });
@@ -185,7 +309,9 @@ async function fetchDriveFile({ fileId, apiKey, resourceKey = '' }) {
     params.set('resourceKey', resourceKey);
   }
 
-  const response = await fetch(`${GOOGLE_DRIVE_API_BASE}/${encodeURIComponent(fileId)}?${params.toString()}`);
+  const response = await fetch(`${GOOGLE_DRIVE_API_BASE}/${encodeURIComponent(fileId)}?${params.toString()}`, {
+    headers: requestOptions.headers
+  });
   if (!response.ok) {
     const body = await response.text();
     throw new Error(`Google Drive API error (${response.status}) for file ${fileId}: ${body}`);
@@ -194,7 +320,12 @@ async function fetchDriveFile({ fileId, apiKey, resourceKey = '' }) {
   return response.json();
 }
 
-async function fetchDriveLibraryFilesRecursive({ rootTarget, apiKey }) {
+function recordMimeType(diagnostic, mimeType) {
+  if (!diagnostic || !mimeType) return;
+  diagnostic.mimeTypes[mimeType] = (diagnostic.mimeTypes[mimeType] || 0) + 1;
+}
+
+async function fetchDriveLibraryFilesRecursive({ rootTarget, apiKey, serviceAccount, diagnostic }) {
   const queue = [rootTarget];
   const visited = new Set();
   const libraryFiles = [];
@@ -207,11 +338,16 @@ async function fetchDriveLibraryFilesRecursive({ rootTarget, apiKey }) {
     }
     visited.add(currentFolderId);
 
-    const files = await fetchFilesInFolder({ folderId: currentFolderId, apiKey });
+    const files = await fetchFilesInFolder({ folderId: currentFolderId, apiKey, serviceAccount });
+    if (diagnostic) {
+      diagnostic.folderCount += 1;
+      diagnostic.scannedFileCount += files.length;
+    }
 
     for (const rawFile of files) {
       const file = normalizeShortcut(rawFile);
       if (!file || !file.mimeType) continue;
+      recordMimeType(diagnostic, file.mimeType);
 
       if (file.mimeType === FOLDER_MIME_TYPE) {
         queue.push({ id: file.id, resourceKey: file.resourceKey || '' });
@@ -227,24 +363,48 @@ async function fetchDriveLibraryFilesRecursive({ rootTarget, apiKey }) {
   return libraryFiles;
 }
 
-async function fetchDriveLibraryFilesForTarget({ target, apiKey }) {
+async function fetchDriveLibraryFilesForTarget({ target, apiKey, serviceAccount }) {
   let rootFile = null;
+  const diagnostic = {
+    id: target.id,
+    hasResourceKey: Boolean(target.resourceKey),
+    metadataMimeType: null,
+    folderCount: 0,
+    scannedFileCount: 0,
+    supportedFileCount: 0,
+    mimeTypes: {},
+    metadataError: null
+  };
 
   try {
     rootFile = normalizeShortcut(await fetchDriveFile({
       fileId: target.id,
       apiKey,
+      serviceAccount,
       resourceKey: target.resourceKey
     }));
+    diagnostic.metadataMimeType = rootFile && rootFile.mimeType ? rootFile.mimeType : null;
   } catch (error) {
+    diagnostic.metadataError = error.message;
     logger.warn(`Unable to read Google Drive target metadata for ${target.id}. Trying it as a folder.`, error.message);
   }
 
   if (rootFile && rootFile.mimeType && rootFile.mimeType !== FOLDER_MIME_TYPE) {
-    return isLibraryFile(rootFile) ? [rootFile] : [];
+    recordMimeType(diagnostic, rootFile.mimeType);
+    const files = isLibraryFile(rootFile) ? [rootFile] : [];
+    diagnostic.scannedFileCount = 1;
+    diagnostic.supportedFileCount = files.length;
+    return { files, diagnostic };
   }
 
-  return fetchDriveLibraryFilesRecursive({ rootTarget: rootFile || target, apiKey });
+  const files = await fetchDriveLibraryFilesRecursive({
+    rootTarget: rootFile || target,
+    apiKey,
+    serviceAccount,
+    diagnostic
+  });
+  diagnostic.supportedFileCount = files.length;
+  return { files, diagnostic };
 }
 
 function normalizeDriveFile(file, overrides) {
@@ -276,20 +436,22 @@ function sortLibraryItems(items) {
 }
 
 async function syncLibraryFromDrive() {
-  const { targets, folderIds, apiKey } = getConfig();
+  const { targets, folderIds, apiKey, serviceAccount, authMode } = getConfig();
 
-  if (targets.length === 0 || !apiKey) {
+  if (targets.length === 0 || authMode === 'none') {
     return {
       synced: false,
       reason: 'missing_drive_config',
-      message: 'Set GOOGLE_DRIVE_FOLDER_IDS or GOOGLE_DRIVE_LIBRARY_URL and GOOGLE_DRIVE_API_KEY to enable library sync.'
+      message: 'Set GOOGLE_DRIVE_FOLDER_IDS or GOOGLE_DRIVE_LIBRARY_URL, plus GOOGLE_DRIVE_SERVICE_ACCOUNT_JSON or GOOGLE_DRIVE_API_KEY, to enable library sync.'
     };
   }
 
   const overrides = loadMetadataOverrides();
   const driveFilesById = new Map();
+  const targetDetails = [];
   for (const target of targets) {
-    const targetFiles = await fetchDriveLibraryFilesForTarget({ target, apiKey });
+    const { files: targetFiles, diagnostic } = await fetchDriveLibraryFilesForTarget({ target, apiKey, serviceAccount });
+    targetDetails.push(diagnostic);
     for (const file of targetFiles) {
       if (file && file.id) {
         driveFilesById.set(file.id, file);
@@ -306,7 +468,10 @@ async function syncLibraryFromDrive() {
     normalizedItemCount: normalizedItems.length,
     rootFolderCount: folderIds.length,
     folderIdConfigured: folderIds.length > 0,
+    authMode,
     apiKeyConfigured: Boolean(apiKey),
+    serviceAccountConfigured: Boolean(serviceAccount),
+    targetDetails,
     completedAt: new Date()
   };
 
@@ -357,12 +522,15 @@ async function ensureLibrarySynced({ force = false } = {}) {
         }
       } else if (result.reason === 'missing_drive_config') {
         const configuredTargets = getConfiguredTargets();
+        const config = getConfig();
         lastSyncDetails = {
           driveFileCount: null,
           normalizedItemCount: null,
           rootFolderCount: configuredTargets.length,
           folderIdConfigured: configuredTargets.length > 0,
+          authMode: config.authMode,
           apiKeyConfigured: Boolean(process.env.GOOGLE_DRIVE_API_KEY),
+          serviceAccountConfigured: Boolean(config.serviceAccount),
           completedAt: new Date()
         };
         logger.warn(result.message);
@@ -372,12 +540,15 @@ async function ensureLibrarySynced({ force = false } = {}) {
     .catch((error) => {
       lastSyncError = error.message;
       const configuredTargets = getConfiguredTargets();
+      const config = getConfig();
       lastSyncDetails = {
         driveFileCount: null,
         normalizedItemCount: null,
         rootFolderCount: configuredTargets.length,
         folderIdConfigured: configuredTargets.length > 0,
+        authMode: config.authMode,
         apiKeyConfigured: Boolean(process.env.GOOGLE_DRIVE_API_KEY),
+        serviceAccountConfigured: Boolean(config.serviceAccount),
         completedAt: new Date()
       };
       logger.error('Library sync failed:', error.message);
