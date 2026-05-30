@@ -6,6 +6,7 @@
     const trackEl = spotifyCard.querySelector('[data-spotify-track]');
     const artistEl = spotifyCard.querySelector('[data-spotify-artist]');
     const linkEl = spotifyCard.querySelector('[data-spotify-link]');
+    const dividerEl = spotifyCard.querySelector('[data-spotify-divider]');
     const embedEl = document.querySelector('[data-spotify-embed]');
     let currentEmbedTrackId = '';
 
@@ -17,6 +18,7 @@
         linkEl.href = '';
         linkEl.style.display = 'none';
       }
+      if (dividerEl) dividerEl.style.display = 'none';
       if (art) {
         art.src = '';
         art.alt = '';
@@ -45,6 +47,7 @@
       iframe.height = '152';
       iframe.allow = 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture';
       iframe.loading = 'lazy';
+      iframe.style.height = '152px';
       embedEl.replaceChildren(iframe);
     }
 
@@ -60,6 +63,7 @@
       }
       if (trackEl) trackEl.textContent = track.name || '';
       if (artistEl) artistEl.textContent = (track.artists || []).join(', ');
+      if (dividerEl) dividerEl.style.display = track.name && track.artists && track.artists.length ? 'inline' : 'none';
       if (linkEl) {
         linkEl.href = track.trackUrl || '';
         linkEl.style.display = track.trackUrl ? 'inline-flex' : 'none';

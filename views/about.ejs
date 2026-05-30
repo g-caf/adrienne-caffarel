@@ -57,17 +57,15 @@
         </div>
 
         <section class="about-spotify" aria-live="polite">
-          <p class="about-spotify__title"><strong>THIS IS</strong> what I’m listening to right now:</p>
-          <div class="spotify-card" data-spotify-card>
-            <div class="spotify-card__art">
-              <img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="" data-spotify-art loading="lazy">
-            </div>
-            <div class="spotify-card__meta">
-              <p class="spotify-card__status" data-spotify-status>Loading Spotify…</p>
-              <h3 class="spotify-card__track" data-spotify-track></h3>
-              <p class="spotify-card__artist" data-spotify-artist></p>
-              <a class="spotify-card__link" data-spotify-link href="" target="_blank" rel="noreferrer">Open in Spotify</a>
-            </div>
+          <p class="about-spotify__title"><strong>THIS IS</strong> what I’m playing on Spotify right now:</p>
+          <div class="about-spotify-current" data-spotify-card>
+            <p class="about-spotify-current__status" data-spotify-status>Loading Spotify…</p>
+            <p class="about-spotify-current__track">
+              <span data-spotify-track></span>
+              <span class="about-spotify-current__divider" data-spotify-divider aria-hidden="true">/</span>
+              <span data-spotify-artist></span>
+            </p>
+            <a class="about-spotify-current__link" data-spotify-link href="" target="_blank" rel="noreferrer">Open in Spotify</a>
           </div>
           <div class="spotify-embed" data-spotify-embed></div>
         </section>
