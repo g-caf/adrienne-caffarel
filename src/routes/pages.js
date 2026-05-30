@@ -1091,7 +1091,7 @@ router.get('/about', (req, res) => {
   const seo = getPageSeo(req, {
     title: 'About',
     path: '/about',
-    description: 'About Adrienne Caffarel: background, tools, and education.'
+    description: 'About Adrienne Caffarel: education, professional background, and areas of practice.'
   });
 
   res.render('about', {

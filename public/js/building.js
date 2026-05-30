@@ -6,6 +6,8 @@
     const trackEl = spotifyCard.querySelector('[data-spotify-track]');
     const artistEl = spotifyCard.querySelector('[data-spotify-artist]');
     const linkEl = spotifyCard.querySelector('[data-spotify-link]');
+    const embedEl = document.querySelector('[data-spotify-embed]');
+    let currentEmbedTrackId = '';
 
     function renderFallback(message) {
       if (statusEl) statusEl.textContent = message;
@@ -19,6 +21,31 @@
         art.src = '';
         art.alt = '';
       }
+      if (embedEl) {
+        embedEl.innerHTML = '';
+        currentEmbedTrackId = '';
+      }
+    }
+
+    function renderEmbed(track) {
+      if (!embedEl) return;
+      const trackId = track && track.id ? track.id : '';
+      if (!trackId) {
+        embedEl.innerHTML = '';
+        currentEmbedTrackId = '';
+        return;
+      }
+      if (trackId === currentEmbedTrackId) return;
+
+      currentEmbedTrackId = trackId;
+      const iframe = document.createElement('iframe');
+      iframe.title = `Spotify Embed: ${track.name || 'Current track'}`;
+      iframe.src = `https://open.spotify.com/embed/track/${encodeURIComponent(trackId)}?utm_source=generator`;
+      iframe.width = '100%';
+      iframe.height = '152';
+      iframe.allow = 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture';
+      iframe.loading = 'lazy';
+      embedEl.replaceChildren(iframe);
     }
 
     function renderTrack(payload) {
@@ -41,6 +68,7 @@
         art.src = track.albumImage || '';
         art.alt = track.album ? `Album art for ${track.album}` : '';
       }
+      renderEmbed(track);
     }
 
     async function fetchSpotify() {

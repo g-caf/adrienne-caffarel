@@ -1142,6 +1142,7 @@ footer a:hover {
 .about-intro strong,
 .about-middle h3 strong,
 .about-outro strong,
+.about-spotify__title strong,
 .about-education strong {
   font-weight: 700;
 }
@@ -2886,13 +2887,32 @@ footer a:hover {
 
 .about-spotify {
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
   justify-content: center;
   margin: 24px auto 36px;
+}
+
+.about-spotify__title {
+  margin: 0;
+  text-align: center;
 }
 
 .about-spotify .spotify-card {
   min-width: 0;
   width: min(520px, 92vw);
+}
+
+.spotify-embed {
+  width: min(520px, 92vw);
+}
+
+.spotify-embed iframe {
+  display: block;
+  width: 100%;
+  border: 0;
+  border-radius: 12px;
 }
 
 .building-visitors {
