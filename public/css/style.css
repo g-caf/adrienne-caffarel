@@ -1150,9 +1150,13 @@ footer a:hover {
 
 .about-middle {
   display: grid;
-  grid-template-columns: minmax(0, 0.92fr) minmax(360px, 0.82fr);
-  gap: clamp(36px, 6vw, 120px);
-  align-items: start;
+  grid-template-columns: minmax(360px, 0.95fr) minmax(260px, 0.62fr) minmax(340px, 0.74fr);
+  grid-template-areas:
+    "tools spotify education"
+    "tools note education";
+  column-gap: clamp(30px, 4.5vw, 88px);
+  row-gap: clamp(18px, 2.2vw, 30px);
+  align-items: center;
   margin-top: clamp(20px, 4vh, 60px);
 }
 
@@ -1178,21 +1182,16 @@ footer a:hover {
   text-justify: inter-word;
 }
 
-.about-side-stack {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-self: end;
-  align-self: center;
-  gap: clamp(22px, 3.2vw, 42px);
-  width: min(430px, 100%);
+.about-tools-block {
+  grid-area: tools;
 }
 
 .about-education-block {
+  grid-area: education;
   display: grid;
   gap: 6px;
-  justify-self: stretch;
-  align-self: stretch;
+  justify-self: end;
+  align-self: center;
   text-align: right;
   width: 100%;
 }
@@ -1264,9 +1263,10 @@ footer a:hover {
 }
 
 .about-note {
+  grid-area: note;
   margin: 0;
   width: 100%;
-  text-align: right;
+  text-align: center;
 }
 
 @media (max-width: 1100px) {
@@ -1276,13 +1276,11 @@ footer a:hover {
 
   .about-middle {
     grid-template-columns: 1fr;
-  }
-
-  .about-side-stack {
-    justify-self: start;
-    align-self: start;
-    align-items: flex-start;
-    width: min(520px, 100%);
+    grid-template-areas:
+      "tools"
+      "education"
+      "spotify"
+      "note";
   }
 
   .about-education-block,
@@ -1292,6 +1290,8 @@ footer a:hover {
   }
 
   .about-education-block {
+    justify-self: start;
+    align-self: start;
     max-width: none;
   }
 
@@ -2909,6 +2909,7 @@ footer a:hover {
 }
 
 .about-spotify {
+  grid-area: spotify;
   display: flex;
   flex-direction: column;
   align-items: center;
