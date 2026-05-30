@@ -1143,14 +1143,15 @@ footer a:hover {
 .about-middle h3 strong,
 .about-outro strong,
 .about-spotify__title strong,
+.about-note strong,
 .about-education strong {
   font-weight: 700;
 }
 
 .about-middle {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.82fr);
-  gap: clamp(26px, 3vw, 44px);
+  grid-template-columns: minmax(0, 0.92fr) minmax(360px, 0.82fr);
+  gap: clamp(36px, 6vw, 120px);
   align-items: start;
   margin-top: clamp(20px, 4vh, 60px);
 }
@@ -1177,13 +1178,22 @@ footer a:hover {
   text-justify: inter-word;
 }
 
+.about-side-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-self: end;
+  align-self: center;
+  gap: clamp(22px, 3.2vw, 42px);
+  width: min(430px, 100%);
+}
+
 .about-education-block {
   display: grid;
   gap: 6px;
-  justify-self: end;
-  align-self: center;
+  justify-self: stretch;
+  align-self: stretch;
   text-align: right;
-  max-width: 360px;
   width: 100%;
 }
 
@@ -1253,6 +1263,12 @@ footer a:hover {
   align-self: center;
 }
 
+.about-note {
+  margin: 0;
+  width: 100%;
+  text-align: right;
+}
+
 @media (max-width: 1100px) {
   .about-top {
     grid-template-columns: minmax(180px, 0.44fr) minmax(0, 1fr);
@@ -1262,14 +1278,20 @@ footer a:hover {
     grid-template-columns: 1fr;
   }
 
+  .about-side-stack {
+    justify-self: start;
+    align-self: start;
+    align-items: flex-start;
+    width: min(520px, 100%);
+  }
+
   .about-education-block,
-  .about-education p {
+  .about-education p,
+  .about-note {
     text-align: left;
   }
 
   .about-education-block {
-    justify-self: start;
-    align-self: start;
     max-width: none;
   }
 
@@ -1300,7 +1322,8 @@ footer a:hover {
     margin-top: 28px;
   }
 
-  .about-outro {
+  .about-outro,
+  .about-note {
     margin-top: 8px;
   }
 }
@@ -2889,10 +2912,10 @@ footer a:hover {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   justify-content: center;
-  margin: clamp(32px, 5vw, 68px) auto 36px;
-  width: min(560px, 92vw);
+  margin: 0;
+  width: 100%;
 }
 
 .about-spotify__title {
@@ -2910,7 +2933,7 @@ footer a:hover {
   column-gap: 18px;
   row-gap: 2px;
   align-items: center;
-  padding: 10px 0 12px;
+  padding: 8px 0 10px;
   border-top: 1px solid rgba(164, 25, 31, 0.45);
   border-bottom: 1px solid rgba(164, 25, 31, 0.45);
 }
@@ -2918,7 +2941,7 @@ footer a:hover {
 .about-spotify-current__status {
   grid-area: status;
   margin: 0;
-  font-size: 0.72rem;
+  font-size: 0.64rem;
   line-height: 1.2;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -2928,7 +2951,7 @@ footer a:hover {
 .about-spotify-current__track {
   grid-area: track;
   margin: 0;
-  font-size: clamp(0.92rem, 0.35vw + 0.82rem, 1.08rem);
+  font-size: 0.84rem;
   line-height: 1.3;
 }
 
@@ -2944,7 +2967,7 @@ footer a:hover {
 .about-spotify-current__link {
   grid-area: link;
   color: var(--color-red);
-  font-size: 0.76rem;
+  font-size: 0.64rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   text-decoration: none;
@@ -2965,7 +2988,7 @@ footer a:hover {
 .spotify-embed iframe {
   display: block;
   width: 100%;
-  height: 152px;
+  height: 80px;
   border: 0;
   border-radius: 12px;
 }

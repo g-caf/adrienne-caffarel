@@ -40,14 +40,15 @@
       if (trackId === currentEmbedTrackId) return;
 
       currentEmbedTrackId = trackId;
+      const embedHeight = embedEl.dataset.spotifyEmbedHeight || '152';
       const iframe = document.createElement('iframe');
       iframe.title = `Spotify Embed: ${track.name || 'Current track'}`;
       iframe.src = `https://open.spotify.com/embed/track/${encodeURIComponent(trackId)}?utm_source=generator`;
       iframe.width = '100%';
-      iframe.height = '152';
+      iframe.height = embedHeight;
       iframe.allow = 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture';
       iframe.loading = 'lazy';
-      iframe.style.height = '152px';
+      iframe.style.height = `${embedHeight}px`;
       embedEl.replaceChildren(iframe);
     }
 
