@@ -1,19 +1,20 @@
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 
-// Security headers configuration
 const helmetConfig = helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'"],
+      baseUri: ["'self'"],
+      formAction: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
       imgSrc: ["'self'", "data:", "https:"],
       connectSrc: ["'self'"],
-      fontSrc: ["'self'"],
+      fontSrc: ["'self'", 'https://fonts.gstatic.com', 'data:'],
       objectSrc: ["'none'"],
       mediaSrc: ["'self'"],
-      frameSrc: ["'none'"]
+      frameSrc: ["'self'", 'https://open.spotify.com']
     }
   },
   crossOriginEmbedderPolicy: false,
@@ -24,37 +25,65 @@ const helmetConfig = helmet({
   }
 });
 
-// Rate limiting configuration
-const rateLimitConfig = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100, // limit each IP to 100 requests per windowMs
-  message: {
-    error: 'Too many requests from this IP, please try again later.',
-    retryAfter: Math.ceil((parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000) / 1000)
-  },
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-  handler: (req, res) => {
-    res.status(429).json({
-      error: 'Too many requests from this IP, please try again later.',
-      retryAfter: Math.ceil((parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000) / 1000)
-    });
-  }
+function minutes(value) {
+  return value * 60 * 1000;
+}
+
+function createLimiter({ windowMs, max, message }) {
+  return rateLimit({
+    windowMs,
+    max,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: message },
+    handler: (req, res) => {
+      res.status(429).json({ error: message });
+    }
+  });
+}
+
+const rateLimitConfig = createLimiter({
+  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS, 10) || minutes(15),
+  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS, 10) || 300,
+  message: 'Too many requests from this IP, please try again later.'
 });
 
-// API-specific rate limiting (stricter)
-const apiRateLimitConfig = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 50, // limit each IP to 50 requests per windowMs for API endpoints
-  message: {
-    error: 'Too many API requests from this IP, please try again later.'
-  },
-  standardHeaders: true,
-  legacyHeaders: false
+const apiRateLimitConfig = createLimiter({
+  windowMs: minutes(15),
+  max: 90,
+  message: 'Too many API requests from this IP, please try again later.'
+});
+
+const analyticsEventRateLimitConfig = createLimiter({
+  windowMs: minutes(5),
+  max: 120,
+  message: 'Too many analytics events from this IP, please try again later.'
+});
+
+const writingUnlockRateLimitConfig = createLimiter({
+  windowMs: minutes(15),
+  max: 8,
+  message: 'Too many writing unlock attempts from this IP, please try again later.'
+});
+
+const adminWriteRateLimitConfig = createLimiter({
+  windowMs: minutes(15),
+  max: 60,
+  message: 'Too many admin write requests from this IP, please try again later.'
+});
+
+const streamRateLimitConfig = createLimiter({
+  windowMs: minutes(5),
+  max: 12,
+  message: 'Too many live visitor streams from this IP, please try again later.'
 });
 
 module.exports = {
   helmet: helmetConfig,
   rateLimit: rateLimitConfig,
-  apiRateLimit: apiRateLimitConfig
+  apiRateLimit: apiRateLimitConfig,
+  analyticsEventRateLimit: analyticsEventRateLimitConfig,
+  writingUnlockRateLimit: writingUnlockRateLimitConfig,
+  adminWriteRateLimit: adminWriteRateLimitConfig,
+  streamRateLimit: streamRateLimitConfig
 };

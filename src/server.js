@@ -6,6 +6,7 @@ const path = require('path');
 
 const pagesRouter = require('./routes/pages');
 const { runMigrations } = require('./config/migrations');
+const { helmet, rateLimit } = require('./config/security');
 const analyticsPageviews = require('./middleware/analyticsPageviews');
 const logger = require('./utils/logger');
 
@@ -24,13 +25,16 @@ if (process.env.NODE_ENV !== 'production') {
   app.use(cors({ origin: true, credentials: true }));
 }
 
+app.use(helmet);
+
 // Static assets
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // Compression and parsing middleware
 app.use(compression());
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(rateLimit);
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: false, limit: '256kb' }));
 
 // Shared SEO locals
 app.use((req, res, next) => {

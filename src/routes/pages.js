@@ -8,6 +8,13 @@ const WritingEntry = require('../models/WritingEntry');
 const BuildingBlock = require('../models/BuildingBlock');
 const WritingSubmission = require('../models/WritingSubmission');
 const AnalyticsEvent = require('../models/AnalyticsEvent');
+const {
+  apiRateLimit,
+  analyticsEventRateLimit,
+  writingUnlockRateLimit,
+  adminWriteRateLimit,
+  streamRateLimit
+} = require('../config/security');
 const { ensureLibrarySynced, getLibrarySyncStatus } = require('../services/librarySync');
 const { buildRequestContext, isAnalyticsOptedOut, setCookie, OPTOUT_COOKIE } = require('../services/analyticsContext');
 
@@ -588,15 +595,51 @@ function parseCookies(req) {
       const separatorIndex = cookie.indexOf('=');
       if (separatorIndex === -1) return acc;
       const name = cookie.substring(0, separatorIndex).trim();
-      const value = decodeURIComponent(cookie.substring(separatorIndex + 1).trim());
+      let value = '';
+      try {
+        value = decodeURIComponent(cookie.substring(separatorIndex + 1).trim());
+      } catch (error) {
+        value = '';
+      }
       acc[name] = value;
       return acc;
     }, {});
 }
 
+function getCookieSigningSecret() {
+  return (
+    process.env.WRITING_ACCESS_SECRET ||
+    process.env.COOKIE_SECRET ||
+    process.env.ADMIN_PASSWORD ||
+    process.env.ANALYTICS_SALT ||
+    'development-writing-cookie-secret'
+  );
+}
+
+function signValue(value) {
+  return crypto
+    .createHmac('sha256', getCookieSigningSecret())
+    .update(String(value))
+    .digest('base64url');
+}
+
+function makeSignedValue(value) {
+  return `${value}.${signValue(value)}`;
+}
+
+function verifySignedValue(signedValue, expectedValue) {
+  const raw = String(signedValue || '');
+  const separatorIndex = raw.lastIndexOf('.');
+  if (separatorIndex === -1) return false;
+  const value = raw.slice(0, separatorIndex);
+  const signature = raw.slice(separatorIndex + 1);
+  if (value !== expectedValue) return false;
+  return safeEqual(signature, signValue(value));
+}
+
 function hasWritingAccess(req) {
   const cookies = parseCookies(req);
-  return cookies.writing_access === 'granted';
+  return verifySignedValue(cookies.writing_access, 'granted');
 }
 
 function getWritingPreviewDurationMs() {
@@ -711,6 +754,43 @@ function safeEqual(a, b) {
   const bBuffer = Buffer.from(b || '', 'utf8');
   if (aBuffer.length !== bBuffer.length) return false;
   return crypto.timingSafeEqual(aBuffer, bBuffer);
+}
+
+function getSafeRedirectPath(rawDestination, fallback = '/admin/analytics') {
+  const destination = String(rawDestination || fallback).trim();
+  if (!destination.startsWith('/') || destination.startsWith('//') || destination.includes('\\')) {
+    return fallback;
+  }
+  return destination;
+}
+
+function getHeaderHost(value) {
+  if (!value) return '';
+  try {
+    return new URL(value).host.toLowerCase();
+  } catch (error) {
+    return '';
+  }
+}
+
+function requireAdminSameOrigin(req, res, next) {
+  const requestHost = (req.get('host') || '').toLowerCase();
+  const originHost = getHeaderHost(req.get('origin'));
+  const refererHost = getHeaderHost(req.get('referer') || req.get('referrer'));
+
+  if (originHost) {
+    return originHost === requestHost ? next() : res.status(403).json({ error: 'Invalid request origin.' });
+  }
+
+  if (refererHost) {
+    return refererHost === requestHost ? next() : res.status(403).json({ error: 'Invalid request referrer.' });
+  }
+
+  if (process.env.NODE_ENV === 'production') {
+    return res.status(403).json({ error: 'Missing request origin.' });
+  }
+
+  return next();
 }
 
 function parseAdminAllowlist() {
@@ -1136,7 +1216,7 @@ router.get('/reading', (req, res) => {
   res.redirect('/library');
 });
 
-router.get('/api/spotify/now-playing', async (req, res) => {
+router.get('/api/spotify/now-playing', apiRateLimit, async (req, res) => {
   try {
     const payload = await fetchSpotifyNowPlaying();
     res.setHeader('Cache-Control', 'no-store');
@@ -1149,7 +1229,7 @@ router.get('/api/spotify/now-playing', async (req, res) => {
   }
 });
 
-router.get('/api/unique-visitors', async (req, res) => {
+router.get('/api/unique-visitors', apiRateLimit, async (req, res) => {
   try {
     const uniqueVisitors = await AnalyticsEvent.getUniqueVisitorCount();
     return res.json({ uniqueVisitors });
@@ -1158,7 +1238,7 @@ router.get('/api/unique-visitors', async (req, res) => {
   }
 });
 
-router.get('/api/unique-visitors/stream', async (req, res) => {
+router.get('/api/unique-visitors/stream', streamRateLimit, async (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
@@ -1192,17 +1272,15 @@ router.get('/api/unique-visitors/stream', async (req, res) => {
 
 router.get('/analytics/opt-out', (req, res) => {
   setCookie(res, OPTOUT_COOKIE, '1', 60 * 60 * 24 * 365);
-  const destination = (req.query.next || '/admin/analytics').toString();
-  return res.redirect(destination.startsWith('/') ? destination : '/admin/analytics');
+  return res.redirect(getSafeRedirectPath(req.query.next, '/admin/analytics'));
 });
 
 router.get('/analytics/opt-in', (req, res) => {
   setCookie(res, OPTOUT_COOKIE, '0', 60 * 60 * 24 * 365);
-  const destination = (req.query.next || '/admin/analytics').toString();
-  return res.redirect(destination.startsWith('/') ? destination : '/admin/analytics');
+  return res.redirect(getSafeRedirectPath(req.query.next, '/admin/analytics'));
 });
 
-router.post('/analytics/event', async (req, res, next) => {
+router.post('/analytics/event', analyticsEventRateLimit, async (req, res, next) => {
   try {
     if (isAnalyticsOptedOut(req)) {
       return res.status(204).send();
@@ -1393,7 +1471,7 @@ router.get('/admin/analytics', requireWritingSubmissionsAdmin, async (req, res, 
   }
 });
 
-router.post('/admin/library-sync', requireWritingSubmissionsAdmin, async (req, res, next) => {
+router.post('/admin/library-sync', requireWritingSubmissionsAdmin, requireAdminSameOrigin, adminWriteRateLimit, async (req, res, next) => {
   try {
     const result = await ensureLibrarySynced({ force: true });
     if (result && result.synced) {
@@ -1411,7 +1489,7 @@ router.post('/admin/library-sync', requireWritingSubmissionsAdmin, async (req, r
   }
 });
 
-router.post('/admin/writing-content', requireWritingSubmissionsAdmin, async (req, res, next) => {
+router.post('/admin/writing-content', requireWritingSubmissionsAdmin, requireAdminSameOrigin, adminWriteRateLimit, async (req, res, next) => {
   try {
     const section = getSectionOrNull(req.body.section);
     if (!section) {
@@ -1440,7 +1518,7 @@ router.post('/admin/writing-content', requireWritingSubmissionsAdmin, async (req
   }
 });
 
-router.post('/admin/building-content', requireWritingSubmissionsAdmin, async (req, res, next) => {
+router.post('/admin/building-content', requireWritingSubmissionsAdmin, requireAdminSameOrigin, adminWriteRateLimit, async (req, res, next) => {
   try {
     const slug = (req.body.slug || '').trim();
     if (!slug) {
@@ -1469,7 +1547,7 @@ router.post('/admin/building-content', requireWritingSubmissionsAdmin, async (re
   }
 });
 
-router.post('/admin/building-order', requireWritingSubmissionsAdmin, async (req, res, next) => {
+router.post('/admin/building-order', requireWritingSubmissionsAdmin, requireAdminSameOrigin, adminWriteRateLimit, async (req, res, next) => {
   try {
     const rawOrder = (req.body.order || '')
       .split(',')
@@ -1505,7 +1583,7 @@ router.post('/admin/building-order', requireWritingSubmissionsAdmin, async (req,
   }
 });
 
-router.post('/writing/unlock', async (req, res, next) => {
+router.post('/writing/unlock', writingUnlockRateLimit, async (req, res, next) => {
   try {
     const first_name = (req.body.first_name || '').trim();
     const last_name = (req.body.last_name || '').trim();
@@ -1545,7 +1623,7 @@ router.post('/writing/unlock', async (req, res, next) => {
 
     const maxAgeSeconds = 60 * 60 * 24 * 365; // 365 days
     const cookieParts = [
-      `writing_access=granted`,
+      `writing_access=${encodeURIComponent(makeSignedValue('granted'))}`,
       `Max-Age=${maxAgeSeconds}`,
       'Path=/',
       'HttpOnly',

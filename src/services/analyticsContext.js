@@ -4,6 +4,7 @@ const SESSION_WINDOW_MS = 30 * 60 * 1000;
 const VISITOR_COOKIE = 'analytics_vid';
 const SESSION_COOKIE = 'analytics_sid';
 const OPTOUT_COOKIE = 'analytics_opt_out';
+const analyticsSalt = process.env.ANALYTICS_SALT || crypto.randomBytes(32).toString('hex');
 
 function normalizeIp(ip) {
   if (!ip) return '';
@@ -44,10 +45,9 @@ function getDeviceType(userAgent) {
 }
 
 function hashToken(value) {
-  const salt = process.env.ANALYTICS_SALT || 'adrienne-site-analytics';
   return crypto
     .createHash('sha256')
-    .update(`${salt}|${value}`)
+    .update(`${analyticsSalt}|${value}`)
     .digest('hex')
     .slice(0, 24);
 }
@@ -71,7 +71,12 @@ function parseCookies(req) {
       const separatorIndex = cookie.indexOf('=');
       if (separatorIndex === -1) return acc;
       const name = cookie.slice(0, separatorIndex).trim();
-      const value = decodeURIComponent(cookie.slice(separatorIndex + 1).trim());
+      let value = '';
+      try {
+        value = decodeURIComponent(cookie.slice(separatorIndex + 1).trim());
+      } catch (error) {
+        value = '';
+      }
       acc[name] = value;
       return acc;
     }, {});
