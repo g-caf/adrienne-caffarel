@@ -1150,7 +1150,7 @@ footer a:hover {
 
 .about-middle {
   display: grid;
-  grid-template-columns: minmax(360px, 0.95fr) minmax(260px, 0.62fr) minmax(340px, 0.74fr);
+  grid-template-columns: minmax(280px, 0.95fr) minmax(220px, 0.58fr) minmax(300px, 0.74fr);
   grid-template-areas:
     "tools spotify education"
     "tools note education";
@@ -1269,11 +1269,24 @@ footer a:hover {
   text-align: center;
 }
 
+.about-note a {
+  color: var(--color-red);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 0.16em;
+}
+
+.about-note a:hover {
+  text-decoration-thickness: 0.12em;
+}
+
 @media (max-width: 1100px) {
   .about-top {
     grid-template-columns: minmax(180px, 0.44fr) minmax(0, 1fr);
   }
+}
 
+@media (max-width: 900px) {
   .about-middle {
     grid-template-columns: 1fr;
     grid-template-areas:
@@ -2927,11 +2940,10 @@ footer a:hover {
 .about-spotify-current {
   width: 100%;
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: 1fr;
   grid-template-areas:
-    "status link"
-    "track link";
-  column-gap: 18px;
+    "status"
+    "track";
   row-gap: 2px;
   align-items: center;
   padding: 8px 0 10px;
@@ -2965,20 +2977,6 @@ footer a:hover {
   opacity: 0.48;
 }
 
-.about-spotify-current__link {
-  grid-area: link;
-  color: var(--color-red);
-  font-size: 0.64rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-.about-spotify-current__link:hover {
-  text-decoration: underline;
-}
-
 .spotify-embed {
   width: 100%;
   overflow: hidden;
@@ -2997,14 +2995,6 @@ footer a:hover {
 @media (max-width: 620px) {
   .about-spotify-current {
     grid-template-columns: 1fr;
-    grid-template-areas:
-      "status"
-      "track"
-      "link";
-  }
-
-  .about-spotify-current__link {
-    margin-top: 4px;
   }
 }
 
