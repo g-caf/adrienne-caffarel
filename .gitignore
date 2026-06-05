@@ -4,3 +4,4 @@ node_modules/
 data/*.sqlite
 data/*.db
 public/uploads/
+spotify-now-playing/
