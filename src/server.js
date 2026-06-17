@@ -13,6 +13,7 @@ const logger = require('./utils/logger');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const configuredSiteUrl = (process.env.SITE_URL || '').trim().replace(/\/+$/, '');
+let isReady = false;
 
 app.set('trust proxy', 1);
 
@@ -30,6 +31,13 @@ app.use(helmet);
 // Static assets
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
+app.get('/healthz', (req, res) => {
+  res.status(200).json({
+    status: isReady ? 'ready' : 'starting',
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Compression and parsing middleware
 app.use(compression());
 app.use(rateLimit);
@@ -42,6 +50,14 @@ app.use((req, res, next) => {
   const protocol = forwardedProto || req.protocol || 'https';
   res.locals.siteUrl = configuredSiteUrl || `${protocol}://${req.get('host')}`;
   next();
+});
+
+app.use((req, res, next) => {
+  if (isReady) {
+    return next();
+  }
+
+  return res.status(503).json({ error: 'Service is starting.' });
 });
 
 // Automatic server-side analytics for HTML navigations
@@ -62,18 +78,23 @@ app.use((err, req, res, next) => {
   res.status(500).send('Server Error');
 });
 
-// Start server with database initialization
+const server = app.listen(PORT, '0.0.0.0', () => {
+  logger.info(`Server listening on port ${PORT}`);
+});
+
+server.on('error', (error) => {
+  logger.error('Failed to start server:', error);
+  process.exit(1);
+});
+
+// Initialize the database after the port is bound so Render can detect the service.
 (async () => {
   try {
-    // Initialize database first
     await runMigrations();
-
-    // Then start the server
-    app.listen(PORT, '0.0.0.0', () => {
-      logger.info(`Server started on port ${PORT}`);
-    });
+    isReady = true;
+    logger.info('Server initialization completed');
   } catch (error) {
-    logger.error('Failed to start server:', error);
+    logger.error('Failed to initialize server:', error);
     process.exit(1);
   }
 })();

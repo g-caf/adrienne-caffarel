@@ -1,4 +1,3 @@
-const sqlite3 = require('sqlite3').verbose();
 const { Pool } = require('pg');
 const logger = require('../utils/logger');
 const path = require('path');
@@ -11,11 +10,16 @@ const postgresPreferred = hasDatabaseUrl;
 
 let db = null;
 let pool = null;
+let sqlite3 = null;
 let activeBackend = postgresPreferred ? 'postgres' : 'sqlite';
 
 const initializeSqlite = () => {
   if (db) {
     return db;
+  }
+
+  if (!sqlite3) {
+    sqlite3 = require('sqlite3').verbose();
   }
 
   if (isProduction && postgresPreferred) {

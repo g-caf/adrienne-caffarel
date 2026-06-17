@@ -34,4 +34,4 @@ services:
         sync: false
       - key: LIBRARY_SYNC_INTERVAL_MINUTES
         value: 60
-    healthCheckPath: /
+    healthCheckPath: /healthz
