@@ -2569,6 +2569,15 @@ footer a:hover {
   font-size: 1.12rem;
 }
 
+.admin-analytics-stat span {
+  display: block;
+  margin-top: 4px;
+  color: var(--color-gray);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
 .admin-analytics-card {
   display: grid;
   gap: 8px;

@@ -19,6 +19,74 @@ function getDayExpr() {
     : `strftime('%Y-%m-%d', created_at)`;
 }
 
+const EASTERN_TIME_ZONE = 'America/New_York';
+
+function getTimeZoneParts(date, timeZone) {
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hourCycle: 'h23'
+  });
+
+  return formatter.formatToParts(date).reduce((parts, part) => {
+    if (part.type !== 'literal') {
+      parts[part.type] = Number.parseInt(part.value, 10);
+    }
+    return parts;
+  }, {});
+}
+
+function getTimeZoneOffsetMs(date, timeZone) {
+  const parts = getTimeZoneParts(date, timeZone);
+  const zonedAsUtc = Date.UTC(
+    parts.year,
+    parts.month - 1,
+    parts.day,
+    parts.hour,
+    parts.minute,
+    parts.second
+  );
+
+  return zonedAsUtc - date.getTime();
+}
+
+function zonedDateTimeToUtc(year, month, day, hour = 0, minute = 0, second = 0, timeZone = EASTERN_TIME_ZONE) {
+  const localAsUtc = Date.UTC(year, month - 1, day, hour, minute, second);
+  let utcMs = localAsUtc;
+
+  for (let index = 0; index < 3; index += 1) {
+    const offset = getTimeZoneOffsetMs(new Date(utcMs), timeZone);
+    const nextUtcMs = localAsUtc - offset;
+
+    if (nextUtcMs === utcMs) {
+      break;
+    }
+
+    utcMs = nextUtcMs;
+  }
+
+  return new Date(utcMs);
+}
+
+function getEasternTodayBounds(now = new Date()) {
+  const parts = getTimeZoneParts(now, EASTERN_TIME_ZONE);
+
+  return {
+    start: zonedDateTimeToUtc(parts.year, parts.month, parts.day),
+    end: zonedDateTimeToUtc(parts.year, parts.month, parts.day + 1),
+    timeZone: EASTERN_TIME_ZONE
+  };
+}
+
+function formatSqlTimestamp(date) {
+  return date.toISOString().slice(0, 19).replace('T', ' ');
+}
+
 class AnalyticsEvent {
   static async createPageview(payload) {
     try {
@@ -138,6 +206,7 @@ class AnalyticsEvent {
   static async getDashboard(days = 30) {
     const safeDays = Math.min(Math.max(toNumber(days) || 30, 1), 365);
     const sinceClause = getSinceClause(1);
+    const todayBounds = getEasternTodayBounds();
 
     const summaryResult = await db.query(
       `SELECT
@@ -147,6 +216,20 @@ class AnalyticsEvent {
        FROM analytics_events
        WHERE event_type = 'pageview' AND ${sinceClause}`,
       [safeDays]
+    );
+
+    const todayResult = await db.query(
+      `SELECT
+         COUNT(*) AS pageviews,
+         COUNT(DISTINCT visitor_id) AS unique_visitors
+       FROM analytics_events
+       WHERE event_type = 'pageview'
+         AND created_at >= $1
+         AND created_at < $2`,
+      [
+        formatSqlTimestamp(todayBounds.start),
+        formatSqlTimestamp(todayBounds.end)
+      ]
     );
 
     const topPagesResult = await db.query(
@@ -271,6 +354,7 @@ class AnalyticsEvent {
     );
 
     const summaryRow = summaryResult.rows[0] || {};
+    const todayRow = todayResult.rows[0] || {};
     const totalPageviews = toNumber(summaryRow.total_pageviews);
     const totalSessions = toNumber(summaryRow.total_sessions);
 
@@ -305,6 +389,11 @@ class AnalyticsEvent {
         avgPagesPerSession: totalSessions > 0
           ? Math.round((totalPageviews / totalSessions) * 100) / 100
           : 0
+      },
+      today: {
+        pageviews: toNumber(todayRow.pageviews),
+        uniqueVisitors: toNumber(todayRow.unique_visitors),
+        timeZone: todayBounds.timeZone
       },
       daily: (dailyResult.rows || []).map((row) => ({
         day: row.day,

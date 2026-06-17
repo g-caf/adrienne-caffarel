@@ -37,6 +37,16 @@
         <section class="admin-analytics-pane is-active" data-analytics-pane="overview" role="tabpanel">
           <div class="admin-analytics-stats">
             <article class="admin-analytics-stat">
+              <h3>Today Pageviews</h3>
+              <p><%= analytics.today.pageviews.toLocaleString() %></p>
+              <span>Since 12 AM ET</span>
+            </article>
+            <article class="admin-analytics-stat">
+              <h3>Today Unique Visitors</h3>
+              <p><%= analytics.today.uniqueVisitors.toLocaleString() %></p>
+              <span>Since 12 AM ET</span>
+            </article>
+            <article class="admin-analytics-stat">
               <h3>Pageviews</h3>
               <p><%= analytics.summary.totalPageviews.toLocaleString() %></p>
             </article>
