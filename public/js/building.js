@@ -11,6 +11,7 @@
     let currentEmbedTrackId = '';
     let embedController = null;
     let spotifyIframeApi = null;
+    let controllerPending = false;
 
     function reportPlaybackStarted(event) {
       const spotifyUri = event && event.data ? event.data.playingURI || '' : '';
@@ -35,14 +36,16 @@
     }
 
     function createSpotifyController(trackId) {
-      if (!embedEl || !spotifyIframeApi || !trackId) return;
+      if (!embedEl || !spotifyIframeApi || !trackId || controllerPending) return;
 
       const embedHeight = Number.parseInt(embedEl.dataset.spotifyEmbedHeight || '152', 10);
+      controllerPending = true;
       spotifyIframeApi.createController(embedEl, {
         uri: `spotify:track:${trackId}`,
         width: '100%',
-        height: Number.isFinite(embedHeight) ? embedHeight : 152
+        height: String(Number.isFinite(embedHeight) ? embedHeight : 152)
       }, function (controller) {
+        controllerPending = false;
         embedController = controller;
         embedController.addListener('playback_started', reportPlaybackStarted);
         if (currentEmbedTrackId && currentEmbedTrackId !== trackId) {
@@ -65,6 +68,21 @@
       script.src = 'https://open.spotify.com/embed/iframe-api/v1';
       script.async = true;
       document.head.appendChild(script);
+    }
+
+    function renderPlainEmbed(track) {
+      if (!embedEl || !track || !track.id) return;
+
+      const embedHeight = embedEl.dataset.spotifyEmbedHeight || '152';
+      const iframe = document.createElement('iframe');
+      iframe.title = `Spotify Embed: ${track.name || 'Current track'}`;
+      iframe.src = `https://open.spotify.com/embed/track/${encodeURIComponent(track.id)}?utm_source=generator`;
+      iframe.width = '100%';
+      iframe.height = embedHeight;
+      iframe.allow = 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture';
+      iframe.loading = 'lazy';
+      iframe.style.height = `${embedHeight}px`;
+      embedEl.replaceChildren(iframe);
     }
 
     function renderFallback(message) {
@@ -109,6 +127,7 @@
         embedController.loadUri(`spotify:track:${trackId}`);
         return;
       }
+      renderPlainEmbed(track);
       if (spotifyIframeApi) {
         createSpotifyController(trackId);
       }
