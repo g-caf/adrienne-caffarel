@@ -20,11 +20,12 @@
 
         <form method="get" action="/admin/analytics" class="admin-analytics-range-form">
           <label for="analytics-days">Range</label>
-          <select id="analytics-days" name="days" onchange="this.form.submit()">
+          <select id="analytics-days" name="days" data-analytics-range>
             <% dayOptions.forEach((value) => { %>
               <option value="<%= value %>" <%= analytics.days === value ? 'selected' : '' %>>Last <%= value %> days</option>
             <% }) %>
           </select>
+          <input type="hidden" name="section" value="overview" data-analytics-section>
         </form>
 
         <div class="writing-mobile-tabs admin-analytics-mobile-tabs" role="tablist" aria-label="Analytics sections">
@@ -100,7 +101,7 @@
 
         <section class="admin-analytics-pane" data-analytics-pane="content" role="tabpanel" hidden>
           <div class="admin-analytics-card">
-            <h3 class="writing-column-heading">Top Pages</h3>
+            <h3 class="writing-column-heading">Top Pages — Last <%= analytics.days %> Days</h3>
             <div class="admin-submissions-table-wrap">
               <table class="admin-submissions-table">
                 <thead>
