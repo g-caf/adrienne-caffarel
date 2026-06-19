@@ -222,7 +222,8 @@ class AnalyticsEvent {
     const todayResult = await db.query(
       `SELECT
          COUNT(*) AS pageviews,
-         COUNT(DISTINCT visitor_id) AS unique_visitors
+         COUNT(DISTINCT visitor_id) AS unique_visitors,
+         SUM(CASE WHEN path = '/about' THEN 1 ELSE 0 END) AS about_pageviews
        FROM analytics_events
        WHERE event_type = 'pageview'
          AND created_at >= $1
@@ -403,6 +404,7 @@ class AnalyticsEvent {
       today: {
         pageviews: toNumber(todayRow.pageviews),
         uniqueVisitors: toNumber(todayRow.unique_visitors),
+        aboutPageviews: toNumber(todayRow.about_pageviews),
         timeZone: todayBounds.timeZone
       },
       daily: (dailyResult.rows || []).map((row) => ({

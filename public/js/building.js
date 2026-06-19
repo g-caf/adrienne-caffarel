@@ -12,9 +12,15 @@
     let embedController = null;
     let spotifyIframeApi = null;
     let controllerPending = false;
+    let fallbackTimer = null;
+    let playbackActive = false;
+    let lastReportedPlaybackUri = '';
 
     function reportPlaybackStarted(event) {
       const spotifyUri = event && event.data ? event.data.playingURI || '' : '';
+      if (spotifyUri && spotifyUri === lastReportedPlaybackUri) return;
+      lastReportedPlaybackUri = spotifyUri;
+
       const body = JSON.stringify({
         eventName: 'spotify_playback_started',
         path: window.location.pathname,
@@ -23,8 +29,9 @@
 
       if (navigator.sendBeacon) {
         const blob = new Blob([body], { type: 'application/json' });
-        navigator.sendBeacon('/analytics/event', blob);
-        return;
+        if (navigator.sendBeacon('/analytics/event', blob)) {
+          return;
+        }
       }
 
       fetch('/analytics/event', {
@@ -35,19 +42,41 @@
       }).catch(function () {});
     }
 
+    function handlePlaybackUpdate(event) {
+      const data = event && event.data ? event.data : {};
+      const isPlaying = data.isPaused === false && data.isBuffering !== true;
+
+      if (isPlaying && !playbackActive) {
+        reportPlaybackStarted(event);
+      }
+      playbackActive = isPlaying;
+    }
+
     function createSpotifyController(trackId) {
       if (!embedEl || !spotifyIframeApi || !trackId || controllerPending) return;
 
       const embedHeight = Number.parseInt(embedEl.dataset.spotifyEmbedHeight || '152', 10);
       controllerPending = true;
+      embedEl.replaceChildren();
+      fallbackTimer = window.setTimeout(function () {
+        if (!embedController && currentEmbedTrackId === trackId) {
+          controllerPending = false;
+          renderPlainEmbed({ id: trackId, name: 'Current track' });
+        }
+      }, 5000);
       spotifyIframeApi.createController(embedEl, {
         uri: `spotify:track:${trackId}`,
         width: '100%',
         height: String(Number.isFinite(embedHeight) ? embedHeight : 152)
       }, function (controller) {
         controllerPending = false;
+        if (fallbackTimer) {
+          window.clearTimeout(fallbackTimer);
+          fallbackTimer = null;
+        }
         embedController = controller;
         embedController.addListener('playback_started', reportPlaybackStarted);
+        embedController.addListener('playback_update', handlePlaybackUpdate);
         if (currentEmbedTrackId && currentEmbedTrackId !== trackId) {
           embedController.loadUri(`spotify:track:${currentEmbedTrackId}`);
         }
@@ -67,6 +96,11 @@
       const script = document.createElement('script');
       script.src = 'https://open.spotify.com/embed/iframe-api/v1';
       script.async = true;
+      script.onerror = function () {
+        if (currentEmbedTrackId) {
+          renderPlainEmbed({ id: currentEmbedTrackId, name: 'Current track' });
+        }
+      };
       document.head.appendChild(script);
     }
 
@@ -123,14 +157,25 @@
       if (trackId === currentEmbedTrackId) return;
 
       currentEmbedTrackId = trackId;
+      playbackActive = false;
+      lastReportedPlaybackUri = '';
       if (embedController) {
         embedController.loadUri(`spotify:track:${trackId}`);
         return;
       }
-      renderPlainEmbed(track);
       if (spotifyIframeApi) {
         createSpotifyController(trackId);
+        return;
       }
+
+      if (fallbackTimer) {
+        window.clearTimeout(fallbackTimer);
+      }
+      fallbackTimer = window.setTimeout(function () {
+        if (!embedController && !controllerPending && currentEmbedTrackId === trackId) {
+          renderPlainEmbed(track);
+        }
+      }, 3000);
     }
 
     function renderTrack(payload) {
