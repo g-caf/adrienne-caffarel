@@ -8,7 +8,7 @@ const helmetConfig = helmet({
       baseUri: ["'self'"],
       formAction: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
-      scriptSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", 'https://open.spotify.com'],
       imgSrc: ["'self'", "data:", "https:"],
       connectSrc: ["'self'"],
       fontSrc: ["'self'", 'https://fonts.gstatic.com', 'data:'],

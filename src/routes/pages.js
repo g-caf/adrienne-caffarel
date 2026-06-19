@@ -1287,7 +1287,7 @@ router.post('/analytics/event', analyticsEventRateLimit, async (req, res, next) 
     }
 
     const eventName = (req.body.eventName || '').trim().toLowerCase();
-    const allowedEvents = new Set(['outbound_click']);
+    const allowedEvents = new Set(['outbound_click', 'spotify_playback_started']);
     if (!allowedEvents.has(eventName)) {
       return res.status(400).json({ error: 'Unsupported event.' });
     }
@@ -1296,7 +1296,8 @@ router.post('/analytics/event', analyticsEventRateLimit, async (req, res, next) 
     const context = buildRequestContext(req, res, requestedPath || req.originalUrl || '/');
     const metadata = {
       targetUrl: (req.body.targetUrl || '').trim().slice(0, 1200),
-      targetHost: (req.body.targetHost || '').trim().slice(0, 255)
+      targetHost: (req.body.targetHost || '').trim().slice(0, 255),
+      spotifyUri: (req.body.spotifyUri || '').trim().slice(0, 255)
     };
 
     await AnalyticsEvent.createEvent({

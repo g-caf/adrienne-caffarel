@@ -83,6 +83,17 @@ function getEasternTodayBounds(now = new Date()) {
   };
 }
 
+function getEasternNoonWindowStart(now = new Date()) {
+  const parts = getTimeZoneParts(now, EASTERN_TIME_ZONE);
+  const todayAtNoon = zonedDateTimeToUtc(parts.year, parts.month, parts.day, 12);
+
+  if (now.getTime() >= todayAtNoon.getTime()) {
+    return todayAtNoon;
+  }
+
+  return zonedDateTimeToUtc(parts.year, parts.month, parts.day - 1, 12);
+}
+
 function formatSqlTimestamp(date) {
   return date.toISOString().slice(0, 19).replace('T', ' ');
 }
@@ -207,6 +218,7 @@ class AnalyticsEvent {
     const safeDays = Math.min(Math.max(toNumber(days) || 30, 1), 365);
     const sinceClause = getSinceClause(1);
     const todayBounds = getEasternTodayBounds();
+    const spotifyWindowStart = getEasternNoonWindowStart();
 
     const summaryResult = await db.query(
       `SELECT
@@ -346,6 +358,15 @@ class AnalyticsEvent {
       [safeDays]
     );
 
+    const spotifyPlaybackResult = await db.query(
+      `SELECT COUNT(DISTINCT visitor_id) AS unique_listeners
+       FROM analytics_events
+       WHERE event_type = 'event'
+         AND event_name = 'spotify_playback_started'
+         AND created_at >= $1`,
+      [formatSqlTimestamp(spotifyWindowStart)]
+    );
+
     const writingSubmissionsResult = await db.query(
       `SELECT COUNT(*) AS submissions
        FROM writing_submissions
@@ -420,6 +441,11 @@ class AnalyticsEvent {
       buildingPage: {
         views: toNumber((buildingResult.rows[0] || {}).views),
         uniqueVisitors: toNumber((buildingResult.rows[0] || {}).unique_visitors)
+      },
+      spotifyPlayback: {
+        uniqueListeners: toNumber((spotifyPlaybackResult.rows[0] || {}).unique_listeners),
+        windowStart: spotifyWindowStart.toISOString(),
+        timeZone: EASTERN_TIME_ZONE
       },
       hubs,
       writingFunnel: {

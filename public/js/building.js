@@ -9,6 +9,63 @@
     const dividerEl = spotifyCard.querySelector('[data-spotify-divider]');
     const embedEl = document.querySelector('[data-spotify-embed]');
     let currentEmbedTrackId = '';
+    let embedController = null;
+    let spotifyIframeApi = null;
+
+    function reportPlaybackStarted(event) {
+      const spotifyUri = event && event.data ? event.data.playingURI || '' : '';
+      const body = JSON.stringify({
+        eventName: 'spotify_playback_started',
+        path: window.location.pathname,
+        spotifyUri
+      });
+
+      if (navigator.sendBeacon) {
+        const blob = new Blob([body], { type: 'application/json' });
+        navigator.sendBeacon('/analytics/event', blob);
+        return;
+      }
+
+      fetch('/analytics/event', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body,
+        keepalive: true
+      }).catch(function () {});
+    }
+
+    function createSpotifyController(trackId) {
+      if (!embedEl || !spotifyIframeApi || !trackId) return;
+
+      const embedHeight = Number.parseInt(embedEl.dataset.spotifyEmbedHeight || '152', 10);
+      spotifyIframeApi.createController(embedEl, {
+        uri: `spotify:track:${trackId}`,
+        width: '100%',
+        height: Number.isFinite(embedHeight) ? embedHeight : 152
+      }, function (controller) {
+        embedController = controller;
+        embedController.addListener('playback_started', reportPlaybackStarted);
+        if (currentEmbedTrackId && currentEmbedTrackId !== trackId) {
+          embedController.loadUri(`spotify:track:${currentEmbedTrackId}`);
+        }
+      });
+    }
+
+    function loadSpotifyIframeApi() {
+      if (!embedEl) return;
+
+      window.onSpotifyIframeApiReady = function (iframeApi) {
+        spotifyIframeApi = iframeApi;
+        if (currentEmbedTrackId) {
+          createSpotifyController(currentEmbedTrackId);
+        }
+      };
+
+      const script = document.createElement('script');
+      script.src = 'https://open.spotify.com/embed/iframe-api/v1';
+      script.async = true;
+      document.head.appendChild(script);
+    }
 
     function renderFallback(message) {
       if (statusEl) statusEl.textContent = message;
@@ -24,6 +81,10 @@
         art.alt = '';
       }
       if (embedEl) {
+        if (embedController) {
+          embedController.destroy();
+          embedController = null;
+        }
         embedEl.innerHTML = '';
         currentEmbedTrackId = '';
       }
@@ -33,6 +94,10 @@
       if (!embedEl) return;
       const trackId = track && track.id ? track.id : '';
       if (!trackId) {
+        if (embedController) {
+          embedController.destroy();
+          embedController = null;
+        }
         embedEl.innerHTML = '';
         currentEmbedTrackId = '';
         return;
@@ -40,16 +105,13 @@
       if (trackId === currentEmbedTrackId) return;
 
       currentEmbedTrackId = trackId;
-      const embedHeight = embedEl.dataset.spotifyEmbedHeight || '152';
-      const iframe = document.createElement('iframe');
-      iframe.title = `Spotify Embed: ${track.name || 'Current track'}`;
-      iframe.src = `https://open.spotify.com/embed/track/${encodeURIComponent(trackId)}?utm_source=generator`;
-      iframe.width = '100%';
-      iframe.height = embedHeight;
-      iframe.allow = 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture';
-      iframe.loading = 'lazy';
-      iframe.style.height = `${embedHeight}px`;
-      embedEl.replaceChildren(iframe);
+      if (embedController) {
+        embedController.loadUri(`spotify:track:${trackId}`);
+        return;
+      }
+      if (spotifyIframeApi) {
+        createSpotifyController(trackId);
+      }
     }
 
     function renderTrack(payload) {
@@ -94,6 +156,7 @@
       }
     }
 
+    loadSpotifyIframeApi();
     fetchSpotify();
     setInterval(fetchSpotify, 30000);
   }
