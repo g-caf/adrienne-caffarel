@@ -83,17 +83,6 @@ function getEasternTodayBounds(now = new Date()) {
   };
 }
 
-function getEasternNoonWindowStart(now = new Date()) {
-  const parts = getTimeZoneParts(now, EASTERN_TIME_ZONE);
-  const todayAtNoon = zonedDateTimeToUtc(parts.year, parts.month, parts.day, 12);
-
-  if (now.getTime() >= todayAtNoon.getTime()) {
-    return todayAtNoon;
-  }
-
-  return zonedDateTimeToUtc(parts.year, parts.month, parts.day - 1, 12);
-}
-
 function formatSqlTimestamp(date) {
   return date.toISOString().slice(0, 19).replace('T', ' ');
 }
@@ -218,7 +207,7 @@ class AnalyticsEvent {
     const safeDays = Math.min(Math.max(toNumber(days) || 30, 1), 365);
     const sinceClause = getSinceClause(1);
     const todayBounds = getEasternTodayBounds();
-    const spotifyWindowStart = getEasternNoonWindowStart();
+    const spotifyWindowStart = todayBounds.start;
 
     const summaryResult = await db.query(
       `SELECT
